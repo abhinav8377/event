@@ -1,0 +1,61 @@
+import User from '../users/user.model.js';
+import Event from '../events/event.model.js';
+import Registration from '../registrations/registration.model.js';
+import type { ServiceError } from '../../types/index.js';
+
+function throwErr(message: string, status: number): never {
+  const err = new Error(message) as ServiceError;
+  err.status = status;
+  throw err;
+}
+
+export const getDashboard = async () => {
+  const [totalUsers, totalEvents, totalRegistrations, publishedEvents] = await Promise.all([
+    User.countDocuments(),
+    Event.countDocuments(),
+    Registration.countDocuments({ status: 'CONFIRMED' }),
+    Event.countDocuments({ status: 'PUBLISHED' }),
+  ]);
+  return { totalUsers, totalEvents, publishedEvents, totalRegistrations };
+};
+
+export const getAllUsers = async () => {
+  const users = await User.find().populate('roleId', 'name').sort({ createdAt: -1 });
+  return { users: users.map((u) => u.toSafeObject()) };
+};
+
+export const getAllEvents = async () => {
+  const events = await Event.find()
+    .populate('organizerId', 'name organization')
+    .sort({ createdAt: -1 });
+  return { events };
+};
+
+export const getAllOrganizers = async () => {
+  const users = await User.find().populate('roleId', 'name');
+  const organizers = users.filter((u) => u.roleId && (u.roleId as any).name === 'ORGANIZER');
+  return { organizers: organizers.map((u) => u.toSafeObject('ORGANIZER')) };
+};
+
+export const verifyOrganizer = async (userId: string) => {
+  const user = await User.findById(userId).populate('roleId');
+  if (!user || !user.roleId || (user.roleId as any).name !== 'ORGANIZER') throwErr('Organizer not found', 404);
+  user.organization = user.organization || {};
+  user.organization.verified = true;
+  await user.save();
+  return { user: user.toSafeObject('ORGANIZER') };
+};
+
+export const toggleBlockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throwErr('User not found', 404);
+  user.isBlocked = !user.isBlocked;
+  await user.save();
+  return { isBlocked: user.isBlocked };
+};
+
+export const deleteEvent = async (eventId: string) => {
+  const event = await Event.findById(eventId);
+  if (!event) throwErr('Event not found', 404);
+  await Event.deleteOne({ _id: event._id });
+};

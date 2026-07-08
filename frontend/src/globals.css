@@ -1,0 +1,124 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800;1,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+
+  --radius: 1rem;
+}
+
+:root {
+  --background: #f6f5f2;
+  --foreground: #111110;
+  --card: #ffffff;
+  --card-foreground: #111110;
+  --primary: #eda40c;
+  --primary-foreground: #131208;
+  --secondary: #edece7;
+  --secondary-foreground: #111110;
+  --muted: #efeeea;
+  --muted-foreground: #6f6d66;
+  --accent: #faf3e3;
+  --accent-foreground: #8a5a00;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --border: #e4e2dc;
+  --input: #dedcd5;
+  --ring: #eda40c;
+  --sidebar: #111110;
+  --sidebar-foreground: #b8b5ac;
+  --sidebar-accent: #232320;
+  --sidebar-accent-foreground: #ffffff;
+}
+
+.dark {
+  --background: #0a0a09;
+  --foreground: #f2f1ed;
+  --card: #141412;
+  --card-foreground: #f2f1ed;
+  --primary: #fbbf24;
+  --primary-foreground: #171407;
+  --secondary: #1e1e1b;
+  --secondary-foreground: #f2f1ed;
+  --muted: #1a1a18;
+  --muted-foreground: #8f8d84;
+  --accent: #241d0c;
+  --accent-foreground: #fbbf24;
+  --destructive: #f87171;
+  --destructive-foreground: #1b0a0a;
+  --success: #4ade80;
+  --success-foreground: #06180c;
+  --warning: #fb923c;
+  --warning-foreground: #1c0f04;
+  --border: #262622;
+  --input: #2e2e29;
+  --ring: #fbbf24;
+  --sidebar: #101010;
+  --sidebar-foreground: #9d9b92;
+  --sidebar-accent: #1f1f1c;
+  --sidebar-accent-foreground: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* freeapi-style display headline */
+.display {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+/* subtle blueprint grid backdrop */
+.bg-grid {
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.bg-grid-fade {
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 75%);
+}
