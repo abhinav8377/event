@@ -3,7 +3,7 @@
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { CalendarRange, Users, UserCheck, Star, Plus, Eye } from "lucide-react"
+import { CalendarRange, Users, UserCheck, Star, Plus, Eye, RefreshCw } from "lucide-react"
 import { useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
 import { PageHeader } from "@/components/common/PageHeader"
@@ -60,12 +60,18 @@ export default function OrganizerDashboard() {
         title={`Hello, ${user.name.split(" ")[0]}`}
         description="Here's how your events are performing."
         action={
-          <Link to="/organizer/events/new">
-            <Button>
-              <Plus className="size-4" aria-hidden="true" />
-              Create event
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => mutate()}>
+              <RefreshCw className="size-4" aria-hidden="true" />
+              Sync
             </Button>
-          </Link>
+            <Link to="/organizer/events/new">
+              <Button>
+                <Plus className="size-4" aria-hidden="true" />
+                Create event
+              </Button>
+            </Link>
+          </div>
         }
       />
 

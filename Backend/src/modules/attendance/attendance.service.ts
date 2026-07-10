@@ -19,7 +19,13 @@ interface CheckInInput {
 export const checkInAttendee = async ({ registrationId, checkedByUserId, checkedByRole, status }: CheckInInput) => {
   if (!registrationId) throwErr('registrationId is required', 400);
 
-  const registration = await Registration.findById(registrationId).populate('eventId');
+  const isObjectId = /^[a-f0-9]{24}$/i.test(registrationId);
+  let registration = isObjectId
+    ? await Registration.findById(registrationId).populate('eventId')
+    : null;
+  if (!registration) {
+    registration = await Registration.findOne({ ticketNumber: registrationId }).populate('eventId');
+  }
   if (!registration || registration.status !== 'CONFIRMED') throwErr('Valid registration not found', 404);
 
   const event = registration.eventId as any;
