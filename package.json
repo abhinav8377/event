@@ -6,8 +6,7 @@
     "install:all": "cd Backend && npm install && cd ../Frontend && npm install",
     "dev:backend": "cd Backend && npm run server",
     "dev:frontend": "cd Frontend && npm run dev",
-    "dev": "concurrently -n BE,FE -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "seed": "cd Backend && npm run seed"
+    "dev": "concurrently -n BE,FE -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
