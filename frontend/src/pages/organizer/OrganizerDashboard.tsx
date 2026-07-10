@@ -21,9 +21,23 @@ const statusVariant: Record<EventStatus, "default" | "success" | "destructive" |
 export default function OrganizerDashboard() {
   const user = useAppSelector((s) => s.auth.user)!
 
-  const { data: myEvents } = useSWR(["organizer-events", user.id], () =>
+  const { data: myEvents, error: myEventsError, mutate } = useSWR(["organizer-events", user.id], () =>
     eventApi.getOrganizerEvents(user.id).then((r) => r.data),
   )
+
+  if (myEventsError) {
+    return (
+      <div>
+        <PageHeader title={`Hello, ${user.name.split(" ")[0]}`} description="Here's how your events are performing." />
+        <EmptyState
+          icon={<CalendarRange className="size-10" aria-hidden="true" />}
+          title="Failed to load dashboard"
+          description={myEventsError.message || "Could not fetch your events. Please try again."}
+          action={<Button onClick={() => mutate()}>Retry</Button>}
+        />
+      </div>
+    )
+  }
 
   if (!myEvents) return <Loader />
 

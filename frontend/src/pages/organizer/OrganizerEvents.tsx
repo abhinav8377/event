@@ -30,9 +30,23 @@ export default function OrganizerEvents() {
   const [filter, setFilter] = useState<(typeof filters)[number]>("All")
   const [deleting, setDeleting] = useState<EventItem | null>(null)
 
-  const { data: myEvents, mutate } = useSWR(["organizer-events", user.id], () =>
+  const { data: myEvents, error: myEventsError, mutate } = useSWR(["organizer-events", user.id], () =>
     eventApi.getOrganizerEvents(user.id).then((r) => r.data),
   )
+
+  if (myEventsError) {
+    return (
+      <div>
+        <PageHeader title="My Events" description="Create, edit, publish, and manage your events." />
+        <EmptyState
+          icon={<CalendarRange className="size-10" aria-hidden="true" />}
+          title="Failed to load events"
+          description={myEventsError.message || "Could not fetch your events. Please try again."}
+          action={<Button onClick={() => mutate()}>Retry</Button>}
+        />
+      </div>
+    )
+  }
 
   if (!myEvents) return <Loader />
 

@@ -30,13 +30,26 @@ export default function AttendancePage() {
   const [checking, setChecking] = useState(false)
   const [mode, setMode] = useState<"scan" | "manual">("scan")
 
-  const { data: myEvents } = useSWR(["organizer-events", user.id], () =>
+  const { data: myEvents, error: myEventsError } = useSWR(["organizer-events", user.id], () =>
     eventApi.getOrganizerEvents(user.id).then((r) => r.data),
   )
   const eventId = selectedEventId || myEvents?.find((e) => e.status === "PUBLISHED")?.id || ""
   const { data: attendance, mutate } = useSWR(eventId ? ["attendance", eventId] : null, () =>
     attendanceApi.getEventAttendance(eventId).then((r) => r.data),
   )
+
+  if (myEventsError) {
+    return (
+      <div>
+        <PageHeader title="Attendance" description="Scan or enter ticket codes to check attendees in." />
+        <EmptyState
+          icon={<QrCode className="size-10" aria-hidden="true" />}
+          title="Failed to load events"
+          description={myEventsError.message || "Could not fetch your events. Please try again."}
+        />
+      </div>
+    )
+  }
 
   if (!myEvents) return <Loader />
 

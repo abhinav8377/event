@@ -19,7 +19,7 @@ import { useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
 import * as feedbackApi from "@/api/feedbackApi"
 import { PageHeader } from "@/components/common/PageHeader"
-import { Card, Loader, EmptyState } from "@/components/common/ui"
+import { Card, Loader, EmptyState, Button } from "@/components/common/ui"
 import useSWRImmutable from "swr/immutable"
 
 const CHART_COLORS = ["#f59e0b", "#22c55e", "#78716c", "#ef4444"]
@@ -27,7 +27,7 @@ const CHART_COLORS = ["#f59e0b", "#22c55e", "#78716c", "#ef4444"]
 export default function OrganizerAnalytics() {
   const user = useAppSelector((s) => s.auth.user)!
 
-  const { data: myEvents } = useSWR(["organizer-events", user.id], () =>
+  const { data: myEvents, error: myEventsError, mutate } = useSWR(["organizer-events", user.id], () =>
     eventApi.getOrganizerEvents(user.id).then((r) => r.data),
   )
 
@@ -39,6 +39,20 @@ export default function OrganizerAnalytics() {
       return all.flat()
     },
   )
+
+  if (myEventsError) {
+    return (
+      <div>
+        <PageHeader title="Analytics" description="Insights across your events." />
+        <EmptyState
+          icon={<Star className="size-10" aria-hidden="true" />}
+          title="Failed to load analytics"
+          description={myEventsError.message || "Could not fetch your events. Please try again."}
+          action={<Button onClick={() => mutate()}>Retry</Button>}
+        />
+      </div>
+    )
+  }
 
   if (!myEvents) return <Loader />
 
