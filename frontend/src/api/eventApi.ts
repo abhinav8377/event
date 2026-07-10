@@ -28,6 +28,7 @@ const CATEGORY_REVERSE: Record<string, string> = {
 }
 
 function mapEvent(e: any): EventItem {
+  if (!e) return {} as EventItem
   const cat = CATEGORY_MAP[e.category] || e.category || "Community"
   return {
     id: e._id || e.id,

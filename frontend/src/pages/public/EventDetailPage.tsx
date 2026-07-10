@@ -46,21 +46,30 @@ export default function EventDetailPage() {
   const load = useCallback(async () => {
     if (!id) return
     try {
-      const [eventRes, feedbackRes] = await Promise.all([
-        getEventById(id),
-        getEventFeedback(id),
-      ])
+      const eventRes = await getEventById(id)
       setEvent(eventRes.data)
+    } catch {
+      setEvent(null)
+      setLoading(false)
+      return
+    }
+    try {
+      const feedbackRes = await getEventFeedback(id)
       setFeedback(feedbackRes.data)
-      if (user) {
+    } catch {
+      // feedback is optional — ignore errors
+    }
+    if (user) {
+      try {
         const regs = await getMyRegistrations(user.id)
         setMyReg(
           regs.data.find((r) => r.eventId === id && r.status === "CONFIRMED") ?? null,
         )
+      } catch {
+        // registrations lookup is optional
       }
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }, [id, user])
 
   useEffect(() => {
