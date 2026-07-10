@@ -16,5 +16,6 @@ router.patch('/:id', auth, permit('ORGANIZER', 'ADMIN'), controller.update);
 router.delete('/:id', auth, permit('ORGANIZER', 'ADMIN'), controller.remove);
 router.patch('/:id/publish', auth, permit('ORGANIZER', 'ADMIN'), controller.publish);
 router.patch('/:id/cancel', auth, permit('ORGANIZER', 'ADMIN'), controller.cancel);
+router.post('/upload-banner', auth, permit('ORGANIZER', 'ADMIN'), controller.uploadBanner);
 
 export default router;

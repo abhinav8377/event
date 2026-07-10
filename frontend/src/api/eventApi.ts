@@ -1,6 +1,17 @@
 import api from "./axios"
 import type { ApiResponse, EventItem, EventStatus } from "@/constants/types"
 
+export async function uploadBannerImage(file: File) {
+  const form = new FormData()
+  form.append("banner", file)
+  const res = await api.post<ApiResponse<{ url: string }>>("/api/events/upload-banner", form)
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    url: res.data.data.url,
+  }
+}
+
 export interface EventFilters {
   search?: string
   category?: string
