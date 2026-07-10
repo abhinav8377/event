@@ -3,11 +3,11 @@
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { Users, Megaphone, CalendarRange, Ticket, Award, TrendingUp } from "lucide-react"
+import { Users, Megaphone, CalendarRange, Ticket, Award, TrendingUp, RefreshCw } from "lucide-react"
 import * as adminApi from "@/api/adminApi"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/cards/StatCard"
-import { Card, Badge, Loader } from "@/components/common/ui"
+import { Card, Badge, Button, Loader, EmptyState } from "@/components/common/ui"
 import type { EventStatus } from "@/constants/types"
 
 const statusVariant: Record<EventStatus, "default" | "success" | "destructive" | "outline"> = {
@@ -18,9 +18,49 @@ const statusVariant: Record<EventStatus, "default" | "success" | "destructive" |
 }
 
 export default function AdminDashboard() {
-  const { data: stats } = useSWR("admin-stats", () => adminApi.getAdminStats().then((r) => r.data))
-  const { data: allEvents } = useSWR("admin-events", () => adminApi.getAllEvents().then((r) => r.data))
-  const { data: allUsers } = useSWR("all-users", () => adminApi.getAllUsers().then((r) => r.data))
+  const {
+    data: stats,
+    error: statsError,
+    mutate: refreshStats,
+  } = useSWR("admin-stats", () => adminApi.getAdminStats().then((r) => r.data))
+  const {
+    data: allEvents,
+    error: eventsError,
+    mutate: refreshEvents,
+  } = useSWR("admin-events", () => adminApi.getAllEvents().then((r) => r.data))
+  const {
+    data: allUsers,
+    error: usersError,
+    mutate: refreshUsers,
+  } = useSWR("all-users", () => adminApi.getAllUsers().then((r) => r.data))
+
+  const syncAll = () => {
+    refreshStats()
+    refreshEvents()
+    refreshUsers()
+  }
+
+  if (statsError || eventsError || usersError) {
+    return (
+      <div>
+        <PageHeader
+          title="Platform overview"
+          description="System-wide statistics and recent activity."
+          action={
+            <Button size="sm" variant="outline" onClick={syncAll}>
+              <RefreshCw className="size-4" aria-hidden="true" />
+              Retry
+            </Button>
+          }
+        />
+        <EmptyState
+          icon={<TrendingUp className="size-10" aria-hidden="true" />}
+          title="Failed to load dashboard"
+          description="Could not fetch admin data. Please try again."
+        />
+      </div>
+    )
+  }
 
   if (!stats || !allEvents || !allUsers) return <Loader />
 
@@ -32,7 +72,16 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <PageHeader title="Platform overview" description="System-wide statistics and recent activity." />
+      <PageHeader
+        title="Platform overview"
+        description="System-wide statistics and recent activity."
+        action={
+          <Button size="sm" variant="outline" onClick={syncAll}>
+            <RefreshCw className="size-4" aria-hidden="true" />
+            Sync
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Total users" value={stats.totalUsers} icon={Users} />

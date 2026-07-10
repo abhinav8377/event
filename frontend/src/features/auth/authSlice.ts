@@ -131,6 +131,14 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (s) => {
         s.user = null
         s.token = null
+        s.loading = false
+        localStorage.removeItem("eventhub_token")
+        localStorage.removeItem("eventhub_user")
+      })
+      .addCase(logoutUser.rejected, (s) => {
+        s.user = null
+        s.token = null
+        s.loading = false
         localStorage.removeItem("eventhub_token")
         localStorage.removeItem("eventhub_user")
       })

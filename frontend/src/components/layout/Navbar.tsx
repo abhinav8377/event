@@ -130,7 +130,7 @@ export function Navbar() {
                   <Button variant="outline" size="sm" onClick={() => { setOpen(false); navigate(dashboardPath[user.role]) }}>
                     Dashboard
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { dispatch(logoutUser()); setOpen(false); navigate("/") }}>
+                  <Button variant="ghost" size="sm" onClick={() => { localStorage.removeItem("eventhub_token"); localStorage.removeItem("eventhub_user"); dispatch(logoutUser()); setOpen(false); window.location.href = "/" }}>
                     Logout
                   </Button>
                 </>

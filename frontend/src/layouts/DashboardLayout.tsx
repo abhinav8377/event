@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
+import { Link, NavLink, Outlet } from "react-router-dom"
 import {
   CalendarRange,
   Menu,
@@ -35,7 +35,6 @@ export default function DashboardLayout({
   const notifications = useAppSelector((s) => s.notifications.items)
   const unread = notifications.filter((n) => !n.read).length
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (user) dispatch(fetchNotifications(user.id))
@@ -88,8 +87,10 @@ export default function DashboardLayout({
           <button
             type="button"
             onClick={() => {
+              localStorage.removeItem("eventhub_token")
+              localStorage.removeItem("eventhub_user")
               dispatch(logoutUser())
-              navigate("/")
+              window.location.href = "/"
             }}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white"
           >

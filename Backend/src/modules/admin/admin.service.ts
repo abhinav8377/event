@@ -1,6 +1,8 @@
 import User from '../users/user.model.js';
 import Event from '../events/event.model.js';
 import Registration from '../registrations/registration.model.js';
+import Certificate from '../certificates/certificate.model.js';
+import Role from '../users/role.model.js';
 import type { ServiceError } from '../../types/index.js';
 
 function throwErr(message: string, status: number): never {
@@ -10,13 +12,26 @@ function throwErr(message: string, status: number): never {
 }
 
 export const getDashboard = async () => {
-  const [totalUsers, totalEvents, totalRegistrations, publishedEvents] = await Promise.all([
-    User.countDocuments(),
-    Event.countDocuments(),
-    Registration.countDocuments({ status: 'CONFIRMED' }),
-    Event.countDocuments({ status: 'PUBLISHED' }),
-  ]);
-  return { totalUsers, totalEvents, publishedEvents, totalRegistrations };
+  const [totalUsers, organizerRole, totalEvents, totalRegistrations, publishedEvents, certificatesIssued] =
+    await Promise.all([
+      User.countDocuments(),
+      Role.findOne({ name: 'ORGANIZER' }),
+      Event.countDocuments(),
+      Registration.countDocuments({ status: 'CONFIRMED' }),
+      Event.countDocuments({ status: 'PUBLISHED' }),
+      Certificate.countDocuments(),
+    ]);
+  const totalOrganizers = organizerRole
+    ? await User.countDocuments({ roleId: organizerRole._id })
+    : 0;
+  return {
+    totalUsers,
+    totalOrganizers,
+    totalEvents,
+    publishedEvents,
+    totalRegistrations,
+    certificatesIssued,
+  };
 };
 
 export const getAllUsers = async () => {
