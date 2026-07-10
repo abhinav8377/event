@@ -16,6 +16,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src/**/*.ts", "app.ts", "server.ts", "seed.ts"],
+  "include": ["src/**/*.ts", "app.ts", "server.ts"],
   "exclude": ["node_modules", "dist"]
 }
