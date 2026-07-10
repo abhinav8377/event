@@ -18,12 +18,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-const demoAccounts = [
-  { role: "User", email: "user@demo.com" },
-  { role: "Organizer", email: "organizer@demo.com" },
-  { role: "Admin", email: "admin@demo.com" },
-]
-
 function dashboardPathFor(role: string) {
   if (role === "ADMIN") return "/admin"
   if (role === "ORGANIZER") return "/organizer"
@@ -136,19 +130,6 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
-        </Card>
-
-        <Card className="mt-4 p-4">
-          <p className="mb-3 text-center font-mono text-xs text-muted-foreground">
-            demo accounts · password: password123
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {demoAccounts.map((d) => (
-              <Button key={d.email} variant="outline" size="sm" onClick={() => fillDemo(d.email)}>
-                {d.role}
-              </Button>
-            ))}
-          </div>
         </Card>
       </div>
     </main>
