@@ -4,6 +4,7 @@ import Event from '../events/event.model.js';
 import { generateQR } from '../../common/utils/qrcode.util.js';
 import * as analyticsService from '../analytics/analytics.service.js';
 import * as notificationService from '../notifications/notification.service.js';
+import { isEventStarted } from '../events/event.lifecycle.js';
 import type { ServiceError } from '../../types/index.js';
 
 function throwErr(message: string, status: number): never {
@@ -15,6 +16,8 @@ function throwErr(message: string, status: number): never {
 export const registerForEvent = async (eventId: string, userId: string) => {
   const event = await Event.findById(eventId);
   if (!event || event.status !== 'PUBLISHED') throwErr('Event not found or not open for registration', 404);
+
+  if (isEventStarted(event)) throwErr('Registration is closed — the event has already started', 400);
 
   const confirmedCount = await Registration.countDocuments({ eventId: event._id, status: 'CONFIRMED' });
   if (confirmedCount >= event.capacity) throwErr('Event is full', 409);

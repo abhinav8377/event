@@ -95,6 +95,7 @@ export default function EventDetailPage() {
   }
 
   const isPast = new Date(event.endDate).getTime() < Date.now()
+  const isStarted = new Date(event.startDate).getTime() <= Date.now()
   const isFull = event.registeredCount >= event.capacity
   const attended = myReg?.attendance === "PRESENT" || myReg?.attendance === "LATE"
   const alreadyReviewed = user ? feedback.some((f) => f.userId === user.id) : false
@@ -328,6 +329,10 @@ export default function EventDetailPage() {
                 <Button className="w-full" disabled>
                   Event has ended
                 </Button>
+              ) : isStarted ? (
+                <Button className="w-full" disabled>
+                  Registration closed
+                </Button>
               ) : isFull ? (
                 <Button className="w-full" disabled>
                   Event is full
@@ -338,7 +343,7 @@ export default function EventDetailPage() {
                   Register now
                 </Button>
               )}
-              {!user && !isPast && !isFull && (
+              {!user && !isPast && !isStarted && !isFull && (
                 <p className="mt-2 text-center text-xs text-muted-foreground">
                   You&apos;ll be asked to log in first.
                 </p>

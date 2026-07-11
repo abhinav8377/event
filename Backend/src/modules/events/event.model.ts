@@ -24,7 +24,7 @@ const eventSchema = new Schema<IEvent>(
     tags: { type: [String], default: [] },
     status: {
       type: String,
-      enum: ['DRAFT', 'PUBLISHED', 'CANCELLED'],
+      enum: ['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED'],
       default: 'DRAFT',
     },
     organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

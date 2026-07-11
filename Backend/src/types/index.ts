@@ -15,7 +15,7 @@ export interface IOrganization {
 }
 
 // Event status
-export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED';
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 
 // Event category
 export type EventCategory =
