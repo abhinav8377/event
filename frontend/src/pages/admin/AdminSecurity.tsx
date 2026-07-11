@@ -6,6 +6,7 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import {
   Shield,
+  ShieldAlert,
   Search,
   Filter,
   ChevronLeft,
@@ -78,6 +79,7 @@ export default function AdminSecurity() {
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
   const [expandedLog, setExpandedLog] = useState<string | null>(null)
+  const [adminRouteFilter, setAdminRouteFilter] = useState<"all" | "true" | "false">("all")
 
   const buildParams = useCallback(() => {
     const params: Record<string, any> = { page, limit: 30 }
@@ -88,8 +90,9 @@ export default function AdminSecurity() {
     if (ipSearch) params.ip = ipSearch
     if (startDate) params.startDate = startDate
     if (endDate) params.endDate = endDate
+    if (adminRouteFilter !== "all") params.adminRoute = adminRouteFilter
     return params
-  }, [page, method, statusGroup, statusSearch, urlSearch, ipSearch, startDate, endDate])
+  }, [page, method, statusGroup, statusSearch, urlSearch, ipSearch, startDate, endDate, adminRouteFilter])
 
   const { data: logsData, mutate: mutateLogs, isLoading: logsLoading } = useSWR(
     ["admin-logs", buildParams()],
@@ -111,10 +114,11 @@ export default function AdminSecurity() {
     setIpSearch("")
     setStartDate("")
     setEndDate("")
+    setAdminRouteFilter("all")
     setPage(1)
   }
 
-  const hasFilters = method || statusGroup || statusSearch || urlSearch || ipSearch || startDate || endDate
+  const hasFilters = method || statusGroup || statusSearch || urlSearch || ipSearch || startDate || endDate || adminRouteFilter !== "all"
 
   const logs = logsData?.logs || []
   const pagination = logsData?.pagination
@@ -198,6 +202,15 @@ export default function AdminSecurity() {
             value={statusSearch}
             onChange={(e) => { setStatusSearch(e.target.value); setPage(1) }}
           />
+          <Select
+            id="admin-route-filter"
+            value={adminRouteFilter}
+            onChange={(e) => { setAdminRouteFilter(e.target.value as "all" | "true" | "false"); setPage(1) }}
+          >
+            <option value="all">All Requests</option>
+            <option value="true">Admin Route Access</option>
+            <option value="false">Non-Admin Routes</option>
+          </Select>
           <Input
             id="start-date"
             type="date"
@@ -266,6 +279,12 @@ export default function AdminSecurity() {
                             <StatusIcon className="size-3" aria-hidden="true" />
                             {log.statusCode}
                           </span>
+                          {log.isAdminRoute && (
+                            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 font-mono text-[10px] font-bold text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                              <ShieldAlert className="size-2.5" />
+                              ADMIN
+                            </span>
+                          )}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">
                           <span className={clsx(
@@ -329,6 +348,14 @@ export default function AdminSecurity() {
                       <span className="font-semibold text-muted-foreground">Status Category</span>
                       <p className="mt-0.5 text-foreground">{getStatusStyle(log.statusCode).label}</p>
                     </div>
+                    {log.isAdminRoute && (
+                      <div className="col-span-full mt-1 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
+                        <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-400">
+                          <ShieldAlert className="size-4" />
+                          Privilege Escalation Attempt — {log.userRole} "{log.userName}" accessed admin resource
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )

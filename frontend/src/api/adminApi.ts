@@ -194,6 +194,7 @@ export async function getRequestLogs(params: {
         userRole: l.userRole,
         duration: l.duration,
         contentLength: l.contentLength || 0,
+        isAdminRoute: l.isAdminRoute || false,
         createdAt: l.createdAt,
       })),
       pagination: res.data.data.pagination,

@@ -13,6 +13,7 @@ const requestLogSchema = new Schema<IRequestLog>(
     userRole: { type: String, default: '' },
     duration: { type: Number, default: 0 },
     contentLength: { type: Number, default: 0 },
+    isAdminRoute: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

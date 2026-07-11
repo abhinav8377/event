@@ -21,6 +21,8 @@ const loggingMiddleware = (req: Request, res: Response, next: NextFunction): voi
       return originalJson(body);
     }
 
+    const isAdminRoute = req.originalUrl.startsWith('/api/admin');
+
     const logData = {
       method: req.method,
       url: req.originalUrl.split('?')[0],
@@ -32,6 +34,7 @@ const loggingMiddleware = (req: Request, res: Response, next: NextFunction): voi
       userRole: role || '',
       duration,
       contentLength: body ? JSON.stringify(body).length : 0,
+      isAdminRoute,
     };
 
     RequestLog.create(logData).catch(() => {});

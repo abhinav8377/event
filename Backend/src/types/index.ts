@@ -196,5 +196,6 @@ export interface IRequestLog extends Document {
   userRole?: string;
   duration: number;
   contentLength?: number;
+  isAdminRoute?: boolean;
   createdAt: Date;
 }

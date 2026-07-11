@@ -127,6 +127,7 @@ export interface RequestLog {
   userRole?: string
   duration: number
   contentLength: number
+  isAdminRoute: boolean
   createdAt: string
 }
 

@@ -195,6 +195,7 @@ export interface LogQuery {
   ip?: string;
   startDate?: string;
   endDate?: string;
+  adminRoute?: string;
 }
 
 export const getRequestLogs = async (query: LogQuery) => {
@@ -237,6 +238,12 @@ export const getRequestLogs = async (query: LogQuery) => {
     filter.createdAt = {};
     if (query.startDate) filter.createdAt.$gte = new Date(query.startDate);
     if (query.endDate) filter.createdAt.$lte = new Date(query.endDate);
+  }
+
+  if (query.adminRoute === 'true') {
+    filter.isAdminRoute = true;
+  } else if (query.adminRoute === 'false') {
+    filter.isAdminRoute = { $ne: true };
   }
 
   const [logs, total] = await Promise.all([

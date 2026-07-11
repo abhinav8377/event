@@ -115,6 +115,7 @@ export const listLogs = async (req: AuthRequest, res: Response, next: NextFuncti
       ip: req.query.ip as string,
       startDate: req.query.startDate as string,
       endDate: req.query.endDate as string,
+      adminRoute: req.query.adminRoute as string,
     });
     success(res, 'Logs fetched', data);
   } catch (err) {
