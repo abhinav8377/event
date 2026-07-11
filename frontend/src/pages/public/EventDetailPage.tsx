@@ -385,7 +385,7 @@ export default function EventDetailPage() {
       <Modal open={ticketOpen} onClose={() => setTicketOpen(false)} title="Your ticket">
         {myReg && (
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="rounded-xl border border-border bg-white p-4">
+            <div className="rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-white">
               <QRCodeSVG value={myReg.qrValue} size={180} aria-label="Ticket QR code" />
             </div>
             <div>

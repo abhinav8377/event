@@ -21,12 +21,19 @@ export function Navbar() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const links = [
-    { to: "/", label: "home" },
+  const publicLinks = [
     { to: "/events", label: "events" },
     { to: "/about", label: "about" },
     { to: "/contact", label: "contact" },
   ]
+
+  const handleLogout = () => {
+    localStorage.removeItem("eventhub_token")
+    localStorage.removeItem("eventhub_user")
+    dispatch(logoutUser())
+    setOpen(false)
+    window.location.href = "/"
+  }
 
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 md:px-6">
@@ -34,7 +41,10 @@ export function Navbar() {
         className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl border border-border bg-card/85 px-3 shadow-lg shadow-black/5 backdrop-blur-md md:px-4"
         aria-label="Main navigation"
       >
-        <Link to="/" className="flex items-center gap-2.5 font-extrabold tracking-tight text-foreground">
+        <Link
+          to={user ? dashboardPath[user.role] || "/user" : "/"}
+          className="flex items-center gap-2.5 font-extrabold tracking-tight text-foreground"
+        >
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <CalendarRange className="size-4" aria-hidden="true" />
           </span>
@@ -44,7 +54,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {links.map((l) => (
+          {publicLinks.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
@@ -68,14 +78,7 @@ export function Navbar() {
                 <LayoutDashboard className="size-4" aria-hidden="true" />
                 Dashboard
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  dispatch(logoutUser())
-                  navigate("/")
-                }}
-              >
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="size-4" aria-hidden="true" />
                 Logout
               </Button>
@@ -109,7 +112,7 @@ export function Navbar() {
       {open && (
         <div className="mx-auto mt-2 max-w-6xl rounded-2xl border border-border bg-card px-4 py-3 shadow-lg md:hidden">
           <div className="flex flex-col gap-1">
-            {links.map((l) => (
+            {publicLinks.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
@@ -130,7 +133,7 @@ export function Navbar() {
                   <Button variant="outline" size="sm" onClick={() => { setOpen(false); navigate(dashboardPath[user.role]) }}>
                     Dashboard
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { localStorage.removeItem("eventhub_token"); localStorage.removeItem("eventhub_user"); dispatch(logoutUser()); setOpen(false); window.location.href = "/" }}>
+                  <Button variant="ghost" size="sm" onClick={handleLogout}>
                     Logout
                   </Button>
                 </>

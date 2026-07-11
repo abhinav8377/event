@@ -56,7 +56,7 @@ function getStatusGroupStyle(group: string) {
     case "redirect": return { color: "text-yellow-500", bg: "bg-yellow-500", label: "Redirect", icon: ArrowUpDown }
     case "clientError": return { color: "text-red-500", bg: "bg-red-500", label: "Client Error", icon: XCircle }
     case "serverError": return { color: "text-orange-500", bg: "bg-orange-500", label: "Server Error", icon: Server }
-    default: return { color: "text-gray-500", bg: "bg-gray-500", label: group, icon: AlertTriangle }
+    default: return { color: "text-muted-foreground", bg: "bg-secondary", label: group, icon: AlertTriangle }
   }
 }
 
@@ -267,7 +267,7 @@ export default function AdminSecurity() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={clsx("inline-flex items-center rounded-md px-2 py-0.5 font-mono text-xs font-bold", METHOD_COLORS[log.method] || "bg-gray-100 text-gray-700")}>
+                          <span className={clsx("inline-flex items-center rounded-md px-2 py-0.5 font-mono text-xs font-bold", METHOD_COLORS[log.method] || "bg-secondary text-muted-foreground")}>
                             {log.method}
                           </span>
                         </td>

@@ -191,7 +191,7 @@ export default function MyRegistrations() {
       <Modal open={!!ticketReg} onClose={() => setTicketReg(null)} title="Your event ticket">
         {ticketReg && (
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="rounded-xl border border-border bg-card p-4">
+            <div className="rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-white">
               <QRCodeSVG value={ticketReg.reg.qrValue} size={180} aria-label="Ticket QR code" />
             </div>
             <div>

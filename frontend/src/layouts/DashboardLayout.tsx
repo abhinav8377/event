@@ -47,10 +47,23 @@ export default function DashboardLayout({
         ? "/organizer/notifications"
         : "/admin/notifications"
 
+  const dashboardPath: Record<string, string> = {
+    USER: "/user",
+    ORGANIZER: "/organizer",
+    ADMIN: "/admin",
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("eventhub_token")
+    localStorage.removeItem("eventhub_user")
+    dispatch(logoutUser())
+    window.location.href = "/"
+  }
+
   const sidebar = (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-y-auto">
       <div className="flex h-16 items-center gap-2 px-5">
-        <Link to="/" className="flex items-center gap-2.5 font-extrabold tracking-tight text-white">
+        <Link to={user ? dashboardPath[user.role] || "/user" : "/"} className="flex items-center gap-2.5 font-extrabold tracking-tight text-white">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <CalendarRange className="size-4" aria-hidden="true" />
           </span>
@@ -86,12 +99,7 @@ export default function DashboardLayout({
       <div className="border-t border-sidebar-accent p-3">
           <button
             type="button"
-            onClick={() => {
-              localStorage.removeItem("eventhub_token")
-              localStorage.removeItem("eventhub_user")
-              dispatch(logoutUser())
-              window.location.href = "/"
-            }}
+            onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white"
           >
             <LogOut className="size-4" aria-hidden="true" />
@@ -102,9 +110,9 @@ export default function DashboardLayout({
   )
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 bg-sidebar lg:block">
+      <aside className="sticky top-0 hidden h-full w-64 shrink-0 bg-sidebar lg:block">
         {sidebar}
       </aside>
 
@@ -123,8 +131,8 @@ export default function DashboardLayout({
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-card px-4 md:px-6">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="z-40 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 md:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -163,7 +171,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

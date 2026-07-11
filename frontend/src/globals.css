@@ -94,6 +94,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -101,7 +102,13 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
   transition: background-color 200ms ease, color 200ms ease;
+}
+
+#root {
+  overflow-x: hidden;
+  min-height: 100dvh;
 }
 
 /* freeapi-style display headline */

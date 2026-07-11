@@ -40,7 +40,7 @@ export default function VenueMap({ latitude, longitude, venue, city, height = "2
             <Popup>
               <div className="text-sm">
                 <p className="font-semibold">{venue}</p>
-                {city && <p className="text-gray-600">{city}</p>}
+                {city && <p className="text-muted-foreground">{city}</p>}
               </div>
             </Popup>
           </Marker>

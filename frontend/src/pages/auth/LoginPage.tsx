@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarDays } from "lucide-react"
+import { CalendarRange } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { login, clearError } from "@/features/auth/authSlice"
 import { pushToast } from "@/features/toast/toastSlice"
@@ -21,7 +21,7 @@ type FormValues = z.infer<typeof schema>
 function dashboardPathFor(role: string) {
   if (role === "ADMIN") return "/admin"
   if (role === "ORGANIZER") return "/organizer"
-  return "/dashboard"
+  return "/user"
 }
 
 const rolePrefix: Record<string, string> = {
@@ -34,7 +34,6 @@ function safeRedirect(from: string | undefined, role: string) {
   if (!from) return dashboardPathFor(role)
   const dashboardPrefixes = Object.values(rolePrefix)
   const isDashboardPath = dashboardPrefixes.some((p) => from.startsWith(p))
-  // Only honor dashboard deep-links that belong to this user's role
   if (isDashboardPath && !from.startsWith(rolePrefix[role] ?? "")) {
     return dashboardPathFor(role)
   }
@@ -50,7 +49,6 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -72,18 +70,13 @@ export default function LoginPage() {
     }
   }
 
-  const fillDemo = (email: string) => {
-    setValue("email", email)
-    setValue("password", "password123")
-  }
-
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
       <div className="bg-grid bg-grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
           <Link to="/" className="flex items-center gap-2 text-primary">
-            <CalendarDays className="size-8" aria-hidden="true" />
+            <CalendarRange className="size-8" aria-hidden="true" />
             <span className="text-2xl font-extrabold tracking-tight text-foreground">
               Event<span className="text-primary">Hub</span>
             </span>

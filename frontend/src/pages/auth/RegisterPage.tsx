@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarDays, User, Megaphone } from "lucide-react"
+import { CalendarRange, User, Megaphone } from "lucide-react"
 import clsx from "clsx"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { registerUser, clearError } from "@/features/auth/authSlice"
@@ -45,7 +45,8 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      navigate(user.role === "ORGANIZER" ? "/organizer" : "/dashboard", { replace: true })
+      const path = user.role === "ORGANIZER" ? "/organizer" : user.role === "ADMIN" ? "/admin" : "/user"
+      navigate(path, { replace: true })
     }
   }, [user, navigate])
 
@@ -70,7 +71,7 @@ export default function RegisterPage() {
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
           <Link to="/" className="flex items-center gap-2 text-primary">
-            <CalendarDays className="size-8" aria-hidden="true" />
+            <CalendarRange className="size-8" aria-hidden="true" />
             <span className="text-2xl font-extrabold tracking-tight text-foreground">
               Event<span className="text-primary">Hub</span>
             </span>
