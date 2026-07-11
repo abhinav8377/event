@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { CalendarRange, Menu, X, LayoutDashboard, LogOut } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
-import { logoutUser } from "@/features/auth/authSlice"
+import { logout } from "@/features/auth/authSlice"
 import { Button } from "@/components/common/ui"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
@@ -28,9 +28,7 @@ export function Navbar() {
   ]
 
   const handleLogout = () => {
-    localStorage.removeItem("eventhub_token")
-    localStorage.removeItem("eventhub_user")
-    dispatch(logoutUser())
+    dispatch(logout())
     setOpen(false)
     window.location.href = "/"
   }

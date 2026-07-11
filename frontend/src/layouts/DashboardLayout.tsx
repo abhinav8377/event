@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
-import { logoutUser } from "@/features/auth/authSlice"
+import { logout } from "@/features/auth/authSlice"
 import { fetchNotifications } from "@/features/notifications/notificationSlice"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
@@ -54,9 +54,7 @@ export default function DashboardLayout({
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("eventhub_token")
-    localStorage.removeItem("eventhub_user")
-    dispatch(logoutUser())
+    dispatch(logout())
     window.location.href = "/"
   }
 
