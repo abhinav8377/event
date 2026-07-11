@@ -36,6 +36,7 @@ import OrganizerEvents from "@/pages/organizer/OrganizerEvents"
 import EventFormPage from "@/pages/organizer/EventFormPage"
 import AttendancePage from "@/pages/organizer/AttendancePage"
 import OrganizerAnalytics from "@/pages/organizer/OrganizerAnalytics"
+import OrganizerNotifications from "@/pages/organizer/OrganizerNotifications"
 
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import AdminUsers from "@/pages/admin/AdminUsers"
@@ -62,6 +63,7 @@ const organizerNav: NavItem[] = [
   { to: "/organizer/attendance", label: "Attendance", icon: QrCode },
   { to: "/organizer/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/organizer/notifications", label: "Notifications", icon: Bell },
+  { to: "/organizer/send-notifications", label: "Send Notifications", icon: Megaphone },
   { to: "/organizer/profile", label: "Profile", icon: UserRound },
 ]
 
@@ -116,6 +118,7 @@ export default function App() {
             <Route path="/organizer/attendance" element={<AttendancePage />} />
             <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
             <Route path="/organizer/notifications" element={<NotificationsPage />} />
+            <Route path="/organizer/send-notifications" element={<OrganizerNotifications />} />
             <Route path="/organizer/profile" element={<ProfilePage />} />
           </Route>
         </Route>

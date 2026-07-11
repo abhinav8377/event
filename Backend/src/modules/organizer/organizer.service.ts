@@ -2,6 +2,9 @@ import Event from '../events/event.model.js';
 import Registration from '../registrations/registration.model.js';
 import Attendance from '../attendance/attendance.model.js';
 import Feedback from '../feedback/feedback.model.js';
+import Notification from '../notifications/notification.model.js';
+import User from '../users/user.model.js';
+import { sendEmail } from '../../common/utils/email.util.js';
 import type { ServiceError } from '../../types/index.js';
 
 function throwErr(message: string, status: number): never {
@@ -72,4 +75,94 @@ export const getEventRegistrations = async (eventId: string, userId: string, rol
     .populate('userId', 'name email')
     .sort({ createdAt: -1 });
   return { registrations };
+};
+
+export const sendEventNotification = async (
+  organizerId: string,
+  eventId: string,
+  title: string,
+  message: string,
+  notificationType: string = 'EVENT_UPDATE',
+) => {
+  const event = await Event.findById(eventId);
+  if (!event) throwErr('Event not found', 404);
+  if (String(event.organizerId) !== organizerId) throwErr('Forbidden', 403);
+
+  const registrations = await Registration.find({ eventId: event._id, status: 'CONFIRMED' }).populate(
+    'userId',
+    'name email',
+  );
+
+  if (registrations.length === 0) throwErr('No registered participants found', 404);
+
+  const VALID_TYPES = ['REGISTRATION', 'REMINDER', 'EVENT_UPDATE', 'CERTIFICATE', 'GENERAL'];
+  const dbType = notificationType === 'UPDATE' ? 'EVENT_UPDATE' : notificationType;
+  const safeType = VALID_TYPES.includes(dbType) ? dbType : 'GENERAL';
+
+  const docs = registrations.map((reg) => ({
+    userId: (reg.userId as any)._id,
+    title,
+    message,
+    type: safeType,
+    sentBy: organizerId,
+  }));
+
+  await Notification.insertMany(docs);
+
+  const emailPromises = registrations.map((reg) => {
+    const user = reg.userId as any;
+    return sendEmail({
+      to: user.email,
+      subject: title,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <h2 style="color:#333;">${title}</h2>
+        <p style="color:#555;font-size:15px;line-height:1.6;">Hi ${user.name},</p>
+        <p style="color:#555;font-size:15px;line-height:1.6;">${message}</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
+        <p style="color:#555;font-size:14px;">Event: <strong>${event.title}</strong></p>
+        <p style="color:#999;font-size:12px;">This is a notification from the event organizer.</p>
+      </div>`,
+    }).catch(() => {});
+  });
+  await Promise.allSettled(emailPromises);
+
+  return { sent: registrations.length, eventTitle: event.title };
+};
+
+export const getOrganizerEvents = async (organizerId: string) => {
+  const events = await Event.find({ organizerId })
+    .select('_id title date startTime venue city status')
+    .sort({ createdAt: -1 });
+  return { events };
+};
+
+export const getSentOrganizerNotifications = async (organizerId: string) => {
+  const notifications = await Notification.find({ sentBy: organizerId })
+    .populate('userId', 'name email')
+    .sort({ createdAt: -1 })
+    .limit(200);
+
+  const grouped = new Map<string, any>();
+
+  for (const n of notifications) {
+    const key = `${n.title}|||${n.message}|||${n.type}`;
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        title: n.title,
+        message: n.message,
+        type: n.type,
+        createdAt: n.createdAt,
+        recipientCount: 0,
+        recipients: [] as { name: string; email: string }[],
+      });
+    }
+    const entry = grouped.get(key);
+    entry.recipientCount += 1;
+    if (entry.recipients.length < 5) {
+      const user = n.userId as any;
+      entry.recipients.push({ name: user?.name ?? '', email: user?.email ?? '' });
+    }
+  }
+
+  return { notifications: Array.from(grouped.values()) };
 };
