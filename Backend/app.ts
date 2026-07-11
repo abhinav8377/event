@@ -12,6 +12,7 @@ import notificationRoutes from "./src/modules/notifications/notification.routes.
 import analyticsRoutes from "./src/modules/analytics/analytics.routes.js";
 import organizerRoutes from "./src/modules/organizer/organizer.routes.js";
 import adminRoutes from "./src/modules/admin/admin.routes.js";
+import loggingMiddleware from "./src/common/middleware/logging.middleware.js";
 import errorMiddleware from "./src/common/middleware/error.middleware.js";
 import type { Request, Response } from "express";
 
@@ -19,6 +20,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(loggingMiddleware);
 
 app.get("/api/health", (req: Request, res: Response) =>
   res.json({ success: true, message: "OK" }),

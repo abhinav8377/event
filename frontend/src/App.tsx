@@ -10,6 +10,7 @@ import {
   BarChart3,
   Users,
   Megaphone,
+  Shield,
 } from "lucide-react"
 import PublicLayout from "@/layouts/PublicLayout"
 import DashboardLayout, { type NavItem } from "@/layouts/DashboardLayout"
@@ -42,6 +43,7 @@ import AdminOrganizers from "@/pages/admin/AdminOrganizers"
 import AdminEvents from "@/pages/admin/AdminEvents"
 import AdminAnalytics from "@/pages/admin/AdminAnalytics"
 import AdminNotifications from "@/pages/admin/AdminNotifications"
+import AdminSecurity from "@/pages/admin/AdminSecurity"
 
 import NotificationsPage from "@/pages/shared/NotificationsPage"
 import ProfilePage from "@/pages/shared/ProfilePage"
@@ -69,6 +71,7 @@ const adminNav: NavItem[] = [
   { to: "/admin/organizers", label: "Organizers", icon: Megaphone },
   { to: "/admin/events", label: "Events", icon: CalendarRange },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/security", label: "Security & Logs", icon: Shield },
   { to: "/admin/notifications", label: "Send Notifications", icon: Bell },
   { to: "/admin/profile", label: "Profile", icon: UserRound },
 ]
@@ -125,6 +128,7 @@ export default function App() {
             <Route path="/admin/organizers" element={<AdminOrganizers />} />
             <Route path="/admin/events" element={<AdminEvents />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/security" element={<AdminSecurity />} />
             <Route path="/admin/notifications" element={<AdminNotifications />} />
             <Route path="/admin/profile" element={<ProfilePage />} />
           </Route>

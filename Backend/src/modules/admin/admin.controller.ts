@@ -102,3 +102,31 @@ export const sentNotifications = async (req: AuthRequest, res: Response, next: N
     next(err);
   }
 };
+
+export const listLogs = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await adminService.getRequestLogs({
+      page: Number(req.query.page) || 1,
+      limit: Number(req.query.limit) || 50,
+      method: req.query.method as string,
+      statusCode: req.query.statusCode ? Number(req.query.statusCode) : undefined,
+      statusGroup: req.query.statusGroup as string,
+      url: req.query.url as string,
+      ip: req.query.ip as string,
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+    });
+    success(res, 'Logs fetched', data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logStats = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await adminService.getLogStats();
+    success(res, 'Log stats fetched', data);
+  } catch (err) {
+    next(err);
+  }
+};

@@ -1,5 +1,5 @@
 import api from "./axios"
-import type { ApiResponse, User, EventItem, NotificationType } from "@/constants/types"
+import type { ApiResponse, User, EventItem, NotificationType, RequestLog, LogStats, LogPagination } from "@/constants/types"
 
 function mapUser(u: any): User {
   return {
@@ -150,5 +150,62 @@ export async function getSentNotifications() {
       recipientCount: n.recipientCount,
       recipients: n.recipients || [],
     })),
+  }
+}
+
+export async function getRequestLogs(params: {
+  page?: number
+  limit?: number
+  method?: string
+  statusCode?: number
+  statusGroup?: string
+  url?: string
+  ip?: string
+  startDate?: string
+  endDate?: string
+} = {}) {
+  const qs = new URLSearchParams()
+  if (params.page) qs.set("page", String(params.page))
+  if (params.limit) qs.set("limit", String(params.limit))
+  if (params.method) qs.set("method", params.method)
+  if (params.statusCode) qs.set("statusCode", String(params.statusCode))
+  if (params.statusGroup) qs.set("statusGroup", params.statusGroup)
+  if (params.url) qs.set("url", params.url)
+  if (params.ip) qs.set("ip", params.ip)
+  if (params.startDate) qs.set("startDate", params.startDate)
+  if (params.endDate) qs.set("endDate", params.endDate)
+
+  const res = await api.get<ApiResponse<{ logs: any[]; pagination: LogPagination }>>(
+    `/api/admin/logs?${qs.toString()}`,
+  )
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: {
+      logs: (res.data.data.logs || []).map((l: any) => ({
+        _id: l._id,
+        method: l.method,
+        url: l.url,
+        statusCode: l.statusCode,
+        ip: l.ip,
+        userAgent: l.userAgent,
+        userId: l.userId,
+        userName: l.userName,
+        userRole: l.userRole,
+        duration: l.duration,
+        contentLength: l.contentLength || 0,
+        createdAt: l.createdAt,
+      })),
+      pagination: res.data.data.pagination,
+    },
+  }
+}
+
+export async function getLogStats() {
+  const res = await api.get<ApiResponse<LogStats>>("/api/admin/logs/stats")
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: res.data.data,
   }
 }

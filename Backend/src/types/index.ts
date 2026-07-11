@@ -183,3 +183,18 @@ export interface AnalyticsSummary {
   attendance: number;
   averageRating: number;
 }
+
+// Request log document
+export interface IRequestLog extends Document {
+  method: string;
+  url: string;
+  statusCode: number;
+  ip: string;
+  userAgent: string;
+  userId?: Types.ObjectId;
+  userName?: string;
+  userRole?: string;
+  duration: number;
+  contentLength?: number;
+  createdAt: Date;
+}

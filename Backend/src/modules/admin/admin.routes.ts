@@ -16,5 +16,7 @@ router.patch('/block-user/:id', controller.blockUser);
 router.delete('/event/:id', controller.deleteEvent);
 router.post('/notifications', controller.sendNotification);
 router.get('/notifications/sent', controller.sentNotifications);
+router.get('/logs', controller.listLogs);
+router.get('/logs/stats', controller.logStats);
 
 export default router;

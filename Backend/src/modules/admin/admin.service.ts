@@ -5,6 +5,7 @@ import Attendance from '../attendance/attendance.model.js';
 import Feedback from '../feedback/feedback.model.js';
 import Certificate from '../certificates/certificate.model.js';
 import Notification from '../notifications/notification.model.js';
+import RequestLog from './requestlog.model.js';
 import Role from '../users/role.model.js';
 import { sendEmail } from '../../common/utils/email.util.js';
 import type { ServiceError } from '../../types/index.js';
@@ -182,4 +183,143 @@ export const getSentNotifications = async (adminId: string) => {
   }
 
   return { notifications: Array.from(grouped.values()) };
+};
+
+export interface LogQuery {
+  page?: number;
+  limit?: number;
+  method?: string;
+  statusCode?: number;
+  statusGroup?: string;
+  url?: string;
+  ip?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const getRequestLogs = async (query: LogQuery) => {
+  const page = Math.max(1, query.page || 1);
+  const limit = Math.min(100, Math.max(1, query.limit || 50));
+  const skip = (page - 1) * limit;
+
+  const filter: Record<string, any> = {};
+
+  if (query.method) {
+    filter.method = query.method.toUpperCase();
+  }
+
+  if (query.statusCode) {
+    filter.statusCode = query.statusCode;
+  }
+
+  if (query.statusGroup) {
+    const ranges: Record<string, any> = {
+      informational: { $gte: 100, $lt: 200 },
+      success: { $gte: 200, $lt: 300 },
+      redirect: { $gte: 300, $lt: 400 },
+      clientError: { $gte: 400, $lt: 500 },
+      serverError: { $gte: 500, $lt: 600 },
+    };
+    if (ranges[query.statusGroup]) {
+      filter.statusCode = ranges[query.statusGroup];
+    }
+  }
+
+  if (query.url) {
+    filter.url = { $regex: query.url, $options: 'i' };
+  }
+
+  if (query.ip) {
+    filter.ip = { $regex: query.ip, $options: 'i' };
+  }
+
+  if (query.startDate || query.endDate) {
+    filter.createdAt = {};
+    if (query.startDate) filter.createdAt.$gte = new Date(query.startDate);
+    if (query.endDate) filter.createdAt.$lte = new Date(query.endDate);
+  }
+
+  const [logs, total] = await Promise.all([
+    RequestLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    RequestLog.countDocuments(filter),
+  ]);
+
+  return {
+    logs,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  };
+};
+
+export const getLogStats = async () => {
+  const now = new Date();
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const last1h = new Date(now.getTime() - 60 * 60 * 1000);
+
+  const [totalLogs, recentLogs, methodBreakdown, statusBreakdown, topEndpoints, activeUsers, recentHourCount] =
+    await Promise.all([
+      RequestLog.countDocuments(),
+      RequestLog.countDocuments({ createdAt: { $gte: last24h } }),
+      RequestLog.aggregate([
+        { $match: { createdAt: { $gte: last24h } } },
+        { $group: { _id: '$method', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      RequestLog.aggregate([
+        { $match: { createdAt: { $gte: last24h } } },
+        {
+          $group: {
+            _id: {
+              $switch: {
+                branches: [
+                  { case: { $lt: ['$statusCode', 200] }, then: 'informational' },
+                  { case: { $lt: ['$statusCode', 300] }, then: 'success' },
+                  { case: { $lt: ['$statusCode', 400] }, then: 'redirect' },
+                  { case: { $lt: ['$statusCode', 500] }, then: 'clientError' },
+                ],
+                default: 'serverError',
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+      ]),
+      RequestLog.aggregate([
+        { $match: { createdAt: { $gte: last24h } } },
+        { $group: { _id: '$url', count: { $sum: 1 }, avgDuration: { $avg: '$duration' } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      RequestLog.aggregate([
+        { $match: { createdAt: { $gte: last24h }, userId: { $ne: null } } },
+        { $group: { _id: { userId: '$userId', userName: '$userName', userRole: '$userRole' }, count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      RequestLog.countDocuments({ createdAt: { $gte: last1h } }),
+    ]);
+
+  return {
+    totalLogs,
+    last24h: recentLogs,
+    last1h: recentHourCount,
+    methodBreakdown: methodBreakdown.map((m) => ({ method: m._id, count: m.count })),
+    statusBreakdown: statusBreakdown.map((s) => ({ group: s._id, count: s.count })),
+    topEndpoints: topEndpoints.map((e) => ({
+      url: e._id,
+      count: e.count,
+      avgDuration: Math.round(e.avgDuration),
+    })),
+    activeUsers: activeUsers.map((u) => ({
+      userId: u._id.userId,
+      userName: u._id.userName,
+      userRole: u._id.userRole,
+      requestCount: u.count,
+    })),
+  };
 };

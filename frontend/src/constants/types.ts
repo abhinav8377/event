@@ -114,3 +114,35 @@ export interface ApiResponse<T> {
   message: string
   data: T
 }
+
+export interface RequestLog {
+  _id: string
+  method: string
+  url: string
+  statusCode: number
+  ip: string
+  userAgent: string
+  userId?: string
+  userName?: string
+  userRole?: string
+  duration: number
+  contentLength: number
+  createdAt: string
+}
+
+export interface LogStats {
+  totalLogs: number
+  last24h: number
+  last1h: number
+  methodBreakdown: { method: string; count: number }[]
+  statusBreakdown: { group: string; count: number }[]
+  topEndpoints: { url: string; count: number; avgDuration: number }[]
+  activeUsers: { userId: string; userName: string; userRole: string; requestCount: number }[]
+}
+
+export interface LogPagination {
+  page: number
+  limit: number
+  total: number
+  pages: number
+}
