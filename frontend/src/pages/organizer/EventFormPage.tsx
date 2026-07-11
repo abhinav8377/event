@@ -227,7 +227,7 @@ export default function EventFormPage() {
                   alt="Custom banner"
                   className="h-44 w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
                     <span className="size-1.5 rounded-full bg-white" />
