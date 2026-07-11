@@ -45,13 +45,13 @@ function mapEvent(e: any): EventItem {
     id: e._id || e.id,
     title: e.title,
     description: e.description || "",
-    longDescription: e.longDescription || e.description || "",
+    longDescription: e.longDescription || "",
     category: cat as EventItem["category"],
     mode: (e.mode || "IN_PERSON") as EventItem["mode"],
     status: (e.status || "DRAFT") as EventStatus,
     banner: e.bannerUrl || e.banner || "/placeholder.svg",
     venue: e.venue || "",
-    city: e.city || (e.venue ? e.venue.split(",").pop()?.trim() || "" : ""),
+    city: e.city || "",
     startDate: e.date || e.startDate,
     endDate: e.endDate || e.date || e.startDate,
     capacity: e.capacity || 100,
@@ -120,13 +120,19 @@ export async function createEvent(organizerId: string, organizerName: string, in
   const body: Record<string, any> = {
     title: input.title,
     description: input.description,
+    longDescription: input.longDescription,
     category: CATEGORY_REVERSE[input.category || ""] || "OTHER",
+    mode: input.mode || "IN_PERSON",
     venue: input.venue,
+    city: input.city,
     date: input.startDate,
+    endDate: input.endDate,
     startTime: input.startDate ? new Date(input.startDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : undefined,
     endTime: input.endDate ? new Date(input.endDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : undefined,
     capacity: input.capacity,
+    price: input.price,
     bannerUrl: input.banner,
+    tags: input.tags,
   }
   const res = await api.post<ApiResponse<{ event: any }>>("/api/events", body)
   return {
@@ -140,11 +146,17 @@ export async function updateEvent(id: string, input: Partial<EventItem>) {
   const body: Record<string, any> = {}
   if (input.title !== undefined) body.title = input.title
   if (input.description !== undefined) body.description = input.description
-  if (input.category !== undefined) body.category = CATEGORY_REVERSE[input.category] || "OTHER"
+  if (input.longDescription !== undefined) body.longDescription = input.longDescription
+  if (input.category !== undefined) body.category = CATEGORY_REVERSE[input.category] || input.category
+  if (input.mode !== undefined) body.mode = input.mode
   if (input.venue !== undefined) body.venue = input.venue
+  if (input.city !== undefined) body.city = input.city
   if (input.startDate !== undefined) body.date = input.startDate
+  if (input.endDate !== undefined) body.endDate = input.endDate
   if (input.capacity !== undefined) body.capacity = input.capacity
+  if (input.price !== undefined) body.price = input.price
   if (input.banner !== undefined) body.bannerUrl = input.banner
+  if (input.tags !== undefined) body.tags = input.tags
   const res = await api.patch<ApiResponse<{ event: any }>>(`/api/events/${id}`, body)
   return {
     success: res.data.success,

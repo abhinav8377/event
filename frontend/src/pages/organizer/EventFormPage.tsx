@@ -12,7 +12,8 @@ import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
 import { pushToast } from "@/features/toast/toastSlice"
 import { PageHeader } from "@/components/common/PageHeader"
-import { Card, Button, Input, Textarea, Select, Loader } from "@/components/common/ui"
+import { Card, Button, Input, Select, Loader } from "@/components/common/ui"
+import QuillEditor from "@/components/common/QuillEditor"
 
 const banners = [
   { value: "/events/tech-conf.png", label: "Tech conference" },
@@ -23,11 +24,16 @@ const banners = [
   { value: "/events/design-summit.png", label: "Arts / design" },
 ]
 
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").trim()
+
 const schema = z
   .object({
     title: z.string().min(3, "Title must be at least 3 characters"),
     description: z.string().min(10, "Short description must be at least 10 characters"),
-    longDescription: z.string().min(20, "Full description must be at least 20 characters"),
+    longDescription: z.string().refine(
+      (val) => stripHtml(val).length >= 20,
+      "Full description must be at least 20 characters of content"
+    ),
     category: z.string(),
     mode: z.enum(["IN_PERSON", "ONLINE", "HYBRID"]),
     banner: z.string(),
@@ -72,6 +78,7 @@ export default function EventFormPage() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -84,6 +91,7 @@ export default function EventFormPage() {
       tags: "",
       venue: "",
       city: "",
+      longDescription: "",
     },
   })
 
@@ -188,13 +196,22 @@ export default function EventFormPage() {
             error={errors.description?.message}
             {...register("description")}
           />
-          <Textarea
-            id="longDescription"
-            label="Full description"
-            placeholder="Tell attendees what to expect..."
-            error={errors.longDescription?.message}
-            {...register("longDescription")}
-          />
+          <div>
+            <label className="text-sm font-medium text-foreground">Full description</label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Use headings, bold, lists, and formatting to create a structured event description.
+            </p>
+            <QuillEditor
+              value={watch("longDescription") || ""}
+              onChange={(val) => {
+                setValue("longDescription", val, { shouldValidate: true, shouldDirty: true })
+              }}
+              placeholder="Tell attendees what to expect — use headings, lists, bold text, and more to structure your description..."
+            />
+            {errors.longDescription?.message && (
+              <p className="mt-1 text-sm text-destructive">{errors.longDescription.message}</p>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <Input id="category" label="Category" placeholder="e.g. Technology, Sports, Business" error={errors.category?.message} {...register("category")} />

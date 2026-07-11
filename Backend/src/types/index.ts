@@ -72,13 +72,19 @@ export interface SafeUser {
 export interface IEvent extends Document {
   title: string;
   description?: string;
+  longDescription?: string;
   category: EventCategory;
+  mode?: string;
   venue: string;
+  city?: string;
   date: Date;
+  endDate?: Date;
   startTime?: string;
   endTime?: string;
   capacity: number;
+  price?: number;
   bannerUrl?: string;
+  tags?: string[];
   status: EventStatus;
   organizerId: Types.ObjectId;
   views: number;

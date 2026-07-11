@@ -18,13 +18,19 @@ interface ListParams {
 interface CreateEventInput {
   title: string;
   description?: string;
+  longDescription?: string;
   category?: string;
+  mode?: string;
   venue?: string;
+  city?: string;
   date: Date;
+  endDate?: Date;
   startTime?: string;
   endTime?: string;
   capacity?: number;
+  price?: number;
   bannerUrl?: string;
+  tags?: string[];
   organizerId: string;
 }
 
@@ -77,18 +83,24 @@ export const getEventById = async (eventId: string) => {
   return { event };
 };
 
-export const createEvent = async ({ title, description, category, venue, date, startTime, endTime, capacity, bannerUrl, organizerId }: CreateEventInput) => {
+export const createEvent = async ({ title, description, longDescription, category, mode, venue, city, date, endDate, startTime, endTime, capacity, price, bannerUrl, tags, organizerId }: CreateEventInput) => {
   if (!title || !date) throwErr('Title and date are required', 400);
   const event = await Event.create({
     title,
     description,
+    longDescription,
     category,
+    mode,
     venue,
+    city,
     date,
+    endDate,
     startTime,
     endTime,
     capacity,
+    price,
     bannerUrl,
+    tags,
     organizerId,
   });
   return { event };
@@ -98,7 +110,7 @@ export const updateEvent = async (eventId: string, body: Record<string, any>, us
   const event = await Event.findById(eventId);
   if (!event) throwErr('Event not found', 404);
   if (role !== 'ADMIN' && String(event.organizerId) !== String(userId)) throwErr('Forbidden', 403);
-  const allowed = ['title', 'description', 'category', 'venue', 'date', 'startTime', 'endTime', 'capacity', 'bannerUrl'] as const;
+  const allowed = ['title', 'description', 'longDescription', 'category', 'mode', 'venue', 'city', 'date', 'endDate', 'startTime', 'endTime', 'capacity', 'price', 'bannerUrl', 'tags'] as const;
   allowed.forEach((field) => {
     if (body[field] !== undefined) (event as any)[field] = body[field];
   });

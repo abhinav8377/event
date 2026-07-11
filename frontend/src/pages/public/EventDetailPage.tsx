@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store"
 import { pushToast } from "@/features/toast/toastSlice"
 import { Badge, Button, Card, Loader, Textarea, EmptyState } from "@/components/common/ui"
 import { Modal } from "@/components/common/Modal"
+import { sanitizeHtml } from "@/utils/sanitize"
 
 const modeLabel = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "Hybrid" }
 
@@ -149,7 +150,7 @@ export default function EventDetailPage() {
         Back to events
       </Link>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-3 lg:items-start">
         {/* Main content */}
         <div className="lg:col-span-2">
           <div className="overflow-hidden rounded-2xl">
@@ -183,11 +184,12 @@ export default function EventDetailPage() {
             )}
           </p>
 
-          <div className="prose-sm mt-6 max-w-none">
+          <div className="mt-6 max-w-none">
             <h2 className="text-lg font-bold text-foreground">About this event</h2>
-            <p className="mt-2 leading-relaxed text-muted-foreground text-pretty">
-              {event.longDescription}
-            </p>
+            <div
+              className="event-prose mt-3"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.longDescription || event.description) }}
+            />
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
