@@ -42,6 +42,7 @@ const schema = z
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
     capacity: z.coerce.number().int().min(1, "Capacity must be at least 1"),
+    eventType: z.enum(["FREE", "PAID"]),
     price: z.coerce.number().min(0, "Price cannot be negative"),
     tags: z.string(),
   })
@@ -52,6 +53,10 @@ const schema = z
   .refine((v) => v.mode === "ONLINE" || (v.venue.trim() && v.city.trim()), {
     message: "Venue and city are required for in-person events",
     path: ["venue"],
+  })
+  .refine((v) => v.eventType === "FREE" || v.price > 0, {
+    message: "Price must be greater than 0 for paid events",
+    path: ["price"],
   })
 
 type FormValues = z.infer<typeof schema>
@@ -87,6 +92,7 @@ export default function EventFormPage() {
       mode: "IN_PERSON",
       banner: banners[0].value,
       capacity: 100,
+      eventType: "FREE",
       price: 0,
       tags: "",
       venue: "",
@@ -109,6 +115,7 @@ export default function EventFormPage() {
         startDate: dayjs(existing.startDate).format("YYYY-MM-DDTHH:mm"),
         endDate: dayjs(existing.endDate).format("YYYY-MM-DDTHH:mm"),
         capacity: existing.capacity,
+        eventType: existing.price > 0 ? "PAID" : "FREE",
         price: existing.price,
         tags: existing.tags.join(", "),
       })
@@ -117,6 +124,7 @@ export default function EventFormPage() {
 
   const mode = watch("mode")
   const banner = watch("banner")
+  const eventType = watch("eventType")
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -147,6 +155,7 @@ export default function EventFormPage() {
   const onSubmit = async (values: FormValues) => {
     const payload = {
       ...values,
+      price: values.eventType === "FREE" ? 0 : values.price,
       banner: customBanner || values.banner,
       category: values.category as never,
       startDate: new Date(values.startDate).toISOString(),
@@ -352,16 +361,38 @@ export default function EventFormPage() {
               error={errors.capacity?.message}
               {...register("capacity")}
             />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="eventType" className="text-sm font-medium text-foreground">
+                Event type
+              </label>
+              <select
+                id="eventType"
+                className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                {...register("eventType", {
+                  onChange: (e) => {
+                    if (e.target.value === "FREE") setValue("price", 0, { shouldValidate: true, shouldDirty: true })
+                  },
+                })}
+              >
+                <option value="FREE">Free</option>
+                <option value="PAID">Paid</option>
+              </select>
+              {errors.eventType?.message && <p className="text-xs text-destructive">{errors.eventType.message}</p>}
+            </div>
+          </div>
+
+          {eventType === "PAID" && (
             <Input
               id="price"
               type="number"
-              label="Ticket price (USD, 0 = free)"
-              min={0}
+              label="Ticket price (USD)"
+              min={1}
               step="0.01"
+              placeholder="e.g. 25.00"
               error={errors.price?.message}
               {...register("price")}
             />
-          </div>
+          )}
 
           <Input
             id="tags"
