@@ -197,13 +197,7 @@ export default function EventFormPage() {
           />
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Select id="category" label="Category" error={errors.category?.message} {...register("category")}>
-              {["Technology", "Business", "Education", "Health", "Arts", "Sports", "Community"].map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </Select>
+            <Input id="category" label="Category" placeholder="e.g. Technology, Sports, Business" error={errors.category?.message} {...register("category")} />
             <Select id="mode" label="Event mode" error={errors.mode?.message} {...register("mode")}>
               <option value="IN_PERSON">In person</option>
               <option value="ONLINE">Online</option>
