@@ -14,7 +14,7 @@ import {
   Cell,
   Legend,
 } from "recharts"
-import { Star } from "lucide-react"
+import { Star, Users, TrendingUp, CheckCircle, BarChart3 } from "lucide-react"
 import { useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
 import * as feedbackApi from "@/api/feedbackApi"
@@ -23,6 +23,39 @@ import { Card, Loader, EmptyState, Button } from "@/components/common/ui"
 import useSWRImmutable from "swr/immutable"
 
 const CHART_COLORS = ["#f59e0b", "#22c55e", "#78716c", "#ef4444"]
+
+function StatCard({ icon: Icon, label, value, sub, color }: { icon: typeof Star; label: string; value: string | number; sub?: string; color: string }) {
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-4">
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${color}`}>
+          <Icon className="size-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          {sub && <p className="text-[11px] text-muted-foreground/70">{sub}</p>}
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-lg">
+      <p className="mb-1 text-xs font-semibold text-foreground">{label}</p>
+      {payload.map((p: any, i: number) => (
+        <div key={i} className="flex items-center gap-2 text-xs">
+          <span className="size-2 rounded-full" style={{ background: p.color }} />
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-semibold text-foreground">{p.value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function OrganizerAnalytics() {
   const user = useAppSelector((s) => s.auth.user)!
@@ -65,6 +98,12 @@ export default function OrganizerAnalytics() {
     )
   }
 
+  const totalRegistrations = myEvents.reduce((s, e) => s + e.registeredCount, 0)
+  const totalAttendance = myEvents.reduce((s, e) => s + e.attendanceCount, 0)
+  const avgRating =
+    myEvents.filter((e) => e.ratingCount > 0).reduce((s, e) => s + e.rating, 0) /
+      (myEvents.filter((e) => e.ratingCount > 0).length || 1)
+
   const regData = myEvents.map((e) => ({
     name: e.title.length > 18 ? `${e.title.slice(0, 18)}…` : e.title,
     Registrations: e.registeredCount,
@@ -83,19 +122,50 @@ export default function OrganizerAnalytics() {
     <div>
       <PageHeader title="Analytics" description="Registrations, attendance, and feedback across your events." />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          icon={BarChart3}
+          label="Total Events"
+          value={myEvents.length}
+          sub={`${myEvents.filter((e) => e.status === "PUBLISHED").length} published`}
+          color="bg-primary/10 text-primary"
+        />
+        <StatCard
+          icon={Users}
+          label="Registrations"
+          value={totalRegistrations}
+          sub="across all events"
+          color="bg-success/10 text-success"
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Checked In"
+          value={totalAttendance}
+          sub={totalRegistrations > 0 ? `${Math.round((totalAttendance / totalRegistrations) * 100)}% attendance rate` : "no data"}
+          color="bg-blue-500/10 text-blue-500"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Avg. Rating"
+          value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
+          sub={avgRating > 0 ? "out of 5 stars" : "no reviews yet"}
+          color="bg-warning/10 text-warning"
+        />
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="p-6 lg:col-span-2">
           <h2 className="mb-4 font-bold text-foreground">Registrations vs. check-ins</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={regData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Registrations" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Checked in" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-muted)", opacity: 0.5 }} />
+                <Legend iconType="circle" iconSize={8} />
+                <Bar dataKey="Registrations" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Checked in" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -111,8 +181,8 @@ export default function OrganizerAnalytics() {
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend iconType="circle" iconSize={8} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -141,7 +211,9 @@ export default function OrganizerAnalytics() {
                       />
                     ))}
                   </span>
-                  <span className="text-xs text-muted-foreground">{eventTitleById.get(f.eventId)}</span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                    {eventTitleById.get(f.eventId)}
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground text-pretty">{f.review}</p>
               </div>
