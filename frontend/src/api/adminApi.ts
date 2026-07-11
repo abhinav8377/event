@@ -38,6 +38,8 @@ function mapEvent(e: any): EventItem {
     banner: e.bannerUrl || e.banner || "/placeholder.svg",
     venue: e.venue || "",
     city: e.city || "",
+    latitude: e.latitude ?? null,
+    longitude: e.longitude ?? null,
     startDate: e.date || e.startDate,
     endDate: e.endDate || e.date || e.startDate,
     capacity: e.capacity || 100,

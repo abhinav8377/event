@@ -52,6 +52,8 @@ function mapEvent(e: any): EventItem {
     banner: e.bannerUrl || e.banner || "/placeholder.svg",
     venue: e.venue || "",
     city: e.city || "",
+    latitude: e.latitude ?? null,
+    longitude: e.longitude ?? null,
     startDate: e.date || e.startDate,
     endDate: e.endDate || e.date || e.startDate,
     capacity: e.capacity || 100,
@@ -125,6 +127,8 @@ export async function createEvent(organizerId: string, organizerName: string, in
     mode: input.mode || "IN_PERSON",
     venue: input.venue,
     city: input.city,
+    latitude: input.latitude,
+    longitude: input.longitude,
     date: input.startDate,
     endDate: input.endDate,
     startTime: input.startDate ? new Date(input.startDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : undefined,
@@ -151,6 +155,8 @@ export async function updateEvent(id: string, input: Partial<EventItem>) {
   if (input.mode !== undefined) body.mode = input.mode
   if (input.venue !== undefined) body.venue = input.venue
   if (input.city !== undefined) body.city = input.city
+  if (input.latitude !== undefined) body.latitude = input.latitude
+  if (input.longitude !== undefined) body.longitude = input.longitude
   if (input.startDate !== undefined) body.date = input.startDate
   if (input.endDate !== undefined) body.endDate = input.endDate
   if (input.capacity !== undefined) body.capacity = input.capacity

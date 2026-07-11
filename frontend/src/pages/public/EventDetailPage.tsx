@@ -24,6 +24,7 @@ import { pushToast } from "@/features/toast/toastSlice"
 import { Badge, Button, Card, Loader, Textarea, EmptyState } from "@/components/common/ui"
 import { Modal } from "@/components/common/Modal"
 import { sanitizeHtml } from "@/utils/sanitize"
+import VenueMap from "@/components/common/VenueMap"
 
 const modeLabel = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "Hybrid" }
 
@@ -350,6 +351,17 @@ export default function EventDetailPage() {
               )}
             </div>
           </Card>
+
+          {event.latitude != null && event.longitude != null && (
+            <Card className="mt-4 p-6">
+              <VenueMap
+                latitude={event.latitude}
+                longitude={event.longitude}
+                venue={event.venue}
+                city={event.city}
+              />
+            </Card>
+          )}
         </aside>
       </div>
 

@@ -77,6 +77,8 @@ export interface IEvent extends Document {
   mode?: string;
   venue: string;
   city?: string;
+  latitude?: number;
+  longitude?: number;
   date: Date;
   endDate?: Date;
   startTime?: string;

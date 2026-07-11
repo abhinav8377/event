@@ -34,6 +34,8 @@ export interface EventItem {
   banner: string
   venue: string
   city: string
+  latitude: number | null
+  longitude: number | null
   startDate: string
   endDate: string
   capacity: number

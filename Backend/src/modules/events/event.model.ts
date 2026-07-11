@@ -14,6 +14,8 @@ const eventSchema = new Schema<IEvent>(
     mode: { type: String, enum: ['IN_PERSON', 'ONLINE', 'HYBRID'], default: 'IN_PERSON' },
     venue: { type: String, default: 'Online' },
     city: { type: String, default: '' },
+    latitude: { type: Number, default: null },
+    longitude: { type: Number, default: null },
     date: { type: Date, required: true },
     endDate: { type: Date },
     startTime: { type: String },

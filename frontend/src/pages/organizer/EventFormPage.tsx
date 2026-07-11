@@ -14,6 +14,7 @@ import { pushToast } from "@/features/toast/toastSlice"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Card, Button, Input, Select, Loader } from "@/components/common/ui"
 import QuillEditor from "@/components/common/QuillEditor"
+import VenueMapPicker from "@/components/common/VenueMapPicker"
 
 const banners = [
   { value: "/events/tech-conf.png", label: "Tech conference" },
@@ -39,6 +40,8 @@ const schema = z
     banner: z.string(),
     venue: z.string(),
     city: z.string(),
+    latitude: z.coerce.number().min(-90).max(90).nullable(),
+    longitude: z.coerce.number().min(-180).max(180).nullable(),
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
     capacity: z.coerce.number().int().min(1, "Capacity must be at least 1"),
@@ -97,6 +100,8 @@ export default function EventFormPage() {
       tags: "",
       venue: "",
       city: "",
+      latitude: null,
+      longitude: null,
       longDescription: "",
     },
   })
@@ -112,6 +117,8 @@ export default function EventFormPage() {
         banner: existing.banner,
         venue: existing.venue,
         city: existing.city,
+        latitude: existing.latitude,
+        longitude: existing.longitude,
         startDate: dayjs(existing.startDate).format("YYYY-MM-DDTHH:mm"),
         endDate: dayjs(existing.endDate).format("YYYY-MM-DDTHH:mm"),
         capacity: existing.capacity,
@@ -125,6 +132,8 @@ export default function EventFormPage() {
   const mode = watch("mode")
   const banner = watch("banner")
   const eventType = watch("eventType")
+  const latitude = watch("latitude")
+  const longitude = watch("longitude")
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -157,6 +166,8 @@ export default function EventFormPage() {
       ...values,
       price: values.eventType === "FREE" ? 0 : values.price,
       banner: customBanner || values.banner,
+      latitude: values.latitude,
+      longitude: values.longitude,
       category: values.category as never,
       startDate: new Date(values.startDate).toISOString(),
       endDate: new Date(values.endDate).toISOString(),
@@ -333,6 +344,17 @@ export default function EventFormPage() {
               />
               <Input id="city" label="City" placeholder="e.g. San Francisco" error={errors.city?.message} {...register("city")} />
             </div>
+          )}
+
+          {mode !== "ONLINE" && (
+            <VenueMapPicker
+              latitude={latitude}
+              longitude={longitude}
+              onChange={(lat, lng) => {
+                setValue("latitude", lat, { shouldValidate: true, shouldDirty: true })
+                setValue("longitude", lng, { shouldValidate: true, shouldDirty: true })
+              }}
+            />
           )}
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
