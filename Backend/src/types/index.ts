@@ -137,6 +137,7 @@ export interface INotification extends Document {
   message: string;
   type: NotificationType;
   read: boolean;
+  sentBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

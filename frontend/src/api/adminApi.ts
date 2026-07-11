@@ -1,5 +1,5 @@
 import api from "./axios"
-import type { ApiResponse, User, EventItem } from "@/constants/types"
+import type { ApiResponse, User, EventItem, NotificationType } from "@/constants/types"
 
 function mapUser(u: any): User {
   return {
@@ -117,5 +117,38 @@ export async function getAllOrganizers() {
     success: res.data.success,
     message: res.data.message,
     data: (res.data.data.organizers || []).map(mapUser),
+  }
+}
+
+export async function sendAdminNotification(payload: {
+  title: string
+  message: string
+  targetRole: "USER" | "ORGANIZER"
+  type?: NotificationType
+}) {
+  const res = await api.post<ApiResponse<{ sent: number; targetRole: string }>>(
+    "/api/admin/notifications",
+    payload,
+  )
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: res.data.data,
+  }
+}
+
+export async function getSentNotifications() {
+  const res = await api.get<ApiResponse<{ notifications: any[] }>>("/api/admin/notifications/sent")
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: (res.data.data.notifications || []).map((n: any) => ({
+      title: n.title,
+      message: n.message,
+      type: (n.type === "EVENT_UPDATE" ? "UPDATE" : n.type) as NotificationType,
+      createdAt: n.createdAt,
+      recipientCount: n.recipientCount,
+      recipients: n.recipients || [],
+    })),
   }
 }

@@ -41,6 +41,7 @@ import AdminUsers from "@/pages/admin/AdminUsers"
 import AdminOrganizers from "@/pages/admin/AdminOrganizers"
 import AdminEvents from "@/pages/admin/AdminEvents"
 import AdminAnalytics from "@/pages/admin/AdminAnalytics"
+import AdminNotifications from "@/pages/admin/AdminNotifications"
 
 import NotificationsPage from "@/pages/shared/NotificationsPage"
 import ProfilePage from "@/pages/shared/ProfilePage"
@@ -68,7 +69,7 @@ const adminNav: NavItem[] = [
   { to: "/admin/organizers", label: "Organizers", icon: Megaphone },
   { to: "/admin/events", label: "Events", icon: CalendarRange },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/notifications", label: "Send Notifications", icon: Bell },
   { to: "/admin/profile", label: "Profile", icon: UserRound },
 ]
 
@@ -124,7 +125,7 @@ export default function App() {
             <Route path="/admin/organizers" element={<AdminOrganizers />} />
             <Route path="/admin/events" element={<AdminEvents />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/notifications" element={<NotificationsPage />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
             <Route path="/admin/profile" element={<ProfilePage />} />
           </Route>
         </Route>

@@ -12,6 +12,7 @@ const notificationSchema = new Schema<INotification>(
       default: 'GENERAL',
     },
     read: { type: Boolean, default: false },
+    sentBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
 );

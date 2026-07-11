@@ -14,5 +14,7 @@ router.get('/organizers', controller.listOrganizers);
 router.patch('/verify-organizer/:id', controller.verifyOrganizer);
 router.patch('/block-user/:id', controller.blockUser);
 router.delete('/event/:id', controller.deleteEvent);
+router.post('/notifications', controller.sendNotification);
+router.get('/notifications/sent', controller.sentNotifications);
 
 export default router;

@@ -68,3 +68,37 @@ export const deleteEvent = async (req: AuthRequest, res: Response, next: NextFun
     else next(err);
   }
 };
+
+export const sendNotification = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { title, message, targetRole, type } = req.body;
+    if (!title || !message || !targetRole) {
+      error(res, 'Title, message, and targetRole are required', 400);
+      return;
+    }
+    if (!['USER', 'ORGANIZER'].includes(targetRole)) {
+      error(res, 'targetRole must be USER or ORGANIZER', 400);
+      return;
+    }
+    const data = await adminService.sendNotification(
+      String(req.user!._id),
+      title,
+      message,
+      targetRole,
+      type || 'GENERAL',
+    );
+    success(res, `Notification sent to ${data.sent} ${targetRole.toLowerCase()}s`, data);
+  } catch (err) {
+    if ((err as any).status) error(res, (err as Error).message, (err as any).status);
+    else next(err);
+  }
+};
+
+export const sentNotifications = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await adminService.getSentNotifications(String(req.user!._id));
+    success(res, 'Sent notifications fetched', data);
+  } catch (err) {
+    next(err);
+  }
+};

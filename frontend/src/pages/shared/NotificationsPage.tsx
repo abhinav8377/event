@@ -22,6 +22,7 @@ const typeIcon: Record<NotificationType, typeof Bell> = {
   REMINDER: Clock,
   UPDATE: Megaphone,
   CERTIFICATE: Award,
+  GENERAL: Bell,
 }
 
 export default function NotificationsPage() {

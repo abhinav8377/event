@@ -78,6 +78,7 @@ export type NotificationType =
   | "REMINDER"
   | "UPDATE"
   | "CERTIFICATE"
+  | "GENERAL"
 
 export interface AppNotification {
   id: string
@@ -87,6 +88,15 @@ export interface AppNotification {
   message: string
   read: boolean
   createdAt: string
+}
+
+export interface SentNotification {
+  title: string
+  message: string
+  type: NotificationType
+  createdAt: string
+  recipientCount: number
+  recipients: { name: string; email: string }[]
 }
 
 export interface Feedback {
