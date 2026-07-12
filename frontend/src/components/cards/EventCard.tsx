@@ -12,7 +12,7 @@ export function EventCard({ event, detailPath }: { event: EventItem; detailPath?
 
   return (
     <Card className="group flex flex-col overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
-      <Link to={`${detailPath || "/events"}/${event.id}`} className="flex h-full flex-col">
+      <Link to={`${detailPath || "/login"}`} className="flex h-full flex-col">
         <div className="relative aspect-video overflow-hidden">
           <img
             src={event.banner || "/placeholder.svg"}

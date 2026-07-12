@@ -21,7 +21,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
           <div className="flex flex-col gap-2">
             <p className="text-sm font-semibold text-foreground">Platform</p>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Explore Events</Link>
+            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">Explore Events</Link>
             <Link to="/register" className="text-sm text-muted-foreground hover:text-foreground">Become an Organizer</Link>
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">Log in</Link>
           </div>
