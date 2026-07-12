@@ -259,6 +259,7 @@ export default function AdminSecurity() {
                     const StatusIcon = status.icon
                     const isExpanded = expandedLog === log._id
                     return (
+                      <>
                       <tr key={log._id} className={clsx("transition-colors hover:bg-muted/50", isExpanded && "bg-muted/30")}>
                         <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
                           <div className="flex flex-col">
@@ -322,44 +323,44 @@ export default function AdminSecurity() {
                           </Button>
                         </td>
                       </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={8} className="border-t border-border bg-muted/20 px-5 py-4">
+                            <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
+                              <div>
+                                <span className="font-semibold text-muted-foreground">Full URL</span>
+                                <p className="mt-0.5 break-all font-mono text-foreground">{log.url}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-muted-foreground">User Agent</span>
+                                <p className="mt-0.5 break-all text-foreground">{log.userAgent || "N/A"}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-muted-foreground">Response Size</span>
+                                <p className="mt-0.5 text-foreground">{log.contentLength ? `${(log.contentLength / 1024).toFixed(1)} KB` : "N/A"}</p>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-muted-foreground">Status Category</span>
+                                <p className="mt-0.5 text-foreground">{getStatusStyle(log.statusCode).label}</p>
+                              </div>
+                              {log.isAdminRoute && (
+                                <div className="col-span-full mt-1 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-400">
+                                    <ShieldAlert className="size-4" />
+                                    Privilege Escalation Attempt — {log.userRole} "{log.userName}" accessed admin resource
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </>
                     )
                   })}
                 </tbody>
               </table>
             </div>
-            {logs.map((log: RequestLog) => {
-              if (expandedLog !== log._id) return null
-              return (
-                <div key={`detail-${log._id}`} className="border-t border-border bg-muted/20 px-5 py-4">
-                  <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Full URL</span>
-                      <p className="mt-0.5 break-all font-mono text-foreground">{log.url}</p>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-muted-foreground">User Agent</span>
-                      <p className="mt-0.5 break-all text-foreground">{log.userAgent || "N/A"}</p>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Response Size</span>
-                      <p className="mt-0.5 text-foreground">{log.contentLength ? `${(log.contentLength / 1024).toFixed(1)} KB` : "N/A"}</p>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Status Category</span>
-                      <p className="mt-0.5 text-foreground">{getStatusStyle(log.statusCode).label}</p>
-                    </div>
-                    {log.isAdminRoute && (
-                      <div className="col-span-full mt-1 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
-                        <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-400">
-                          <ShieldAlert className="size-4" />
-                          Privilege Escalation Attempt — {log.userRole} "{log.userName}" accessed admin resource
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
           </Card>
 
           {pagination && pagination.pages > 1 && (
