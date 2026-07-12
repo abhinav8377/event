@@ -227,10 +227,18 @@ export default function BrowseEventsPage() {
             {upcomingRegistered.map((event) => (
               <Link key={event.id} to={`/user/events/${event.id}`}>
                 <Card className="group overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
-                  <div className="relative h-36 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <CalendarCheck className="size-12 text-primary/20" />
-                    </div>
+                  <div className="relative h-36 overflow-hidden">
+                    {event.bannerUrl ? (
+                      <img
+                        src={event.bannerUrl}
+                        alt={event.title}
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
+                        <CalendarCheck className="size-12 text-primary/20" />
+                      </div>
+                    )}
                     <Badge variant="success" className="absolute left-3 top-3">
                       Registered
                     </Badge>
@@ -279,10 +287,18 @@ export default function BrowseEventsPage() {
             {suggestions.map((event) => (
               <Link key={event.id} to={`/user/events/${event.id}`}>
                 <Card className="group overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
-                  <div className="relative h-28 bg-gradient-to-br from-accent/25 via-accent/10 to-transparent">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="size-10 text-accent/30" />
-                    </div>
+                  <div className="relative h-28 overflow-hidden">
+                    {event.bannerUrl ? (
+                      <img
+                        src={event.bannerUrl}
+                        alt={event.title}
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-accent/25 via-accent/10 to-transparent">
+                        <Sparkles className="size-10 text-accent/30" />
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="truncate font-bold text-foreground">{event.title}</h3>
