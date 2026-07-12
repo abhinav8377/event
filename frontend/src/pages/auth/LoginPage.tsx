@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -45,6 +45,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, loading, error } = useAppSelector((s) => s.auth)
+  const [unverifiedRedirect, setUnverifiedRedirect] = useState(false)
 
   const {
     register,
@@ -62,6 +63,17 @@ export default function LoginPage() {
       navigate(safeRedirect(from, user.role), { replace: true })
     }
   }, [user, navigate, location.state])
+
+  useEffect(() => {
+    if (error && error.toLowerCase().includes("not verified")) {
+      setUnverifiedRedirect(true)
+      const timer = setTimeout(() => {
+        dispatch({ type: "auth/clearError" })
+        navigate("/", { replace: true })
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [error, navigate, dispatch])
 
   const onSubmit = async (values: FormValues) => {
     const result = await dispatch(login(values))
@@ -88,8 +100,20 @@ export default function LoginPage() {
           <h1 className="display mb-6 text-2xl text-foreground">Welcome back.</h1>
 
           {error && (
-            <div role="alert" className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error}
+            <div
+              role="alert"
+              className={`mb-4 rounded-lg px-4 py-3 text-sm ${
+                error.toLowerCase().includes("not verified")
+                  ? "border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "bg-destructive/10 text-destructive"
+              }`}
+            >
+              <p className="font-semibold">{error}</p>
+              {unverifiedRedirect && (
+                <p className="mt-1 text-xs opacity-80">
+                  Redirecting to home page in a few seconds...
+                </p>
+              )}
             </div>
           )}
 

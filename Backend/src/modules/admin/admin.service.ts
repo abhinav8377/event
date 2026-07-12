@@ -96,6 +96,66 @@ export const verifyOrganizer = async (userId: string) => {
   user.organization = user.organization || {};
   user.organization.verified = true;
   await user.save();
+
+  const verifiedEmailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">EventHub</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 14px;">Event Discovery & Management Platform</p>
+      </div>
+      <div style="padding: 40px 30px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <div style="width: 70px; height: 70px; background: #f0fdf4; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <span style="font-size: 36px;">🎉</span>
+          </div>
+          <h2 style="color: #16a34a; margin: 0 0 10px; font-size: 22px;">Account Verified!</h2>
+          <p style="color: #64748b; margin: 0; font-size: 15px;">Congratulations, ${user.name}!</p>
+        </div>
+        <div style="background: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+          <h3 style="color: #15803d; margin: 0 0 8px; font-size: 16px;">Your Account is Now Active</h3>
+          <p style="color: #166534; margin: 0; font-size: 14px; line-height: 1.6;">
+            Great news! Your organizer account has been verified by our admin team. 
+            You can now log in and access your organizer dashboard to create and manage events.
+          </p>
+        </div>
+        <div style="text-align: center; margin-bottom: 25px;">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="display: inline-block; background: #6366f1; color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">Login to Dashboard</a>
+        </div>
+        <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+          <h3 style="color: #334155; margin: 0 0 12px; font-size: 15px;">What You Can Do Now:</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; vertical-align: top; width: 30px; color: #6366f1; font-weight: bold;">1.</td>
+              <td style="padding: 8px 0; color: #475569; font-size: 14px;">Create and publish events</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; vertical-align: top; width: 30px; color: #6366f1; font-weight: bold;">2.</td>
+              <td style="padding: 8px 0; color: #475569; font-size: 14px;">Manage registrations and attendance</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; vertical-align: top; width: 30px; color: #6366f1; font-weight: bold;">3.</td>
+              <td style="padding: 8px 0; color: #475569; font-size: 14px;">Track analytics and send notifications</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; vertical-align: top; width: 30px; color: #6366f1; font-weight: bold;">4.</td>
+              <td style="padding: 8px 0; color: #475569; font-size: 14px;">Generate certificates for attendees</td>
+            </tr>
+          </table>
+        </div>
+        <div style="text-align: center; padding: 20px 0; border-top: 1px solid #e2e8f0;">
+          <p style="color: #94a3b8; margin: 0; font-size: 13px;">
+            If you have any questions, feel free to contact our support team.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+  sendEmail({
+    to: user.email,
+    subject: 'EventHub - Your Account Has Been Verified!',
+    html: verifiedEmailHtml,
+  }).catch(() => {});
+
   return { user: user.toSafeObject('ORGANIZER') };
 };
 

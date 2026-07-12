@@ -45,8 +45,12 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      const path = user.role === "ORGANIZER" ? "/organizer" : user.role === "ADMIN" ? "/admin" : "/user"
-      navigate(path, { replace: true })
+      if (user.role === "ORGANIZER" && user.verified === false) {
+        navigate("/verification-pending", { replace: true })
+      } else {
+        const path = user.role === "ORGANIZER" ? "/organizer" : user.role === "ADMIN" ? "/admin" : "/user"
+        navigate(path, { replace: true })
+      }
     }
   }, [user, navigate])
 
@@ -61,7 +65,14 @@ export default function RegisterPage() {
       }),
     )
     if (registerUser.fulfilled.match(result)) {
-      dispatch(pushToast({ type: "success", message: "Account created successfully. Welcome to EventHub!" }))
+      if (role === "ORGANIZER") {
+        localStorage.removeItem("eventhub_token")
+        localStorage.removeItem("eventhub_user")
+        dispatch({ type: "auth/logout" })
+        navigate("/verification-pending", { state: { email: values.email, name: values.name }, replace: true })
+      } else {
+        dispatch(pushToast({ type: "success", message: "Account created successfully. Welcome to EventHub!" }))
+      }
     }
   }
 

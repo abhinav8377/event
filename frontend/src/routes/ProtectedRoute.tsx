@@ -14,5 +14,9 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles: Role[] 
     return <Navigate to="/403" replace />
   }
 
+  if (user.role === "ORGANIZER" && user.verified === false) {
+    return <Navigate to="/verification-pending" replace />
+  }
+
   return <Outlet />
 }

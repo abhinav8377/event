@@ -26,6 +26,7 @@ import NotFoundPage from "@/pages/public/NotFoundPage"
 import ForbiddenPage from "@/pages/public/ForbiddenPage"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
+import VerificationPendingPage from "@/pages/auth/VerificationPendingPage"
 
 import UserDashboard from "@/pages/user/UserDashboard"
 import MyRegistrations from "@/pages/user/MyRegistrations"
@@ -94,6 +95,7 @@ export default function App() {
         </Route>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verification-pending" element={<VerificationPendingPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
 
         {/* User dashboard */}
