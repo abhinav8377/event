@@ -7,7 +7,7 @@ export default function ProtectedRoute({ allowedRoles }: { allowedRoles: Role[] 
   const location = useLocation()
 
   if (!token || !user) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+    return <Navigate to="/" state={{ from: location.pathname }} replace />
   }
 
   if (!allowedRoles.includes(user.role)) {

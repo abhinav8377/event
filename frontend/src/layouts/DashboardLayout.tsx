@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
-import { logout } from "@/features/auth/authSlice"
+import { logoutUser } from "@/features/auth/authSlice"
 import { fetchNotifications } from "@/features/notifications/notificationSlice"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
@@ -53,8 +53,8 @@ export default function DashboardLayout({
     ADMIN: "/admin",
   }
 
-  const handleLogout = () => {
-    dispatch(logout())
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
     window.location.href = "/"
   }
 

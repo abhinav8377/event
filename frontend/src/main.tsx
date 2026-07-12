@@ -8,6 +8,11 @@ import "@/globals.css"
 
 initTheme()
 
+window.addEventListener("beforeunload", () => {
+  localStorage.removeItem("eventhub_token")
+  localStorage.removeItem("eventhub_user")
+})
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>

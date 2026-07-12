@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { CalendarRange, Menu, X, LayoutDashboard, LogOut } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
-import { logout } from "@/features/auth/authSlice"
+import { logoutUser } from "@/features/auth/authSlice"
 import { Button } from "@/components/common/ui"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
@@ -26,8 +26,8 @@ export function Navbar() {
     { to: "/contact", label: "contact" },
   ]
 
-  const handleLogout = () => {
-    dispatch(logout())
+  const handleLogout = async () => {
+    await dispatch(logoutUser())
     setOpen(false)
     window.location.href = "/"
   }
