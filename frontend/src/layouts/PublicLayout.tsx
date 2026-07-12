@@ -13,8 +13,13 @@ export default function PublicLayout() {
   const { user } = useAppSelector((s) => s.auth)
   const location = useLocation()
 
-  if (user && location.pathname === "/") {
-    return <Navigate to={dashboardPath[user.role] || "/user"} replace />
+  if (user) {
+    if (user.role === "USER") {
+      return <Navigate to="/user" replace />
+    }
+    if (location.pathname === "/") {
+      return <Navigate to={dashboardPath[user.role] || "/user"} replace />
+    }
   }
 
   return (

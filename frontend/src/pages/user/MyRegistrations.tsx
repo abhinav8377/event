@@ -116,7 +116,7 @@ export default function MyRegistrations() {
           title={`No ${tab} registrations`}
           description="When you register for events, your tickets will show up here."
           action={
-            <Link to="/events">
+            <Link to="/user/browse">
               <Button size="sm">Browse events</Button>
             </Link>
           }

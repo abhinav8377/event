@@ -34,6 +34,9 @@ export default function EventDetailPage() {
   const dispatch = useAppDispatch()
   const user = useAppSelector((s) => s.auth.user)
 
+  const backLink = user?.role === "USER" ? "/user/browse" : "/"
+  const loginTarget = user?.role === "USER" ? "/user/browse" : "/login"
+
   const [event, setEvent] = useState<EventItem | null>(null)
   const [feedback, setFeedback] = useState<Feedback[]>([])
   const [myReg, setMyReg] = useState<Registration | null>(null)
@@ -86,7 +89,7 @@ export default function EventDetailPage() {
           title="Event not found"
           description="This event may have been removed or unpublished."
           action={
-            <Link to="/events">
+            <Link to={backLink}>
               <Button variant="outline">Browse events</Button>
             </Link>
           }
@@ -103,7 +106,7 @@ export default function EventDetailPage() {
 
   const handleRegister = async () => {
     if (!user) {
-      navigate("/login", { state: { from: `/events/${event.id}` } })
+      navigate(loginTarget, { state: { from: `/events/${event.id}` } })
       return
     }
     setRegistering(true)
@@ -145,7 +148,7 @@ export default function EventDetailPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
       <Link
-        to="/events"
+        to={backLink}
         className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -339,7 +342,7 @@ export default function EventDetailPage() {
                   Event is full
                 </Button>
               ) : (
-                <Button className="w-full" onClick={() => (user ? setConfirmOpen(true) : navigate("/login", { state: { from: `/events/${event.id}` } }))}>
+                <Button className="w-full" onClick={() => (user ? setConfirmOpen(true) : navigate(loginTarget, { state: { from: `/events/${event.id}` } }))}>
                   <Ticket className="size-4" aria-hidden="true" />
                   Register now
                 </Button>

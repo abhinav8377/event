@@ -6,13 +6,13 @@ import { Badge, Card } from "@/components/common/ui"
 
 const modeLabel = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "Hybrid" }
 
-export function EventCard({ event }: { event: EventItem }) {
+export function EventCard({ event, detailPath }: { event: EventItem; detailPath?: string }) {
   const spotsLeft = event.capacity - event.registeredCount
   const isPast = new Date(event.endDate).getTime() < Date.now()
 
   return (
     <Card className="group flex flex-col overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
-      <Link to={`/events/${event.id}`} className="flex h-full flex-col">
+      <Link to={`${detailPath || "/events"}/${event.id}`} className="flex h-full flex-col">
         <div className="relative aspect-video overflow-hidden">
           <img
             src={event.banner || "/placeholder.svg"}

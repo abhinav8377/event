@@ -67,7 +67,7 @@ export default function AboutPage() {
           moment you discover an event to the moment your certificate lands in your account.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link to="/events">
+          <Link to="/">
             <Button>
               Explore events
               <ArrowRight className="size-4" aria-hidden="true" />

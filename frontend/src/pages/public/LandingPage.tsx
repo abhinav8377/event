@@ -240,7 +240,7 @@ export default function LandingPage() {
               variants={fadeInUp}
               className="mt-8 flex flex-col gap-3 sm:flex-row"
             >
-              <Link to="/events">
+              <Link to="/">
                 <Button size="lg" className="w-full sm:w-auto">
                   Explore events
                   <ArrowRight className="size-4" aria-hidden="true" />
@@ -390,7 +390,7 @@ export default function LandingPage() {
                 Filling <span className="text-primary">fast.</span> Grab a seat.
               </h2>
               <Link
-                to="/events"
+                to="/"
                 className="hidden items-center gap-1 font-mono text-sm text-primary hover:underline sm:flex"
               >
                 view all events

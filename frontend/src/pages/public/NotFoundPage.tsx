@@ -14,7 +14,7 @@ export default function NotFoundPage() {
         <Link to="/">
           <Button variant="outline">Go home</Button>
         </Link>
-        <Link to="/events">
+        <Link to="/">
           <Button>Browse events</Button>
         </Link>
       </div>

@@ -22,7 +22,6 @@ export function Navbar() {
   const navigate = useNavigate()
 
   const publicLinks = [
-    { to: "/events", label: "events" },
     { to: "/about", label: "about" },
     { to: "/contact", label: "contact" },
   ]

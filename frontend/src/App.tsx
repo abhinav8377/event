@@ -11,6 +11,7 @@ import {
   Users,
   Megaphone,
   Shield,
+  Search,
 } from "lucide-react"
 import PublicLayout from "@/layouts/PublicLayout"
 import DashboardLayout, { type NavItem } from "@/layouts/DashboardLayout"
@@ -18,7 +19,6 @@ import ProtectedRoute from "@/routes/ProtectedRoute"
 import { Toaster } from "@/components/common/Toaster"
 
 import LandingPage from "@/pages/public/LandingPage"
-import EventsPage from "@/pages/public/EventsPage"
 import EventDetailPage from "@/pages/public/EventDetailPage"
 import AboutPage from "@/pages/public/AboutPage"
 import ContactPage from "@/pages/public/ContactPage"
@@ -31,6 +31,7 @@ import VerificationPendingPage from "@/pages/auth/VerificationPendingPage"
 import UserDashboard from "@/pages/user/UserDashboard"
 import MyRegistrations from "@/pages/user/MyRegistrations"
 import MyCertificates from "@/pages/user/MyCertificates"
+import BrowseEventsPage from "@/pages/user/BrowseEventsPage"
 
 import OrganizerDashboard from "@/pages/organizer/OrganizerDashboard"
 import OrganizerEvents from "@/pages/organizer/OrganizerEvents"
@@ -52,6 +53,7 @@ import ProfilePage from "@/pages/shared/ProfilePage"
 
 const userNav: NavItem[] = [
   { to: "/user", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/user/browse", label: "Browse Events", icon: Search },
   { to: "/user/registrations", label: "My Registrations", icon: Ticket },
   { to: "/user/certificates", label: "Certificates", icon: Award },
   { to: "/user/notifications", label: "Notifications", icon: Bell },
@@ -87,7 +89,6 @@ export default function App() {
         {/* Public */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -102,6 +103,8 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
           <Route element={<DashboardLayout title="Attendee" navItems={userNav} />}>
             <Route path="/user" element={<UserDashboard />} />
+            <Route path="/user/browse" element={<BrowseEventsPage />} />
+            <Route path="/user/events/:id" element={<EventDetailPage />} />
             <Route path="/user/registrations" element={<MyRegistrations />} />
             <Route path="/user/certificates" element={<MyCertificates />} />
             <Route path="/user/notifications" element={<NotificationsPage />} />

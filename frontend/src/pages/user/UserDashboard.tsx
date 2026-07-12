@@ -25,13 +25,10 @@ import {
   MessageSquare,
   Bell,
   RefreshCw,
-  Clock,
-  MapPin,
-  Zap,
   XCircle,
 } from "lucide-react"
 import { useAppSelector } from "@/app/store"
-import { getUserDashboard, type UserDashboardData } from "@/api/userApi"
+import { getUserDashboard } from "@/api/userApi"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/cards/StatCard"
 import { Card, Badge, Button, Loader, EmptyState } from "@/components/common/ui"
@@ -93,7 +90,7 @@ export default function UserDashboard() {
 
   if (!dashboard) return <Loader />
 
-  const { stats, recentActivity, categoryData, monthlyData, upcomingRegistered, suggestions } = dashboard
+  const { stats, recentActivity, categoryData, monthlyData } = dashboard
 
   const categoryChartData = categoryData.map((c) => ({
     name: CATEGORY_LABELS[c.name] || c.name,
@@ -125,7 +122,6 @@ export default function UserDashboard() {
           tone="warning"
         />
         <StatCard label="Unread Notifications" value={stats.unreadNotifications} icon={Bell} tone="destructive" />
-        <StatCard label="Upcoming Events" value={upcomingRegistered.length} icon={Clock} />
         <StatCard label="Cancelled" value={stats.cancelledRegistrations} icon={XCircle} tone="destructive" />
       </div>
 
@@ -258,85 +254,6 @@ export default function UserDashboard() {
         </Card>
       )}
 
-      {upcomingRegistered.length > 0 && (
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground">Your Upcoming Events</h2>
-            <Link to="/user/registrations" className="text-sm font-semibold text-primary hover:underline">
-              View all registrations
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingRegistered.map((event) => (
-              <Link key={event.id} to={`/events/${event.id}`}>
-                <Card className="overflow-hidden transition-shadow hover:shadow-md">
-                  <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Zap className="size-10 text-primary/30" />
-                    </div>
-                    <Badge variant="success" className="absolute left-3 top-3">
-                      Registered
-                    </Badge>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="truncate font-semibold text-foreground">{event.title}</h3>
-                    <div className="mt-2 space-y-1">
-                      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        {dayjs(event.date).format("MMM D, YYYY")}
-                      </p>
-                      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin className="size-3.5" />
-                        {event.venue || event.city || "TBA"}
-                      </p>
-                    </div>
-                    <div className="mt-3 flex gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {event.category}
-                      </Badge>
-                      <Badge variant="accent" className="text-xs">
-                        {event.mode}
-                      </Badge>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {suggestions.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-4 text-lg font-bold text-foreground">Suggested For You</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {suggestions.map((event) => (
-              <Link key={event.id} to={`/events/${event.id}`}>
-                <Card className="overflow-hidden transition-shadow hover:shadow-md">
-                  <div className="h-24 bg-gradient-to-br from-accent/30 to-accent/5" />
-                  <div className="p-4">
-                    <h3 className="truncate text-sm font-semibold text-foreground">{event.title}</h3>
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="size-3" />
-                      {dayjs(event.date).format("MMM D, YYYY")}
-                    </p>
-                    <div className="mt-2 flex gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {event.category}
-                      </Badge>
-                      {event.price > 0 && (
-                        <Badge variant="warning" className="text-xs">
-                          ${event.price}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   )
 }
