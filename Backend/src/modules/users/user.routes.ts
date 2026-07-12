@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(auth);
 
+router.get('/dashboard', controller.getDashboard);
 router.get('/profile', controller.getProfile);
 router.patch('/profile', controller.updateProfile);
 router.patch('/change-password', controller.changePassword);

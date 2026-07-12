@@ -39,3 +39,12 @@ export const deleteAccount = async (req: AuthRequest, res: Response, next: NextF
     next(err);
   }
 };
+
+export const getDashboard = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await userService.getDashboard(req.user!._id.toString());
+    success(res, 'Dashboard data fetched', data);
+  } catch (err) {
+    next(err);
+  }
+};

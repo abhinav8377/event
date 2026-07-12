@@ -15,6 +15,63 @@ function mapUser(u: any): User {
   }
 }
 
+export interface UserDashboardData {
+  stats: {
+    totalRegistered: number
+    eventsAttended: number
+    eventsPending: number
+    certificatesEarned: number
+    feedbackGiven: number
+    avgRatingGiven: number
+    unreadNotifications: number
+    cancelledRegistrations: number
+    totalRegistrations: number
+  }
+  recentActivity: {
+    id: string
+    eventTitle: string
+    eventCategory: string
+    ticketNumber: string
+    status: string
+    attendance: string
+    registeredAt: string
+  }[]
+  categoryData: { name: string; value: number }[]
+  monthlyData: { month: string; registered: number; attended: number }[]
+  upcomingRegistered: {
+    id: string
+    title: string
+    category: string
+    mode: string
+    date: string
+    venue: string
+    city: string
+    bannerUrl: string
+  }[]
+  suggestions: {
+    id: string
+    title: string
+    description: string
+    category: string
+    mode: string
+    date: string
+    venue: string
+    city: string
+    bannerUrl: string
+    capacity: number
+    price: number
+  }[]
+}
+
+export async function getUserDashboard() {
+  const res = await api.get<ApiResponse<UserDashboardData>>("/api/users/dashboard")
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: res.data.data,
+  }
+}
+
 export async function updateProfile(input: { name?: string; organization?: string }) {
   const res = await api.patch<ApiResponse<{ user: any }>>("/api/users/profile", input)
   return {
