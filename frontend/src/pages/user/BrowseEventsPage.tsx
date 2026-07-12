@@ -235,7 +235,7 @@ export default function BrowseEventsPage() {
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-primary/15 via-primary/5 to-transparent">
+                      <div className="flex size-full items-center justify-center bg-linear-to-br from-primary/15 via-primary/5 to-transparent">
                         <CalendarCheck className="size-12 text-primary/20" />
                       </div>
                     )}
@@ -295,7 +295,7 @@ export default function BrowseEventsPage() {
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-accent/25 via-accent/10 to-transparent">
+                      <div className="flex size-full items-center justify-center bg-linear-to-br from-accent/25 via-accent/10 to-transparent">
                         <Sparkles className="size-10 text-accent/30" />
                       </div>
                     )}
