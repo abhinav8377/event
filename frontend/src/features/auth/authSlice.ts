@@ -53,6 +53,18 @@ export const registerUser = createAsyncThunk(
   },
 )
 
+export const loginWithClerk = createAsyncThunk(
+  "auth/loginWithClerk",
+  async (clerkToken: string, { rejectWithValue }) => {
+    try {
+      const res = await authApi.clerkAuth(clerkToken)
+      return res.data
+    } catch (e) {
+      return rejectWithValue((e as any).response?.data?.message || (e as Error).message)
+    }
+  },
+)
+
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
@@ -127,6 +139,15 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (s, a) => {
         s.loading = false
         s.error = (a.payload as string) ?? "Registration failed"
+      })
+      .addCase(loginWithClerk.pending, (s) => {
+        s.loading = true
+        s.error = null
+      })
+      .addCase(loginWithClerk.fulfilled, (s, a) => persist(s, a.payload))
+      .addCase(loginWithClerk.rejected, (s, a) => {
+        s.loading = false
+        s.error = (a.payload as string) ?? "Google sign-in failed"
       })
       .addCase(logoutUser.fulfilled, (s) => {
         s.user = null

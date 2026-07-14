@@ -45,6 +45,15 @@ export async function register(input: {
   }
 }
 
+export async function clerkAuth(clerkToken: string) {
+  const res = await api.post<ApiResponse<{ token: string; user: any }>>("/api/auth/clerk", { clerkToken })
+  return {
+    success: res.data.success,
+    message: res.data.message,
+    data: { user: mapUser(res.data.data.user), token: res.data.data.token },
+  }
+}
+
 export async function logout() {
   const res = await api.post<ApiResponse<{}>>("/api/auth/logout")
   return res.data

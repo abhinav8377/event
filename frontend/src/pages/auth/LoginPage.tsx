@@ -10,6 +10,9 @@ import { useAppDispatch, useAppSelector } from "@/app/store"
 import { login, clearError } from "@/features/auth/authSlice"
 import { pushToast } from "@/features/toast/toastSlice"
 import { Button, Input, Card } from "@/components/common/ui"
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
+
+const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -140,6 +143,17 @@ export default function LoginPage() {
               Sign in
             </Button>
           </form>
+
+          {clerkEnabled && (
+            <>
+              <div className="my-6 flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs font-medium text-muted-foreground">or</span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <GoogleSignInButton />
+            </>
+          )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {"Don't have an account? "}

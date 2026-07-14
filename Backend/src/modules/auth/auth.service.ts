@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import User from '../users/user.model.js';
 import Role from '../users/role.model.js';
 import { signToken } from '../../common/utils/jwt.util.js';
@@ -143,6 +144,73 @@ export const loginUser = async ({ email, password }: LoginInput) => {
 export const logoutUser = async (user: any) => {
   user.lastLogoutAt = new Date();
   await user.save();
+};
+
+/**
+ * Bridges a Clerk session (e.g. Google sign-in) to the app's own JWT auth.
+ * Verifies the Clerk-issued session token server-side, resolves the Clerk
+ * user's verified profile, then finds or creates the matching local User and
+ * returns the standard app token so the rest of the platform works unchanged.
+ */
+export const clerkLogin = async (clerkToken: string) => {
+  if (!clerkToken) throwErr('Clerk session token is required', 400);
+
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  if (!secretKey) throwErr('Google sign-in is not configured on the server', 500);
+
+  let clerkUserId: string | undefined;
+  try {
+    const claims = await verifyToken(clerkToken, { secretKey });
+    clerkUserId = claims.sub;
+  } catch {
+    throwErr('Invalid or expired Google session. Please try again.', 401);
+  }
+  if (!clerkUserId) throwErr('Invalid Google session', 401);
+
+  const clerkClient = createClerkClient({ secretKey });
+  let clerkUser;
+  try {
+    clerkUser = await clerkClient.users.getUser(clerkUserId);
+  } catch {
+    throwErr('Unable to read your Google profile. Please try again.', 401);
+  }
+
+  const primaryEmail =
+    clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ||
+    clerkUser.emailAddresses[0]?.emailAddress;
+  if (!primaryEmail) throwErr('No email is associated with this Google account', 400);
+
+  const email = primaryEmail.toLowerCase().trim();
+  const displayName =
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ').trim() ||
+    clerkUser.username ||
+    email.split('@')[0];
+
+  let user = await User.findOne({ email }).populate('roleId');
+
+  if (!user) {
+    const roleDoc = await Role.findOne({ name: 'USER' });
+    if (!roleDoc) throwErr('Default role not found', 500);
+    const randomPassword = crypto.randomBytes(24).toString('hex');
+    const created = await User.create({
+      name: displayName,
+      email,
+      password: randomPassword,
+      roleId: roleDoc._id,
+    });
+    user = await User.findById(created._id).populate('roleId');
+  }
+
+  if (!user) throwErr('Failed to create your account', 500);
+  if (user.isBlocked) throwErr('Account is blocked', 403);
+
+  const userRole = (user.roleId as unknown as { name: string })?.name;
+  if (userRole === 'ORGANIZER' && user.organization && !user.organization.verified) {
+    throwErr('Access denied. Your account is not verified yet. Please contact the administrator.', 403);
+  }
+
+  const token = signToken({ id: user._id });
+  return { token, user: user.toSafeObject(userRole) };
 };
 
 export const forgotPassword = async ({ email }: { email: string }) => {

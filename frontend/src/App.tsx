@@ -29,6 +29,8 @@ import ForbiddenPage from "@/pages/public/ForbiddenPage"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
 import VerificationPendingPage from "@/pages/auth/VerificationPendingPage"
+import SSOCallbackPage from "@/pages/auth/SSOCallbackPage"
+import SSOCompletePage from "@/pages/auth/SSOCompletePage"
 
 import UserDashboard from "@/pages/user/UserDashboard"
 import MyRegistrations from "@/pages/user/MyRegistrations"
@@ -77,6 +79,8 @@ const organizerNav: NavItem[] = [
   { to: "/organizer/profile", label: "Profile", icon: UserRound },
 ]
 
+const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
 const adminNav: NavItem[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/users", label: "Users", icon: Users },
@@ -105,6 +109,12 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verification-pending" element={<VerificationPendingPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
+        {clerkEnabled && (
+          <>
+            <Route path="/sso-callback" element={<SSOCallbackPage />} />
+            <Route path="/sso-complete" element={<SSOCompletePage />} />
+          </>
+        )}
 
         {/* User dashboard */}
         <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>

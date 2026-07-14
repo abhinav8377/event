@@ -23,6 +23,17 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
   }
 };
 
+export const clerkAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { clerkToken } = req.body;
+    const data = await authService.clerkLogin(clerkToken);
+    success(res, 'Login successful', data);
+  } catch (err) {
+    if ((err as { status?: number }).status) error(res, (err as Error).message, (err as { status: number }).status);
+    else next(err);
+  }
+};
+
 export const logout = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     await authService.logoutUser(req.user!);
