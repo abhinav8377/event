@@ -17,7 +17,7 @@ export const getDashboard = async (organizerId: string) => {
   const events = await Event.find({ organizerId }).select('_id status');
   const eventIds = events.map((e) => e._id);
   const [totalRegistrations, totalAttendance] = await Promise.all([
-    Registration.countDocuments({ eventId: { $in: eventIds }, status: 'CONFIRMED' }),
+    Registration.countDocuments({ eventId: { $in: eventIds }, status: { $in: ['CONFIRMED', 'ALLOWED'] } }),
     Attendance.countDocuments({ eventId: { $in: eventIds }, status: { $in: ['PRESENT', 'LATE'] } }),
   ]);
   return {
@@ -35,7 +35,7 @@ export const getMyEvents = async (organizerId: string) => {
 
   const [regCounts, attCounts, fbAgg] = await Promise.all([
     Registration.aggregate([
-      { $match: { eventId: { $in: eventIds }, status: 'CONFIRMED' } },
+      { $match: { eventId: { $in: eventIds }, status: { $in: ['CONFIRMED', 'ALLOWED'] } } },
       { $group: { _id: '$eventId', count: { $sum: 1 } } },
     ]),
     Attendance.aggregate([
@@ -71,9 +71,33 @@ export const getEventRegistrations = async (eventId: string, userId: string, rol
   const event = await Event.findById(eventId);
   if (!event) throwErr('Event not found', 404);
   if (role !== 'ADMIN' && String(event.organizerId) !== String(userId)) throwErr('Forbidden', 403);
-  const registrations = await Registration.find({ eventId: event._id, status: 'CONFIRMED' })
+  const registrations = await Registration.find({ eventId: event._id, status: { $in: ['CONFIRMED', 'ALLOWED'] } })
     .populate('userId', 'name email')
     .sort({ createdAt: -1 });
+  return { registrations };
+};
+
+export const getAllRegistrationsForOrganizer = async (organizerId: string, role: string, eventId?: string) => {
+  let events;
+  if (eventId) {
+    const event = await Event.findById(eventId);
+    if (!event) throwErr('Event not found', 404);
+    if (role !== 'ADMIN' && String(event.organizerId) !== String(organizerId)) throwErr('Forbidden', 403);
+    events = [event];
+  } else {
+    events = await Event.find({ organizerId }).select('_id title');
+  }
+
+  const eventIds = events.map((e) => e._id);
+
+  const registrations = await Registration.find({
+    eventId: { $in: eventIds },
+    status: { $in: ['PENDING', 'ALLOWED', 'CONFIRMED'] },
+  })
+    .populate('userId', 'name email')
+    .populate('eventId', 'title date venue city price')
+    .sort({ createdAt: -1 });
+
   return { registrations };
 };
 
@@ -88,7 +112,7 @@ export const sendEventNotification = async (
   if (!event) throwErr('Event not found', 404);
   if (String(event.organizerId) !== organizerId) throwErr('Forbidden', 403);
 
-  const registrations = await Registration.find({ eventId: event._id, status: 'CONFIRMED' }).populate(
+  const registrations = await Registration.find({ eventId: event._id, status: { $in: ['CONFIRMED', 'ALLOWED'] } }).populate(
     'userId',
     'name email',
   );

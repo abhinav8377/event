@@ -5,7 +5,7 @@ import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
 import { QRCodeSVG } from "qrcode.react"
-import { Ticket, MapPin, CalendarDays, Star, QrCode } from "lucide-react"
+import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as registrationApi from "@/api/registrationApi"
 import * as eventApi from "@/api/eventApi"
@@ -17,7 +17,7 @@ import { Card, Badge, Button, Loader, EmptyState, Textarea } from "@/components/
 import type { EventItem, Registration } from "@/constants/types"
 import clsx from "clsx"
 
-type Tab = "upcoming" | "past" | "cancelled"
+type Tab = "upcoming" | "past" | "cancelled" | "pending"
 
 export default function MyRegistrations() {
   const user = useAppSelector((s) => s.auth.user)!
@@ -45,8 +45,9 @@ export default function MyRegistrations() {
 
   const now = Date.now()
   const filtered = rows.filter(({ reg, event }) => {
-    if (tab === "cancelled") return reg.status === "CANCELLED"
-    if (reg.status === "CANCELLED") return false
+    if (tab === "cancelled") return reg.status === "CANCELLED" || reg.status === "DENIED"
+    if (tab === "pending") return reg.status === "PENDING" || reg.status === "PAYMENT_PENDING"
+    if (reg.status === "CANCELLED" || reg.status === "DENIED" || reg.status === "PENDING" || reg.status === "PAYMENT_PENDING") return false
     const isPast = new Date(event.endDate).getTime() < now
     return tab === "past" ? isPast : !isPast
   })
@@ -85,6 +86,7 @@ export default function MyRegistrations() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "upcoming", label: "Upcoming" },
+    { key: "pending", label: "Pending" },
     { key: "past", label: "Past" },
     { key: "cancelled", label: "Cancelled" },
   ]
@@ -137,18 +139,26 @@ export default function MyRegistrations() {
                   </Link>
                   <Badge
                     variant={
-                      reg.status === "CANCELLED"
+                      reg.status === "CANCELLED" || reg.status === "DENIED"
                         ? "destructive"
-                        : reg.attendance === "PRESENT"
-                          ? "success"
-                          : "default"
+                        : reg.status === "PENDING" || reg.status === "PAYMENT_PENDING"
+                          ? "warning"
+                          : reg.attendance === "PRESENT"
+                            ? "success"
+                            : "default"
                     }
                   >
                     {reg.status === "CANCELLED"
                       ? "Cancelled"
-                      : reg.attendance === "PRESENT"
-                        ? "Attended"
-                        : "Confirmed"}
+                      : reg.status === "DENIED"
+                        ? "Denied"
+                        : reg.status === "PENDING"
+                          ? "Pending"
+                          : reg.status === "PAYMENT_PENDING"
+                            ? "Payment Pending"
+                            : reg.attendance === "PRESENT"
+                              ? "Attended"
+                              : "Confirmed"}
                   </Badge>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -161,10 +171,24 @@ export default function MyRegistrations() {
                     {event.mode === "ONLINE" ? "Online" : `${event.venue}, ${event.city}`}
                   </span>
                 </div>
-                <p className="mt-1 text-xs font-mono text-muted-foreground">Ticket {reg.ticketNumber}</p>
+                {reg.status !== "PENDING" && reg.status !== "PAYMENT_PENDING" && (
+                  <p className="mt-1 text-xs font-mono text-muted-foreground">Ticket {reg.ticketNumber}</p>
+                )}
+                {reg.status === "PENDING" && (
+                  <p className="mt-1 text-xs text-warning">
+                    <Clock className="mr-1 inline size-3" aria-hidden="true" />
+                    Awaiting organizer verification
+                  </p>
+                )}
+                {reg.status === "PAYMENT_PENDING" && (
+                  <p className="mt-1 text-xs text-warning">
+                    <Clock className="mr-1 inline size-3" aria-hidden="true" />
+                    Payment pending
+                  </p>
+                )}
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
-                {reg.status === "CONFIRMED" && tab === "upcoming" && (
+                {(reg.status === "CONFIRMED" || reg.status === "ALLOWED") && tab === "upcoming" && (
                   <>
                     <Button size="sm" variant="outline" onClick={() => setTicketReg({ reg, event })}>
                       <QrCode className="size-4" aria-hidden="true" />
@@ -174,6 +198,11 @@ export default function MyRegistrations() {
                       Cancel
                     </Button>
                   </>
+                )}
+                {(reg.status === "PENDING" || reg.status === "PAYMENT_PENDING") && tab === "pending" && (
+                  <Button size="sm" variant="destructive" onClick={() => cancel(reg)}>
+                    Cancel
+                  </Button>
                 )}
                 {tab === "past" && reg.attendance === "PRESENT" && (
                   <Button size="sm" variant="outline" onClick={() => setFeedbackFor({ reg, event })}>

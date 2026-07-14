@@ -12,6 +12,7 @@ router.get('/dashboard', controller.dashboard);
 router.get('/events', controller.myEvents);
 router.get('/analytics', analyticsController.dashboard);
 router.get('/registrations/:eventId', controller.eventRegistrations);
+router.get('/all-registrations', controller.allRegistrations);
 router.get('/notifications/sent', controller.sentNotifications);
 router.get('/notifications/events', controller.organizerEvents);
 router.post('/notifications/send', controller.sendNotification);

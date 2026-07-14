@@ -31,6 +31,21 @@ export const eventRegistrations = async (req: AuthRequest, res: Response, next: 
   }
 };
 
+export const allRegistrations = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const eventId = req.query.eventId as string | undefined;
+    const data = await organizerService.getAllRegistrationsForOrganizer(
+      String(req.user!._id),
+      req.role!,
+      eventId,
+    );
+    success(res, 'Registrations fetched', data);
+  } catch (err) {
+    if ((err as any).status) error(res, (err as Error).message, (err as any).status);
+    else next(err);
+  }
+};
+
 export const sendNotification = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { eventId, title, message, type } = req.body;

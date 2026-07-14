@@ -5,21 +5,11 @@ let timer: ReturnType<typeof setInterval> | null = null;
 
 function getEndDateTime(event: any): Date | null {
   if (!event.endDate) return null;
-  const end = new Date(event.endDate);
-  if (event.endTime) {
-    const [h, m] = event.endTime.split(':').map(Number);
-    end.setHours(h, m, 0, 0);
-  }
-  return end;
+  return new Date(event.endDate);
 }
 
 function getStartDateTime(event: any): Date {
-  const start = new Date(event.date);
-  if (event.startTime) {
-    const [h, m] = event.startTime.split(':').map(Number);
-    start.setHours(h, m, 0, 0);
-  }
-  return start;
+  return new Date(event.date);
 }
 
 export const runLifecycleCheck = async (): Promise<{ completed: number; closedRegistrations: number }> => {

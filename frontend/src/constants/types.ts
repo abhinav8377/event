@@ -51,7 +51,7 @@ export interface EventItem {
   tags: string[]
 }
 
-export type RegistrationStatus = "CONFIRMED" | "CANCELLED" | "WAITLISTED"
+export type RegistrationStatus = "CONFIRMED" | "CANCELLED" | "WAITLISTED" | "PENDING" | "ALLOWED" | "PAYMENT_PENDING" | "DENIED"
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "NOT_MARKED"
 
 export interface Registration {
@@ -62,6 +62,21 @@ export interface Registration {
   qrValue: string
   status: RegistrationStatus
   attendance: AttendanceStatus
+  registrantName?: string
+  registrantEmail?: string
+  registrantPhone?: string
+  registrantAge?: number
+  registrantGender?: string
+  registrantAltPhone?: string
+  registrantOrganization?: string
+  registrantCountry?: string
+  registrantState?: string
+  registrantCity?: string
+  registrantPincode?: string
+  registrantSocialLinks?: string
+  registrantProfession?: string
+  registrantReason?: string
+  registrantSpecialRequest?: string
   registeredAt: string
 }
 
@@ -148,4 +163,51 @@ export interface LogPagination {
   limit: number
   total: number
   pages: number
+}
+
+export interface PaymentIntegration {
+  id: string
+  organizerId: string
+  razorpayKeyId: string
+  razorpayKeySecret: string
+  isActive: boolean
+  createdAt: string
+}
+
+export interface RazorpayOrder {
+  orderId: string
+  amount: number
+  currency: string
+  keyId: string
+  eventName: string
+  eventPrice: number
+}
+
+export interface RegistrationWithDetails {
+  id: string
+  userId: string | { _id: string; name: string; email: string }
+  eventId: string | { _id: string; title: string; date: string; venue: string; city: string; price: number }
+  ticketNumber: string
+  qrValue: string
+  status: RegistrationStatus
+  attendance: AttendanceStatus
+  registrantName?: string
+  registrantEmail?: string
+  registrantPhone?: string
+  registrantAge?: number
+  registrantGender?: string
+  registrantAltPhone?: string
+  registrantOrganization?: string
+  registrantCountry?: string
+  registrantState?: string
+  registrantCity?: string
+  registrantPincode?: string
+  registrantSocialLinks?: string
+  registrantProfession?: string
+  registrantReason?: string
+  registrantSpecialRequest?: string
+  paymentId?: string
+  paymentAmount?: number
+  paymentStatus?: string
+  registeredAt: string
 }

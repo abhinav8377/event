@@ -8,11 +8,13 @@ export function Modal({
   onClose,
   title,
   children,
+  panelClassName = "",
 }: {
   open: boolean
   onClose: () => void
   title: string
   children: ReactNode
+  panelClassName?: string
 }) {
   useEffect(() => {
     if (!open) return
@@ -42,7 +44,7 @@ export function Modal({
         className="absolute inset-0 bg-foreground/50"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl">
+      <div className={`relative z-10 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl ${panelClassName}`}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">{title}</h2>
           <button

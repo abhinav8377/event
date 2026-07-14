@@ -28,7 +28,7 @@ export type EventCategory =
   | 'OTHER';
 
 // Registration status
-export type RegistrationStatus = 'CONFIRMED' | 'CANCELLED';
+export type RegistrationStatus = 'PENDING' | 'ALLOWED' | 'CONFIRMED' | 'CANCELLED' | 'DENIED' | 'PAYMENT_PENDING';
 
 // Attendance status
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE';
@@ -101,6 +101,34 @@ export interface IRegistration extends Document {
   ticketNumber: string;
   qrCode?: string;
   status: RegistrationStatus;
+  registrantName?: string;
+  registrantEmail?: string;
+  registrantPhone?: string;
+  registrantAge?: number;
+  registrantGender?: string;
+  registrantAltPhone?: string;
+  registrantOrganization?: string;
+  registrantCountry?: string;
+  registrantState?: string;
+  registrantCity?: string;
+  registrantPincode?: string;
+  registrantSocialLinks?: string;
+  registrantProfession?: string;
+  registrantReason?: string;
+  registrantSpecialRequest?: string;
+  paymentId?: string;
+  paymentAmount?: number;
+  paymentStatus?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Payment Integration document (multi-tenant Razorpay)
+export interface IPaymentIntegration extends Document {
+  organizerId: Types.ObjectId;
+  razorpayKeyId: string;
+  razorpayKeySecret: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

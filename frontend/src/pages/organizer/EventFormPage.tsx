@@ -53,6 +53,10 @@ const schema = z
     message: "End date must be after the start date",
     path: ["endDate"],
   })
+  .refine((v) => new Date(v.startDate) >= new Date(), {
+    message: "Start date cannot be in the past",
+    path: ["startDate"],
+  })
   .refine((v) => v.mode === "ONLINE" || (v.venue.trim() && v.city.trim()), {
     message: "Venue and city are required for in-person events",
     path: ["venue"],
@@ -134,6 +138,8 @@ export default function EventFormPage() {
   const eventType = watch("eventType")
   const latitude = watch("latitude")
   const longitude = watch("longitude")
+
+  const now = dayjs().format("YYYY-MM-DDTHH:mm")
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -362,6 +368,7 @@ export default function EventFormPage() {
               id="startDate"
               type="datetime-local"
               label="Starts"
+              min={now}
               error={errors.startDate?.message}
               {...register("startDate")}
             />
@@ -369,6 +376,7 @@ export default function EventFormPage() {
               id="endDate"
               type="datetime-local"
               label="Ends"
+              min={now}
               error={errors.endDate?.message}
               {...register("endDate")}
             />

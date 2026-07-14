@@ -12,6 +12,8 @@ import {
   Megaphone,
   Shield,
   Search,
+  CreditCard,
+  ClipboardList,
 } from "lucide-react"
 import PublicLayout from "@/layouts/PublicLayout"
 import DashboardLayout, { type NavItem } from "@/layouts/DashboardLayout"
@@ -39,6 +41,9 @@ import EventFormPage from "@/pages/organizer/EventFormPage"
 import AttendancePage from "@/pages/organizer/AttendancePage"
 import OrganizerAnalytics from "@/pages/organizer/OrganizerAnalytics"
 import OrganizerNotifications from "@/pages/organizer/OrganizerNotifications"
+import OrganizerRegistrations from "@/pages/organizer/OrganizerRegistrations"
+import PaymentIntegrationPage from "@/pages/organizer/PaymentIntegrationPage"
+import PaymentSuccessPage from "@/pages/user/PaymentSuccessPage"
 
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import AdminUsers from "@/pages/admin/AdminUsers"
@@ -63,8 +68,10 @@ const userNav: NavItem[] = [
 const organizerNav: NavItem[] = [
   { to: "/organizer", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/organizer/events", label: "My Events", icon: CalendarRange },
+  { to: "/organizer/registrations", label: "Registrations", icon: ClipboardList },
   { to: "/organizer/attendance", label: "Attendance", icon: QrCode },
   { to: "/organizer/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/organizer/payment-integration", label: "Payment Setup", icon: CreditCard },
   { to: "/organizer/notifications", label: "Notifications", icon: Bell },
   { to: "/organizer/send-notifications", label: "Send Notifications", icon: Megaphone },
   { to: "/organizer/profile", label: "Profile", icon: UserRound },
@@ -111,6 +118,11 @@ export default function App() {
             <Route path="/user/profile" element={<ProfilePage />} />
           </Route>
         </Route>
+        <Route path="/payment-success" element={<ProtectedRoute allowedRoles={["USER"]} />}>
+          <Route element={<DashboardLayout title="Attendee" navItems={userNav} />}>
+            <Route index element={<PaymentSuccessPage />} />
+          </Route>
+        </Route>
         <Route path="/dashboard" element={<Navigate to="/user" replace />} />
 
         {/* Organizer dashboard */}
@@ -120,8 +132,10 @@ export default function App() {
             <Route path="/organizer/events" element={<OrganizerEvents />} />
             <Route path="/organizer/events/new" element={<EventFormPage />} />
             <Route path="/organizer/events/:id/edit" element={<EventFormPage />} />
+            <Route path="/organizer/registrations" element={<OrganizerRegistrations />} />
             <Route path="/organizer/attendance" element={<AttendancePage />} />
             <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
+            <Route path="/organizer/payment-integration" element={<PaymentIntegrationPage />} />
             <Route path="/organizer/notifications" element={<NotificationsPage />} />
             <Route path="/organizer/send-notifications" element={<OrganizerNotifications />} />
             <Route path="/organizer/profile" element={<ProfilePage />} />

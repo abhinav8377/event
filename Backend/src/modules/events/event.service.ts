@@ -1,4 +1,6 @@
+import mongoose from 'mongoose';
 import Event from './event.model.js';
+import Registration from '../registrations/registration.model.js';
 import * as analyticsService from '../analytics/analytics.service.js';
 import type { ServiceError } from '../../types/index.js';
 
@@ -6,6 +8,15 @@ function throwErr(message: string, status: number): never {
   const err = new Error(message) as ServiceError;
   err.status = status;
   throw err;
+}
+
+async function getRegistrationCounts(eventIds: mongoose.Types.ObjectId[]): Promise<Map<string, number>> {
+  if (eventIds.length === 0) return new Map();
+  const counts = await Registration.aggregate([
+    { $match: { eventId: { $in: eventIds }, status: { $in: ['CONFIRMED', 'ALLOWED'] } } },
+    { $group: { _id: '$eventId', count: { $sum: 1 } } },
+  ]);
+  return new Map(counts.map((c) => [String(c._id), c.count]));
 }
 
 interface ListParams {
@@ -50,7 +61,13 @@ export const listEvents = async ({ category, search, page = 1, limit = 12 }: Lis
     Event.countDocuments(filter),
   ]);
 
-  return { events, total, page: Number(page) };
+  const countMap = await getRegistrationCounts(events.map((e) => e._id));
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    registeredCount: countMap.get(String(e._id)) || 0,
+  }));
+
+  return { events: enriched, total, page: Number(page) };
 };
 
 export const searchEvents = async (q = '') => {
@@ -61,19 +78,34 @@ export const searchEvents = async (q = '') => {
       { description: { $regex: q, $options: 'i' } },
     ],
   }).limit(20);
-  return { events };
+  const countMap = await getRegistrationCounts(events.map((e) => e._id));
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    registeredCount: countMap.get(String(e._id)) || 0,
+  }));
+  return { events: enriched };
 };
 
 export const getUpcomingEvents = async () => {
   const events = await Event.find({ status: 'PUBLISHED', date: { $gte: new Date() } })
     .sort({ date: 1 })
     .limit(10);
-  return { events };
+  const countMap = await getRegistrationCounts(events.map((e) => e._id));
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    registeredCount: countMap.get(String(e._id)) || 0,
+  }));
+  return { events: enriched };
 };
 
 export const getPopularEvents = async () => {
   const events = await Event.find({ status: 'PUBLISHED' }).sort({ views: -1 }).limit(10);
-  return { events };
+  const countMap = await getRegistrationCounts(events.map((e) => e._id));
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    registeredCount: countMap.get(String(e._id)) || 0,
+  }));
+  return { events: enriched };
 };
 
 export const getEventById = async (eventId: string) => {
@@ -82,7 +114,13 @@ export const getEventById = async (eventId: string) => {
   event.views += 1;
   await event.save();
   analyticsService.increment(event._id, 'views').catch(() => {});
-  return { event };
+
+  const registeredCount = await Registration.countDocuments({
+    eventId: event._id,
+    status: { $in: ['CONFIRMED', 'ALLOWED'] },
+  });
+
+  return { event: { ...event.toObject(), registeredCount } };
 };
 
 export const createEvent = async ({ title, description, longDescription, category, mode, venue, city, latitude, longitude, date, endDate, startTime, endTime, capacity, price, bannerUrl, tags, organizerId }: CreateEventInput) => {

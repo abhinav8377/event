@@ -41,6 +41,10 @@ const CATEGORY_REVERSE: Record<string, string> = {
 function mapEvent(e: any): EventItem {
   if (!e) return {} as EventItem
   const cat = CATEGORY_MAP[e.category] || e.category || "Community"
+
+  const startDate = e.date || e.startDate
+  const endDate = e.endDate || startDate
+
   return {
     id: e._id || e.id,
     title: e.title,
@@ -54,8 +58,8 @@ function mapEvent(e: any): EventItem {
     city: e.city || "",
     latitude: e.latitude ?? null,
     longitude: e.longitude ?? null,
-    startDate: e.date || e.startDate,
-    endDate: e.endDate || e.date || e.startDate,
+    startDate,
+    endDate,
     capacity: e.capacity || 100,
     registeredCount: e.registeredCount || 0,
     attendanceCount: e.attendanceCount || 0,
@@ -119,6 +123,11 @@ export async function getOrganizerEvents(organizerId: string) {
 }
 
 export async function createEvent(organizerId: string, organizerName: string, input: Partial<EventItem>) {
+  const parseLocalDatetime = (val?: string) => {
+    if (!val) return undefined
+    const d = new Date(val)
+    return isNaN(d.getTime()) ? val : d.toISOString()
+  }
   const body: Record<string, any> = {
     title: input.title,
     description: input.description,
@@ -129,10 +138,8 @@ export async function createEvent(organizerId: string, organizerName: string, in
     city: input.city,
     latitude: input.latitude,
     longitude: input.longitude,
-    date: input.startDate,
-    endDate: input.endDate,
-    startTime: input.startDate ? new Date(input.startDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : undefined,
-    endTime: input.endDate ? new Date(input.endDate).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : undefined,
+    date: parseLocalDatetime(input.startDate),
+    endDate: parseLocalDatetime(input.endDate),
     capacity: input.capacity,
     price: input.price,
     bannerUrl: input.banner,
@@ -147,6 +154,11 @@ export async function createEvent(organizerId: string, organizerName: string, in
 }
 
 export async function updateEvent(id: string, input: Partial<EventItem>) {
+  const parseLocalDatetime = (val?: string) => {
+    if (!val) return undefined
+    const d = new Date(val)
+    return isNaN(d.getTime()) ? val : d.toISOString()
+  }
   const body: Record<string, any> = {}
   if (input.title !== undefined) body.title = input.title
   if (input.description !== undefined) body.description = input.description
@@ -157,8 +169,8 @@ export async function updateEvent(id: string, input: Partial<EventItem>) {
   if (input.city !== undefined) body.city = input.city
   if (input.latitude !== undefined) body.latitude = input.latitude
   if (input.longitude !== undefined) body.longitude = input.longitude
-  if (input.startDate !== undefined) body.date = input.startDate
-  if (input.endDate !== undefined) body.endDate = input.endDate
+  if (input.startDate !== undefined) body.date = parseLocalDatetime(input.startDate)
+  if (input.endDate !== undefined) body.endDate = parseLocalDatetime(input.endDate)
   if (input.capacity !== undefined) body.capacity = input.capacity
   if (input.price !== undefined) body.price = input.price
   if (input.banner !== undefined) body.bannerUrl = input.banner
