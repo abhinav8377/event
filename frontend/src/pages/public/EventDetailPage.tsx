@@ -27,7 +27,6 @@ import { pushToast } from "@/features/toast/toastSlice"
 import { Badge, Button, Card, Loader, Textarea, EmptyState, Input } from "@/components/common/ui"
 import { Modal } from "@/components/common/Modal"
 import { sanitizeHtml } from "@/utils/sanitize"
-import { getValidToken } from "@/utils/token"
 import VenueMap from "@/components/common/VenueMap"
 
 const modeLabel = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "Hybrid" }
@@ -187,7 +186,11 @@ export default function EventDetailPage() {
   }
 
   const openRegistrationForm = () => {
-    if (!user || !getValidToken()) {
+    if (!user) {
+      navigate(loginTarget, { state: { from: `/events/${event.id}` } })
+      return
+    }
+    if (!localStorage.getItem("eventhub_token")) {
       dispatch(pushToast({ type: "error", message: "Your session has expired. Please log in again." }))
       navigate(loginTarget, { state: { from: `/events/${event.id}` } })
       return
@@ -198,7 +201,7 @@ export default function EventDetailPage() {
   const handleRegister = async () => {
     if (!validateForm()) return
 
-    if (!getValidToken()) {
+    if (!localStorage.getItem("eventhub_token")) {
       dispatch(pushToast({ type: "error", message: "Your session has expired. Please log in again." }))
       navigate(loginTarget, { state: { from: `/events/${event.id}` } })
       return
