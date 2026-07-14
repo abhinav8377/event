@@ -1,4 +1,5 @@
 import Event from './event.model.js';
+import * as feedbackService from '../feedback/feedback.service.js';
 
 const CHECK_INTERVAL_MS = 60_000;
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -15,20 +16,29 @@ function getStartDateTime(event: any): Date {
 export const runLifecycleCheck = async (): Promise<{ completed: number; closedRegistrations: number }> => {
   const now = new Date();
 
-  const completedResult = await Event.updateMany(
-    {
-      status: 'PUBLISHED',
-      $expr: {
-        $lte: [
-          getEndDateTimeExpr(),
-          now,
-        ],
-      },
+  // Events that have ended but haven't yet triggered the feedback-request emails.
+  const dueEvents = await Event.find({
+    status: 'PUBLISHED',
+    feedbackNotified: { $ne: true },
+    $expr: {
+      $lte: [getEndDateTimeExpr(), now],
     },
-    { $set: { status: 'COMPLETED' } },
-  );
+  });
 
-  return { completed: completedResult.modifiedCount, closedRegistrations: 0 };
+  let completed = 0;
+  for (const ev of dueEvents) {
+    try {
+      await feedbackService.sendFeedbackRequests(String(ev._id), ev.title);
+    } catch (e) {
+      console.error('Failed to send feedback requests for event', String(ev._id), e);
+    }
+    ev.feedbackNotified = true;
+    ev.status = 'COMPLETED';
+    await ev.save();
+    completed++;
+  }
+
+  return { completed, closedRegistrations: 0 };
 };
 
 function getEndDateTimeExpr(): any {

@@ -90,6 +90,7 @@ export interface IEvent extends Document {
   status: EventStatus;
   organizerId: Types.ObjectId;
   views: number;
+  feedbackNotified?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
