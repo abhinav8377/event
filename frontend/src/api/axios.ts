@@ -15,9 +15,11 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && !err.config?.url?.includes("/auth/login")) {
-      localStorage.removeItem("eventhub_token")
-      localStorage.removeItem("eventhub_user")
-      window.location.href = "/"
+      const token = localStorage.getItem("eventhub_token")
+      if (!token) {
+        localStorage.removeItem("eventhub_user")
+        window.location.href = "/"
+      }
     }
     return Promise.reject(err)
   },

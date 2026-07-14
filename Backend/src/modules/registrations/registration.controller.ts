@@ -6,27 +6,27 @@ import type { Response, NextFunction } from 'express';
 export const register = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const b = req.body || {};
-    const hasDetails = b.registrantName || b.registrantEmail || b.registrantPhone;
+    const hasDetails = b.registrantName || b.registrantEmail || b.registrantPhone || b.name || b.email || b.phone;
     const data = await registrationService.registerForEvent(
       String(req.params.eventId),
       String(req.user!._id),
       hasDetails
         ? {
-            name: b.registrantName,
-            email: b.registrantEmail,
-            phone: b.registrantPhone,
-            age: b.registrantAge,
-            gender: b.registrantGender,
-            altPhone: b.registrantAltPhone,
-            organization: b.registrantOrganization,
-            country: b.registrantCountry,
-            state: b.registrantState,
-            city: b.registrantCity,
-            pincode: b.registrantPincode,
-            socialLinks: b.registrantSocialLinks,
-            profession: b.registrantProfession,
-            reason: b.registrantReason,
-            specialRequest: b.registrantSpecialRequest,
+            name: b.registrantName || b.name,
+            email: b.registrantEmail || b.email,
+            phone: b.registrantPhone || b.phone,
+            age: b.registrantAge ?? b.age,
+            gender: b.registrantGender || b.gender,
+            altPhone: b.registrantAltPhone || b.altPhone,
+            organization: b.registrantOrganization || b.organization,
+            country: b.registrantCountry || b.country,
+            state: b.registrantState || b.state,
+            city: b.registrantCity || b.city,
+            pincode: b.registrantPincode || b.pincode,
+            socialLinks: b.registrantSocialLinks || b.socialLinks,
+            profession: b.registrantProfession || b.profession,
+            reason: b.registrantReason || b.reason,
+            specialRequest: b.registrantSpecialRequest || b.specialRequest,
           }
         : undefined,
     );

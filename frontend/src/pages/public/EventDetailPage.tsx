@@ -190,11 +190,22 @@ export default function EventDetailPage() {
       navigate(loginTarget, { state: { from: `/events/${event.id}` } })
       return
     }
+    if (!localStorage.getItem("eventhub_token")) {
+      dispatch(pushToast({ type: "error", message: "Your session has expired. Please log in again." }))
+      navigate(loginTarget, { state: { from: `/events/${event.id}` } })
+      return
+    }
     setFormOpen(true)
   }
 
   const handleRegister = async () => {
     if (!validateForm()) return
+
+    if (!localStorage.getItem("eventhub_token")) {
+      dispatch(pushToast({ type: "error", message: "Your session has expired. Please log in again." }))
+      navigate(loginTarget, { state: { from: `/events/${event.id}` } })
+      return
+    }
 
     setRegistering(true)
     try {
@@ -225,8 +236,15 @@ export default function EventDetailPage() {
         setFormOpen(false)
         setPendingOpen(true)
       }
-    } catch (e) {
-      dispatch(pushToast({ type: "error", message: (e as Error).message }))
+    } catch (e: any) {
+      const status = e?.response?.status
+      if (status === 401) {
+        dispatch(pushToast({ type: "error", message: "Authentication failed. Please log in again." }))
+        navigate(loginTarget, { state: { from: `/events/${event.id}` } })
+      } else {
+        const msg = e?.response?.data?.message || (e as Error).message
+        dispatch(pushToast({ type: "error", message: msg }))
+      }
     } finally {
       setRegistering(false)
     }
@@ -264,8 +282,9 @@ export default function EventDetailPage() {
             navigate(
               `/payment-success?eventTitle=${encodeURIComponent(eventData.title)}&eventId=${eventData.id}`,
             )
-          } catch (e) {
-            dispatch(pushToast({ type: "error", message: "Payment verification failed. Please contact support." }))
+          } catch (e: any) {
+            const msg = e?.response?.data?.message || "Payment verification failed. Please contact support."
+            dispatch(pushToast({ type: "error", message: msg }))
           }
         },
         prefill: {
@@ -285,8 +304,15 @@ export default function EventDetailPage() {
 
       const rzp = new window.Razorpay(options)
       rzp.open()
-    } catch (e) {
-      dispatch(pushToast({ type: "error", message: (e as Error).message || "Failed to initiate payment" }))
+    } catch (e: any) {
+      const status = e?.response?.status
+      if (status === 401) {
+        dispatch(pushToast({ type: "error", message: "Authentication failed. Please log in again." }))
+        navigate(loginTarget, { state: { from: `/events/${event.id}` } })
+      } else {
+        const msg = e?.response?.data?.message || (e as Error).message || "Failed to initiate payment"
+        dispatch(pushToast({ type: "error", message: msg }))
+      }
     }
   }
 
