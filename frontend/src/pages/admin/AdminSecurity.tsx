@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, Fragment } from "react"
 import useSWR from "swr"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -259,8 +259,8 @@ export default function AdminSecurity() {
                     const StatusIcon = status.icon
                     const isExpanded = expandedLog === log._id
                     return (
-                      <>
-                      <tr key={log._id} className={clsx("transition-colors hover:bg-muted/50", isExpanded && "bg-muted/30")}>
+                      <Fragment key={log._id}>
+                      <tr className={clsx("transition-colors hover:bg-muted/50", isExpanded && "bg-muted/30")}>
                         <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
                           <div className="flex flex-col">
                             <span className="font-medium text-foreground">{dayjs(log.createdAt).format("MMM D, HH:mm:ss")}</span>
@@ -324,7 +324,7 @@ export default function AdminSecurity() {
                         </td>
                       </tr>
                       {isExpanded && (
-                        <tr>
+                        <tr key={`${log._id}-details`}>
                           <td colSpan={8} className="border-t border-border bg-muted/20 px-5 py-4">
                             <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
                               <div>
@@ -355,7 +355,7 @@ export default function AdminSecurity() {
                           </td>
                         </tr>
                       )}
-                      </>
+                      </Fragment>
                     )
                   })}
                 </tbody>
