@@ -270,9 +270,9 @@ export default function AdminAnalytics() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Top events by registrations</h2>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topEvents} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
+          <div className="scroll-x h-80 min-w-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topEvents} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
@@ -304,9 +304,9 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Events by status</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={statusData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+          <div className="scroll-x h-72 min-w-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
@@ -359,9 +359,9 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Price distribution</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={priceData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+          <div className="scroll-x h-72 min-w-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={priceData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
@@ -374,9 +374,9 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Capacity utilization</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={capacityUtil} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
+          <div className="scroll-x h-72 min-w-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={capacityUtil} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />

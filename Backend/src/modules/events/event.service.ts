@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Event from './event.model.js';
+import User from '../users/user.model.js';
 import Registration from '../registrations/registration.model.js';
 import * as analyticsService from '../analytics/analytics.service.js';
 import type { ServiceError } from '../../types/index.js';
@@ -108,12 +109,18 @@ export const getPopularEvents = async () => {
   return { events: enriched };
 };
 
-export const getEventById = async (eventId: string) => {
+export const getEventById = async (eventId: string, userId?: string | null) => {
   const event = await Event.findById(eventId).populate('organizerId', 'name organization');
   if (!event) throwErr('Event not found', 404);
-  event.views += 1;
-  await event.save();
-  analyticsService.increment(event._id, 'views').catch(() => {});
+
+  // Real, de-duplicated view counting: a logged-in user is counted at most once.
+  if (userId && !event.viewedBy.some((id) => String(id) === String(userId))) {
+    event.viewedBy.push(new mongoose.Types.ObjectId(userId));
+    event.views = event.viewedBy.length + (event.guestViews || 0);
+    await event.save();
+  } else if (!userId) {
+    event.views = event.viewedBy.length + (event.guestViews || 0);
+  }
 
   const registeredCount = await Registration.countDocuments({
     eventId: event._id,
@@ -121,6 +128,33 @@ export const getEventById = async (eventId: string) => {
   });
 
   return { event: { ...event.toObject(), registeredCount } };
+};
+
+export const recordGuestView = async (eventId: string) => {
+  const event = await Event.findById(eventId);
+  if (!event) throwErr('Event not found', 404);
+  event.guestViews = (event.guestViews || 0) + 1;
+  event.views = event.viewedBy.length + event.guestViews;
+  await event.save();
+  return { views: event.views };
+};
+
+export const getOrganizerPublic = async (organizerId: string): Promise<{ organizer: any; events: any[] }> => {
+  const organizer = await User.findById(organizerId).select('name organization');
+  if (!organizer) throwErr('Organizer not found', 404);
+
+  const now = new Date();
+  const events = await Event.find({ organizerId, status: 'PUBLISHED', date: { $gte: now } })
+    .populate('organizerId', 'name organization')
+    .sort({ date: 1 })
+    .limit(10);
+  const countMap = await getRegistrationCounts(events.map((e) => e._id));
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    registeredCount: countMap.get(String(e._id)) || 0,
+  }));
+
+  return { organizer, events: enriched };
 };
 
 export const createEvent = async ({ title, description, longDescription, category, mode, venue, city, latitude, longitude, date, endDate, startTime, endTime, capacity, price, bannerUrl, tags, organizerId }: CreateEventInput) => {

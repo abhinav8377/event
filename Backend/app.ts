@@ -19,6 +19,10 @@ import type { Request, Response } from "express";
 
 const app = express();
 
+// Trust a single reverse proxy (e.g. Nginx, Heroku, Vercel) so req.ip reflects
+// the real client IP instead of the proxy's internal address (::1 / 127.0.0.1).
+app.set('trust proxy', 1);
+
 app.use(cors());
 app.use(express.json());
 app.use(loggingMiddleware);

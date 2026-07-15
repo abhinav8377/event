@@ -47,6 +47,7 @@ export interface EventItem {
   ratingCount: number
   organizerId: string
   organizerName: string
+  organizerOrganization?: string
   organizerVerified: boolean
   tags: string[]
 }

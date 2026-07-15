@@ -69,6 +69,7 @@ function mapEvent(e: any): EventItem {
     ratingCount: e.ratingCount || 0,
     organizerId: e.organizerId?._id || e.organizerId || "",
     organizerName: e.organizerId?.name || e.organizerName || "",
+    organizerOrganization: e.organizerId?.organization?.name || e.organizerName || "",
     organizerVerified: e.organizerId?.organization?.verified ?? e.organizerVerified ?? false,
     tags: e.tags || [],
   }
@@ -92,6 +93,24 @@ export async function getEventById(id: string) {
     success: res.data.success,
     message: res.data.message,
     data: mapEvent(res.data.data.event),
+  }
+}
+
+export async function recordEventView(id: string) {
+  const res = await api.post<ApiResponse<{ views: number }>>(`/api/events/${id}/view`)
+  return { success: res.data.success, data: res.data.data.views }
+}
+
+export async function getOrganizerPublic(organizerId: string) {
+  const res = await api.get<ApiResponse<{ organizer: any; events: any[] }>>(
+    `/api/events/organizer/${organizerId}`,
+  )
+  return {
+    success: res.data.success,
+    data: {
+      organizer: res.data.data.organizer,
+      events: (res.data.data.events || []).map(mapEvent),
+    },
   }
 }
 

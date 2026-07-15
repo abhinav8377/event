@@ -9,7 +9,9 @@ router.get('/', controller.list);
 router.get('/search', controller.search);
 router.get('/upcoming', controller.upcoming);
 router.get('/popular', controller.popular);
+router.get('/organizer/:organizerId', controller.byOrganizer);
 router.get('/:id', controller.getById);
+router.post('/:id/view', controller.recordView);
 
 router.post('/', auth, permit('ORGANIZER', 'ADMIN'), controller.create);
 router.patch('/:id', auth, permit('ORGANIZER', 'ADMIN'), controller.update);

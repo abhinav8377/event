@@ -14,10 +14,12 @@ import {
   QrCode,
   Clock,
   CheckCircle,
+  Building2,
+  CalendarClock,
 } from "lucide-react"
 import dayjs from "dayjs"
 import { QRCodeSVG } from "qrcode.react"
-import { getEventById } from "@/api/eventApi"
+import { getEventById, getOrganizerPublic, recordEventView } from "@/api/eventApi"
 import { registerForEvent, getMyRegistrations } from "@/api/registrationApi"
 import { createRazorpayOrder, verifyRazorpayPayment, confirmPaymentSuccess } from "@/api/paymentApi"
 import { getEventFeedback, submitFeedback } from "@/api/feedbackApi"
@@ -68,6 +70,9 @@ export default function EventDetailPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [ticketOpen, setTicketOpen] = useState(false)
   const [pendingOpen, setPendingOpen] = useState(false)
+  const [orgOpen, setOrgOpen] = useState(false)
+  const [orgLoading, setOrgLoading] = useState(false)
+  const [orgData, setOrgData] = useState<{ organizer: any; events: EventItem[] } | null>(null)
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState("")
   const [submittingFeedback, setSubmittingFeedback] = useState(false)
@@ -120,6 +125,21 @@ export default function EventDetailPage() {
       }
     }
     setLoading(false)
+
+    // Real, de-duplicated guest views: count once per browser.
+    if (!user) {
+      const viewKey = `eh_viewed_${id}`
+      if (!localStorage.getItem(viewKey)) {
+        localStorage.setItem(viewKey, "1")
+        recordEventView(id)
+          .then((res) => {
+            if (res.success) {
+              setEvent((ev) => (ev ? { ...ev, views: res.data } : ev))
+            }
+          })
+          .catch(() => {})
+      }
+    }
   }, [id, user])
 
   useEffect(() => {
@@ -149,7 +169,7 @@ export default function EventDetailPage() {
 
   if (loading) return <Loader label="Loading event..." />
   if (!event) {
-    return (
+  return (
       <div className="mx-auto max-w-3xl px-4 py-20">
         <EmptyState
           title="Event not found"
@@ -162,6 +182,21 @@ export default function EventDetailPage() {
         />
       </div>
     )
+  }
+
+  const openOrganizerPanel = async () => {
+    if (!event.organizerId) return
+    setOrgOpen(true)
+    if (orgData) return
+    setOrgLoading(true)
+    try {
+      const res = await getOrganizerPublic(event.organizerId)
+      setOrgData(res.data)
+    } catch {
+      setOrgData(null)
+    } finally {
+      setOrgLoading(false)
+    }
   }
 
   const startMs = event.startDate ? new Date(event.startDate).getTime() : NaN
@@ -380,12 +415,18 @@ export default function EventDetailPage() {
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground text-balance">
             {event.title}
           </h1>
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <p className="mt-2 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
             Hosted by{" "}
-            <span className="font-semibold text-foreground">{event.organizerName}</span>
-            {event.organizerVerified && (
-              <BadgeCheck className="size-4 text-primary" aria-label="Verified organizer" />
-            )}
+            <button
+              type="button"
+              onClick={openOrganizerPanel}
+              className="inline-flex items-center gap-1 font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              {event.organizerOrganization}
+              {event.organizerVerified && (
+                <BadgeCheck className="size-4 text-primary" aria-label="Verified organizer" />
+              )}
+            </button>
           </p>
 
           <div className="mt-6 max-w-none">
@@ -468,7 +509,7 @@ export default function EventDetailPage() {
                         <div>
                           <p className="text-sm font-semibold text-foreground">{f.userName}</p>
                           <p className="text-xs text-muted-foreground">
-                            {dayjs(f.createdAt).format("MMM D, YYYY")}
+                            {dayjs(f.createdAt).format("MMM D, YYYY · h:mm A")}
                           </p>
                         </div>
                       </div>
@@ -835,6 +876,70 @@ export default function EventDetailPage() {
             </Button>
           </Link>
         </div>
+      </Modal>
+
+      {/* Organizer details panel */}
+      <Modal open={orgOpen} onClose={() => setOrgOpen(false)} title="About the organizer" panelClassName="!max-w-lg">
+        {orgLoading ? (
+          <Loader label="Loading organizer..." />
+        ) : (
+          orgData && (
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <span className="flex size-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                  <Building2 className="size-6" aria-hidden="true" />
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-bold text-foreground">{orgData.organizer?.organization?.name || event?.organizerOrganization}</p>
+                    {event?.organizerVerified && <BadgeCheck className="size-4 text-primary" aria-label="Verified organizer" />}
+                  </div>
+                  <p className="text-sm text-muted-foreground">by {orgData.organizer?.name}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="mb-2 text-sm font-semibold text-foreground">About organization</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {orgData.organizer?.organization?.bio ||
+                    `${orgData.organizer?.organization?.name || event?.organizerOrganization} is a verified event organizer on EventHub, hosting experiences for the community.`}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="mb-3 text-sm font-semibold text-foreground">Upcoming events</h3>
+                {orgData.events.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No upcoming public events right now.</p>
+                ) : (
+                  <ol className="relative flex flex-col gap-4 border-l border-border pl-5">
+                    {orgData.events.map((ev) => (
+                      <li key={ev.id} className="relative">
+                        <span className="absolute -left-[1.6rem] top-1.5 size-3 rounded-full border-2 border-card bg-primary" aria-hidden="true" />
+                        <Link
+                          to={`/events/${ev.id}`}
+                          onClick={() => setOrgOpen(false)}
+                          className="block rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40"
+                        >
+                          <p className="font-semibold text-foreground">{ev.title}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <CalendarClock className="size-3.5" aria-hidden="true" />
+                              {dayjs(ev.startDate).format("MMM D, YYYY · h:mm A")}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="size-3.5" aria-hidden="true" />
+                              {ev.mode === "ONLINE" ? "Online" : `${ev.venue}, ${ev.city}`}
+                            </span>
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            </div>
+          )
+        )}
       </Modal>
     </div>
   )

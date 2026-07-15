@@ -155,9 +155,32 @@ export const sendEventNotification = async (
 
 export const getOrganizerEvents = async (organizerId: string) => {
   const events = await Event.find({ organizerId })
-    .select('_id title date startTime venue city status')
+    .populate('organizerId', 'name organization')
     .sort({ createdAt: -1 });
-  return { events };
+
+  const eventIds = events.map((e) => e._id);
+
+  const regCounts = await Registration.aggregate([
+    { $match: { eventId: { $in: eventIds }, status: { $in: ['CONFIRMED', 'ALLOWED'] } } },
+    { $group: { _id: '$eventId', count: { $sum: 1 } } },
+  ]);
+  const regMap = new Map(regCounts.map((c) => [String(c._id), c.count]));
+
+  const attCounts = await Attendance.aggregate([
+    { $match: { eventId: { $in: eventIds }, status: { $in: ['PRESENT', 'LATE'] } } },
+    { $group: { _id: '$eventId', count: { $sum: 1 } } },
+  ]);
+  const attMap = new Map(attCounts.map((c) => [String(c._id), c.count]));
+
+  const enriched = events.map((e) => ({
+    ...e.toObject(),
+    // Synced, de-duplicated view count (matches public event detail).
+    views: (e.viewedBy?.length || 0) + (e.guestViews || 0),
+    registeredCount: regMap.get(String(e._id)) || 0,
+    attendanceCount: attMap.get(String(e._id)) || 0,
+  }));
+
+  return { events: enriched };
 };
 
 export const getSentOrganizerNotifications = async (organizerId: string) => {

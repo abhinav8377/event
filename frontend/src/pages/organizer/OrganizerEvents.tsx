@@ -141,9 +141,7 @@ export default function OrganizerEvents() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link to={`/events/${event.id}`} className="font-bold text-foreground hover:text-primary">
-                    {event.title}
-                  </Link>
+                  <span className="font-bold text-foreground">{event.title}</span>
                   <Badge variant={statusVariant[event.status]}>{event.status}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">

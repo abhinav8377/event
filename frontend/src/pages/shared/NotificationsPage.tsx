@@ -57,38 +57,40 @@ export default function NotificationsPage() {
           description="Event updates, reminders, and certificates will appear here."
         />
       ) : (
-        <Card className="divide-y divide-border">
-          {notifications.map((n) => {
-            const Icon = typeIcon[n.type]
-            return (
-              <button
-                key={n.id}
-                type="button"
-                onClick={() => !n.read && dispatch(markNotificationRead(n.id))}
-                className={clsx(
-                  "flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-muted",
-                  !n.read && "bg-accent/40",
-                )}
-              >
-                <span
+        <Card className="overflow-hidden">
+          <div className="scroll-area max-h-[460px] divide-y divide-border">
+            {notifications.map((n) => {
+              const Icon = typeIcon[n.type]
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => !n.read && dispatch(markNotificationRead(n.id))}
                   className={clsx(
-                    "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg",
-                    n.read ? "bg-muted text-muted-foreground" : "bg-accent text-accent-foreground",
+                    "flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-muted",
+                    !n.read && "bg-accent/40",
                   )}
                 >
-                  <Icon className="size-4" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className={clsx("text-sm text-foreground", !n.read && "font-bold")}>{n.title}</p>
-                    {!n.read && <span className="size-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />}
+                  <span
+                    className={clsx(
+                      "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg",
+                      n.read ? "bg-muted text-muted-foreground" : "bg-accent text-accent-foreground",
+                    )}
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className={clsx("text-sm text-foreground", !n.read && "font-bold")}>{n.title}</p>
+                      {!n.read && <span className="size-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />}
+                    </div>
+                    <p className="mt-0.5 text-sm text-muted-foreground text-pretty">{n.message}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{dayjs(n.createdAt).fromNow()}</p>
                   </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground text-pretty">{n.message}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{dayjs(n.createdAt).fromNow()}</p>
-                </div>
-              </button>
-            )
-          })}
+                </button>
+              )
+            })}
+          </div>
         </Card>
       )}
     </div>

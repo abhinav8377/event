@@ -147,7 +147,7 @@ export default function UserDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recentActivity.map((r) => (
+                {recentActivity.slice(0, 4).map((r) => (
                   <tr key={r.id} className="hover:bg-muted/50">
                     <td className="px-5 py-3">
                       <p className="truncate font-medium text-foreground">{r.eventTitle}</p>
@@ -223,33 +223,44 @@ export default function UserDashboard() {
         </Card>
       </div>
 
-      {monthlyData.length > 0 && (
+          {monthlyData.length > 0 && (
         <Card className="mt-6 p-5">
           <h2 className="mb-4 font-bold text-foreground">Monthly Activity</h2>
-          <div className="h-[260px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="month"
-                  tickFormatter={(v) => dayjs(v + "-01").format("MMM YY")}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                />
-                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  labelFormatter={(v) => dayjs(v + "-01").format("MMMM YYYY")}
-                />
-                <Legend />
-                <Bar dataKey="registered" name="Registered" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="attended" name="Attended" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="w-full overflow-x-auto">
+            <div className="h-[260px] min-w-[460px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} barGap={4} margin={{ top: 8, right: 12, bottom: 4, left: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickFormatter={(v) => dayjs(v + "-01").format("MMM YY")}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={{ stroke: "hsl(var(--border))" }}
+                  />
+                  <YAxis
+                    width={44}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: "hsl(var(--foreground))", fontSize: 12, fontWeight: 600 }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--muted))", opacity: 0.5 }}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                    }}
+                    labelFormatter={(v) => dayjs(v + "-01").format("MMMM YYYY")}
+                  />
+                  <Legend />
+                  <Bar dataKey="registered" name="Registered" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="attended" name="Attended" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
       )}

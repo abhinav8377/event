@@ -31,6 +31,8 @@ const eventSchema = new Schema<IEvent>(
     },
     organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     views: { type: Number, default: 0 },
+    viewedBy: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], default: [], index: true },
+    guestViews: { type: Number, default: 0 },
     feedbackNotified: { type: Boolean, default: false },
   },
   { timestamps: true }

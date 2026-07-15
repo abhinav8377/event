@@ -104,11 +104,13 @@ export default function OrganizerAnalytics() {
     myEvents.filter((e) => e.ratingCount > 0).reduce((s, e) => s + e.rating, 0) /
       (myEvents.filter((e) => e.ratingCount > 0).length || 1)
 
-  const regData = myEvents.map((e) => ({
-    name: e.title.length > 18 ? `${e.title.slice(0, 18)}…` : e.title,
-    Registrations: e.registeredCount,
-    "Checked in": e.attendanceCount,
-  }))
+  const regData = myEvents
+    .slice(0, 5)
+    .map((e) => ({
+      name: e.title.length > 18 ? `${e.title.slice(0, 18)}…` : e.title,
+      Registrations: e.registeredCount,
+      "Checked in": e.attendanceCount,
+    }))
 
   const categoryCounts = myEvents.reduce<Record<string, number>>((acc, e) => {
     acc[e.category] = (acc[e.category] ?? 0) + 1
@@ -154,20 +156,29 @@ export default function OrganizerAnalytics() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="p-6 lg:col-span-2">
-          <h2 className="mb-4 font-bold text-foreground">Registrations vs. check-ins</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={regData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-muted)", opacity: 0.5 }} />
-                <Legend iconType="circle" iconSize={8} />
-                <Bar dataKey="Registrations" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} barSize={20} />
-                <Bar dataKey="Checked in" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
+        <Card className="flex flex-col p-6 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="font-bold text-foreground">Registrations vs. check-ins</h2>
+            {myEvents.length > 5 && (
+              <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">
+                top 5 of {myEvents.length}
+              </span>
+            )}
+          </div>
+          <div className="scroll-x w-full">
+            <div className="h-72 min-w-[460px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={regData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--color-muted)", opacity: 0.5 }} />
+                  <Legend iconType="circle" iconSize={8} />
+                  <Bar dataKey="Registrations" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} barSize={20} />
+                  <Bar dataKey="Checked in" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
 

@@ -43,8 +43,28 @@ export const popular = async (req: AuthRequest, res: Response, next: NextFunctio
 
 export const getById = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const data = await eventService.getEventById(String(req.params.id));
+    const data = await eventService.getEventById(String(req.params.id), req.user?._id || null);
     success(res, 'Event fetched', data);
+  } catch (err) {
+    if ((err as any).status) error(res, (err as Error).message, (err as any).status);
+    else next(err);
+  }
+};
+
+export const recordView = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await eventService.recordGuestView(String(req.params.id));
+    success(res, 'View recorded', data);
+  } catch (err) {
+    if ((err as any).status) error(res, (err as Error).message, (err as any).status);
+    else next(err);
+  }
+};
+
+export const byOrganizer = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await eventService.getOrganizerPublic(String(req.params.organizerId));
+    success(res, 'Organizer fetched', data);
   } catch (err) {
     if ((err as any).status) error(res, (err as Error).message, (err as any).status);
     else next(err);

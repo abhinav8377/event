@@ -34,7 +34,7 @@ export default function AdminEvents() {
     (e) =>
       !query ||
       e.title.toLowerCase().includes(query.toLowerCase()) ||
-      e.organizerName.toLowerCase().includes(query.toLowerCase()),
+      (e.organizerOrganization ?? "").toLowerCase().includes(query.toLowerCase()),
   )
 
   const cancelEvent = async (id: string) => {
@@ -102,7 +102,7 @@ export default function AdminEvents() {
                     </Link>
                     <p className="text-xs text-muted-foreground">{e.category}</p>
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{e.organizerName}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{e.organizerOrganization}</td>
                   <td className="px-5 py-3 text-muted-foreground">{dayjs(e.startDate).format("MMM D, YYYY")}</td>
                   <td className="px-5 py-3 text-foreground">
                     {e.registeredCount} / {e.capacity}

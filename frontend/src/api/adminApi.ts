@@ -51,6 +51,7 @@ function mapEvent(e: any): EventItem {
     ratingCount: e.ratingCount || 0,
     organizerId: e.organizerId?._id || e.organizerId || "",
     organizerName: e.organizerId?.name || e.organizerName || "",
+    organizerOrganization: e.organizerId?.organization?.name || e.organizerOrganization || "",
     organizerVerified: e.organizerId?.organization?.verified ?? e.organizerVerified ?? false,
     tags: e.tags || [],
   }

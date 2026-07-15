@@ -382,3 +382,95 @@ input::-webkit-calendar-picker-indicator:hover {
   color: var(--foreground);
   opacity: 0.88;
 }
+
+/* ─── Custom scrollbars (global) ─── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent)
+    color-mix(in srgb, var(--muted-foreground) 10%, transparent);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 75%, var(--muted-foreground)),
+    color-mix(in srgb, var(--primary) 45%, var(--muted-foreground))
+  );
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+  transition: background 150ms ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 60%, var(--foreground))
+  );
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Reusable scroll container that keeps a fixed height and scrolls internally,
+   so it never forces the whole page to scroll. Pair with a height/max-height. */
+.scroll-area {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Horizontal scroller with snap + styled track */
+.scroll-x {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-x > * {
+  scroll-snap-align: start;
+}
+
+/* Refined baseline typography */
+body {
+  font-feature-settings: "ss01", "cv01", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+.display {
+  font-optical-sizing: auto;
+}
+
+/* ─── Organizer theme (subtle differentiation from the user side) ─── */
+.theme-organizer {
+  --primary: #6366f1;
+  --primary-foreground: #0b1020;
+  --accent: #eef0ff;
+  --accent-foreground: #4338ca;
+  --ring: #6366f1;
+  --sidebar: #0e1020;
+  --sidebar-foreground: #b9bce0;
+  --sidebar-accent: #1c1f3a;
+  --sidebar-accent-foreground: #ffffff;
+}
+
+.dark .theme-organizer {
+  --primary: #818cf8;
+  --primary-foreground: #0b1020;
+  --accent: #1e2147;
+  --accent-foreground: #c7d2fe;
+  --ring: #818cf8;
+}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { CheckCircle, XCircle, Filter, Search, Users } from "lucide-react"
+import { CheckCircle, XCircle, Filter, Search, Users, Eye, EyeOff } from "lucide-react"
 import dayjs from "dayjs"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { getAllRegistrations, allowRegistration, denyRegistration } from "@/api/registrationApi"
@@ -45,7 +45,17 @@ export default function OrganizerRegistrations() {
   const [searchQuery, setSearchQuery] = useState("")
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [denyModal, setDenyModal] = useState<RegistrationWithDetails | null>(null)
+  const [revealed, setRevealed] = useState<Set<string>>(new Set())
   const fetchIdRef = useRef(0)
+
+  const toggleReveal = (id: string) => {
+    setRevealed((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const loadData = useCallback(async () => {
     const thisFetch = ++fetchIdRef.current
@@ -208,7 +218,9 @@ export default function OrganizerRegistrations() {
         </div>
       ) : (
         <div className="mt-6 space-y-3">
-          {filtered.map((reg) => (
+          {filtered.map((reg) => {
+            const isRevealed = revealed.has(reg.id)
+            return (
             <Card key={reg.id} className="p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
@@ -218,9 +230,6 @@ export default function OrganizerRegistrations() {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">{getRegistrantName(reg)}</p>
                     <p className="text-xs text-muted-foreground">{getRegistrantEmail(reg)}</p>
-                    {getRegistrantPhone(reg) && (
-                      <p className="text-xs text-muted-foreground">{getRegistrantPhone(reg)}</p>
-                    )}
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <Badge variant={statusVariant[reg.status]}>{statusLabel[reg.status]}</Badge>
                       <span className="text-xs text-muted-foreground">
@@ -232,15 +241,28 @@ export default function OrganizerRegistrations() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                      <span className="font-mono">{reg.ticketNumber}</span>
-                      {reg.paymentAmount ? <span>₹{reg.paymentAmount}</span> : <span>Free</span>}
-                      <span>{dayjs(reg.registeredAt).format("MMM D, YYYY h:mm A")}</span>
-                    </div>
+                    {isRevealed && (
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        {getRegistrantPhone(reg) && (
+                          <span className="font-medium text-foreground">{getRegistrantPhone(reg)}</span>
+                        )}
+                        <span>{reg.paymentAmount ? `₹${reg.paymentAmount}` : "Free"}</span>
+                        <span>{dayjs(reg.registeredAt).format("MMM D, YYYY h:mm A")}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleReveal(reg.id)}
+                    aria-label={isRevealed ? "Hide registrant details" : "Show registrant details"}
+                  >
+                    {isRevealed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {isRevealed ? "Hide" : "Details"}
+                  </Button>
                   {reg.status === "PENDING" && (
                     <>
                       <Button
@@ -272,7 +294,8 @@ export default function OrganizerRegistrations() {
                 </div>
               </div>
             </Card>
-          ))}
+            )
+          })}
         </div>
       )}
 

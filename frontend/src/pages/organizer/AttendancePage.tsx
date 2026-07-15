@@ -203,7 +203,7 @@ export default function AttendancePage() {
             ) : attendance.length === 0 ? (
               <EmptyState title="No attendance records yet" description="Attendees will appear here once they check in." />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="scroll-area max-h-[520px] overflow-x-auto">
                 <table className="w-full min-w-[560px] text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">

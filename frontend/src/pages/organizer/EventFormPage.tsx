@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import dayjs from "dayjs"
-import { Upload, X } from "lucide-react"
+import { Upload, X, Type, AlignLeft, LayoutGrid, Image as ImageIcon, MapPin, CalendarClock, Ticket, Tag, Eye, Sparkles } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
 import { pushToast } from "@/features/toast/toastSlice"
@@ -70,6 +70,45 @@ type FormValues = z.infer<typeof schema>
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"]
 const MAX_SIZE = 5 * 1024 * 1024
+
+function Section({
+  title,
+  eyebrow,
+  icon,
+  children,
+}: {
+  title: string
+  eyebrow?: string
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <Card className="p-5 transition-shadow hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.18)] sm:p-6">
+      <div className="mb-5 flex items-center gap-3 border-b border-border pb-4">
+        {icon && (
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+            {icon}
+          </span>
+        )}
+        <div>
+          {eyebrow && (
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+              {eyebrow}
+            </p>
+          )}
+          <h3 className="text-base font-bold tracking-tight text-foreground">{title}</h3>
+        </div>
+      </div>
+      {children}
+    </Card>
+  )
+}
+
+const MODE_LABEL: Record<string, string> = {
+  IN_PERSON: "In person",
+  ONLINE: "Online",
+  HYBRID: "Hybrid",
+}
 
 export default function EventFormPage() {
   const { id } = useParams()
@@ -195,253 +234,386 @@ export default function EventFormPage() {
 
   if (isEdit && isLoading) return <Loader />
 
+  const previewBanner = customBanner || banner
+  const previewTitle = watch("title") || "Untitled event"
+  const previewDesc = watch("description") || "Your event summary will appear here."
+  const previewStart = watch("startDate") ? dayjs(watch("startDate")) : null
+  const previewEnd = watch("endDate") ? dayjs(watch("endDate")) : null
+  const previewTags = (watch("tags") || "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean)
+  const previewPrice = eventType === "PAID" ? Number(watch("price")) || 0 : 0
+
   return (
-    <div className="mx-auto max-w-3xl">
-      <PageHeader
-        title={isEdit ? "Edit event" : "Create event"}
-        description={
-          isEdit
-            ? "Update your event details."
-            : "New events are saved as drafts — publish them from My Events when ready."
-        }
+    <div className="relative">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-grid bg-grid-fade opacity-70"
+        aria-hidden="true"
       />
 
-      <Card className="p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
-          <Input
-            id="title"
-            label="Event title"
-            placeholder="e.g. DevConf 2026"
-            error={errors.title?.message}
-            {...register("title")}
-          />
-          <Input
-            id="description"
-            label="Short description"
-            placeholder="One-line summary shown on event cards"
-            error={errors.description?.message}
-            {...register("description")}
-          />
-          <div>
-            <label className="text-sm font-medium text-foreground">Full description</label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Use headings, bold, lists, and formatting to create a structured event description.
-            </p>
-            <QuillEditor
-              value={watch("longDescription") || ""}
-              onChange={(val) => {
-                setValue("longDescription", val, { shouldValidate: true, shouldDirty: true })
-              }}
-              placeholder="Tell attendees what to expect — use headings, lists, bold text, and more to structure your description..."
-            />
-            {errors.longDescription?.message && (
-              <p className="mt-1 text-sm text-destructive">{errors.longDescription.message}</p>
-            )}
-          </div>
+      <div className="mx-auto max-w-6xl">
+        <PageHeader
+          title={isEdit ? "Edit event" : "Create event"}
+          description={
+            isEdit
+              ? "Update your event details and republish when ready."
+              : "New events are saved as drafts — publish them from My Events when ready."
+          }
+        />
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Input id="category" label="Category" placeholder="e.g. Technology, Sports, Business" error={errors.category?.message} {...register("category")} />
-            <Select id="mode" label="Event mode" error={errors.mode?.message} {...register("mode")}>
-              <option value="IN_PERSON">In person</option>
-              <option value="ONLINE">Online</option>
-              <option value="HYBRID">Hybrid</option>
-            </Select>
-          </div>
-
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">Banner image</p>
-              {customBanner && (
-                <button
-                  type="button"
-                  onClick={() => { setCustomBanner(null); reset({ ...watch(), banner: banners[0].value }) }}
-                  className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                >
-                  <X className="size-3.5" />
-                  Remove custom
-                </button>
-              )}
-            </div>
-
-            {customBanner ? (
-              <div className="group relative mb-4 overflow-hidden rounded-xl border border-border bg-muted">
-                <img
-                  src={customBanner}
-                  alt="Custom banner"
-                  className="h-44 w-full object-cover"
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 lg:grid-cols-3" noValidate>
+          {/* ───────────────── Main column ───────────────── */}
+          <div className="flex flex-col gap-6 lg:col-span-2">
+            <Section title="Event basics" eyebrow="Step 01" icon={<Type className="size-4" />}>
+              <div className="flex flex-col gap-5">
+                <Input
+                  id="title"
+                  label="Event title"
+                  placeholder="e.g. DevConf 2026"
+                  error={errors.title?.message}
+                  {...register("title")}
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                    <span className="size-1.5 rounded-full bg-white" />
-                    Custom upload
-                  </span>
+                <Input
+                  id="description"
+                  label="Short description"
+                  placeholder="One-line summary shown on event cards"
+                  error={errors.description?.message}
+                  {...register("description")}
+                />
+              </div>
+            </Section>
+
+            <Section title="Full description" eyebrow="Step 02" icon={<AlignLeft className="size-4" />}>
+              <label className="mb-2 block text-sm font-medium text-foreground">Event details</label>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Use headings, bold, lists, and formatting to create a structured event description.
+              </p>
+              <QuillEditor
+                value={watch("longDescription") || ""}
+                onChange={(val) => {
+                  setValue("longDescription", val, { shouldValidate: true, shouldDirty: true })
+                }}
+                placeholder="Tell attendees what to expect — use headings, lists, bold text, and more to structure your description..."
+              />
+              {errors.longDescription?.message && (
+                <p className="mt-2 text-sm text-destructive">{errors.longDescription.message}</p>
+              )}
+            </Section>
+
+            <Section title="Category & mode" eyebrow="Step 03" icon={<LayoutGrid className="size-4" />}>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <Input
+                  id="category"
+                  label="Category"
+                  placeholder="e.g. Technology, Sports, Business"
+                  error={errors.category?.message}
+                  {...register("category")}
+                />
+                <Select id="mode" label="Event mode" error={errors.mode?.message} {...register("mode")}>
+                  <option value="IN_PERSON">In person</option>
+                  <option value="ONLINE">Online</option>
+                  <option value="HYBRID">Hybrid</option>
+                </Select>
+              </div>
+            </Section>
+
+            <Section title="Banner & artwork" eyebrow="Step 04" icon={<ImageIcon className="size-4" />}>
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm font-medium text-foreground">Choose a cover image</p>
+                {customBanner && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomBanner(null)
+                      reset({ ...watch(), banner: banners[0].value })
+                    }}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  >
+                    <X className="size-3.5" />
+                    Remove custom
+                  </button>
+                )}
+              </div>
+
+              {customBanner ? (
+                <div className="group relative mb-4 overflow-hidden rounded-xl border border-border bg-muted">
+                  <img src={customBanner} alt="Custom banner" className="h-44 w-full object-cover" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                      <span className="size-1.5 rounded-full bg-white" />
+                      Custom upload
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {banners.map((b) => (
+                    <label key={b.value} className="group relative cursor-pointer">
+                      <input type="radio" value={b.value} className="peer sr-only" {...register("banner")} />
+                      <img
+                        src={b.value || "/placeholder.svg"}
+                        alt={b.label}
+                        className={
+                          banner === b.value
+                            ? "h-14 w-full rounded-lg border-2 border-primary object-cover ring-1 ring-primary/30"
+                            : "h-14 w-full rounded-lg border-2 border-border object-cover opacity-70 ring-1 ring-transparent transition-all duration-200 group-hover:opacity-100 group-hover:ring-muted-foreground/30"
+                        }
+                      />
+                      <span
+                        className={
+                          banner === b.value
+                            ? "mt-1 block truncate text-center text-[10px] font-semibold text-primary"
+                            : "mt-1 block truncate text-center text-[10px] text-muted-foreground"
+                        }
+                      >
+                        {b.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <label
+                  onClick={() => fileRef.current?.click()}
+                  className="group relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/25 px-4 py-6 transition-all duration-200 hover:border-primary/50 hover:bg-primary/5"
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                    className="sr-only"
+                    onChange={handleFile}
+                  />
+                  {uploading ? (
+                    <>
+                      <span className="relative flex size-10 items-center justify-center rounded-full bg-primary/10">
+                        <span className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      </span>
+                      <span className="text-sm font-medium text-muted-foreground">Uploading...</span>
+                      <span className="text-xs text-muted-foreground/60">Please wait while we process your image</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="relative flex size-10 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
+                        <Upload className="size-5 text-primary" aria-hidden="true" />
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        {customBanner ? "Replace with another image" : "Upload a custom banner"}
+                      </span>
+                      <span className="text-xs text-muted-foreground/60">JPG, PNG, GIF, WebP &middot; Max 5 MB</span>
+                    </>
+                  )}
+                </label>
+              </div>
+            </Section>
+
+            {mode !== "ONLINE" && (
+              <Section title="Location" eyebrow="Step 05" icon={<MapPin className="size-4" />}>
+                <div className="flex flex-col gap-5">
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <Input
+                      id="venue"
+                      label="Venue"
+                      placeholder="e.g. Convention Center Hall A"
+                      error={errors.venue?.message}
+                      {...register("venue")}
+                    />
+                    <Input
+                      id="city"
+                      label="City"
+                      placeholder="e.g. San Francisco"
+                      error={errors.city?.message}
+                      {...register("city")}
+                    />
+                  </div>
+                  <VenueMapPicker
+                    latitude={latitude}
+                    longitude={longitude}
+                    onChange={(lat, lng) => {
+                      setValue("latitude", lat, { shouldValidate: true, shouldDirty: true })
+                      setValue("longitude", lng, { shouldValidate: true, shouldDirty: true })
+                    }}
+                  />
+                </div>
+              </Section>
+            )}
+
+            <Section title="Schedule" eyebrow="Step 06" icon={<CalendarClock className="size-4" />}>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <Input
+                  id="startDate"
+                  type="datetime-local"
+                  label="Starts"
+                  min={now}
+                  error={errors.startDate?.message}
+                  {...register("startDate")}
+                />
+                <Input
+                  id="endDate"
+                  type="datetime-local"
+                  label="Ends"
+                  min={now}
+                  error={errors.endDate?.message}
+                  {...register("endDate")}
+                />
+              </div>
+            </Section>
+
+            <Section title="Capacity & pricing" eyebrow="Step 07" icon={<Ticket className="size-4" />}>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <Input
+                  id="capacity"
+                  type="number"
+                  label="Capacity"
+                  min={1}
+                  error={errors.capacity?.message}
+                  {...register("capacity")}
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="eventType" className="text-sm font-medium text-foreground">
+                    Event type
+                  </label>
+                  <select
+                    id="eventType"
+                    className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    {...register("eventType", {
+                      onChange: (e) => {
+                        if (e.target.value === "FREE") setValue("price", 0, { shouldValidate: true, shouldDirty: true })
+                      },
+                    })}
+                  >
+                    <option value="FREE">Free</option>
+                    <option value="PAID">Paid</option>
+                  </select>
+                  {errors.eventType?.message && <p className="text-xs text-destructive">{errors.eventType.message}</p>}
                 </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                {banners.map((b) => (
-                  <label key={b.value} className="group relative cursor-pointer">
-                    <input type="radio" value={b.value} className="peer sr-only" {...register("banner")} />
-                    <img
-                      src={b.value || "/placeholder.svg"}
-                      alt={b.label}
-                      className={
-                        banner === b.value
-                          ? "h-14 w-full rounded-lg border-2 border-primary object-cover ring-1 ring-primary/30"
-                          : "h-14 w-full rounded-lg border-2 border-border object-cover opacity-70 ring-1 ring-transparent transition-all duration-200 group-hover:opacity-100 group-hover:ring-muted-foreground/30"
-                      }
+
+              {eventType === "PAID" && (
+                <div className="mt-5">
+                    <Input
+                      id="price"
+                      type="number"
+                      label="Ticket price (INR)"
+                      min={1}
+                      step="0.01"
+                      placeholder="e.g. 25.00"
+                      error={errors.price?.message}
+                      {...register("price")}
                     />
-                    <span className={
-                      banner === b.value
-                        ? "mt-1 block truncate text-center text-[10px] font-semibold text-primary"
-                        : "mt-1 block truncate text-center text-[10px] text-muted-foreground"
-                    }>
-                      {b.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
+                </div>
+              )}
+            </Section>
 
-            <div className="mt-4">
-              <label
-                onClick={() => fileRef.current?.click()}
-                className="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/25 px-4 py-6 transition-all duration-200 hover:border-primary/50 hover:bg-primary/5"
-              >
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.webp"
-                  className="sr-only"
-                  onChange={handleFile}
-                />
-                {uploading ? (
-                  <>
-                    <span className="relative flex size-10 items-center justify-center rounded-full bg-primary/10">
-                      <span className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    </span>
-                    <span className="text-sm font-medium text-muted-foreground">Uploading...</span>
-                    <span className="text-xs text-muted-foreground/60">Please wait while we process your image</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="relative flex size-10 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
-                      <Upload className="size-5 text-primary" aria-hidden="true" />
-                    </span>
-                    <span className="text-sm font-medium text-foreground">
-                      {customBanner ? "Replace with another image" : "Upload a custom banner"}
-                    </span>
-                    <span className="text-xs text-muted-foreground/60">JPG, PNG, GIF, WebP &middot; Max 5 MB</span>
-                  </>
-                )}
-              </label>
-            </div>
-          </div>
-
-          {mode !== "ONLINE" && (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Section title="Tags" eyebrow="Step 08" icon={<Tag className="size-4" />}>
               <Input
-                id="venue"
-                label="Venue"
-                placeholder="e.g. Convention Center Hall A"
-                error={errors.venue?.message}
-                {...register("venue")}
+                id="tags"
+                label="Tags (comma separated)"
+                placeholder="e.g. react, networking, beginner-friendly"
+                error={errors.tags?.message}
+                {...register("tags")}
               />
-              <Input id="city" label="City" placeholder="e.g. San Francisco" error={errors.city?.message} {...register("city")} />
+            </Section>
+          </div>
+
+          {/* ───────────────── Preview sidebar ───────────────── */}
+          <aside className="lg:col-span-1">
+            <div className="lg:sticky lg:top-6 flex flex-col gap-4">
+              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <div className="relative">
+                  <img
+                    src={previewBanner || "/placeholder.svg"}
+                    alt="Event banner preview"
+                    className="h-40 w-full object-cover"
+                  />
+                  <div className="absolute right-3 top-3 flex gap-2">
+                    <span className="rounded-full bg-black/55 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+                      {MODE_LABEL[mode] || mode}
+                    </span>
+                    <span className="rounded-full bg-primary px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                      {watch("category") || "Category"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <div className="mb-3 flex items-center gap-2 text-primary">
+                    <Eye className="size-4" />
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em]">
+                      Live preview
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold leading-snug tracking-tight text-foreground">
+                    {previewTitle}
+                  </h4>
+                  <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{previewDesc}</p>
+
+                  <dl className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
+                    <div className="flex items-start gap-2.5">
+                      <CalendarClock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <span className="text-foreground">
+                        {previewStart?.isValid() ? previewStart.format("MMM D, YYYY · h:mm A") : "Start date"}
+                        {previewEnd?.isValid() && (
+                          <span className="text-muted-foreground">
+                            {" → "}
+                            {previewEnd.format("MMM D, YYYY · h:mm A")}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    {mode !== "ONLINE" && (
+                      <div className="flex items-start gap-2.5">
+                        <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                        <span className="text-foreground">
+                          {watch("venue") || "Venue"}
+                          {watch("city") && <span className="text-muted-foreground">, {watch("city")}</span>}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2.5">
+                      <Ticket className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <span className="text-foreground">
+                        {watch("capacity") || 0} seats &middot;{" "}
+                        {eventType === "PAID" ? (
+                          <span className="font-semibold text-primary">₹{previewPrice}</span>
+                        ) : (
+                          <span className="font-semibold text-success">Free</span>
+                        )}
+                      </span>
+                    </div>
+                  </dl>
+
+                  {previewTags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-1.5 border-t border-border pt-4">
+                      {previewTags.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-full bg-accent px-2.5 py-0.5 font-mono text-[10px] font-medium text-accent-foreground"
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-4">
+                <Button type="submit" size="lg" loading={isSubmitting} className="w-full">
+                  <Sparkles className="size-4" />
+                  {isEdit ? "Save changes" : "Create draft"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => navigate("/organizer/events")} className="w-full">
+                  Cancel
+                </Button>
+              </div>
             </div>
-          )}
-
-          {mode !== "ONLINE" && (
-            <VenueMapPicker
-              latitude={latitude}
-              longitude={longitude}
-              onChange={(lat, lng) => {
-                setValue("latitude", lat, { shouldValidate: true, shouldDirty: true })
-                setValue("longitude", lng, { shouldValidate: true, shouldDirty: true })
-              }}
-            />
-          )}
-
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Input
-              id="startDate"
-              type="datetime-local"
-              label="Starts"
-              min={now}
-              error={errors.startDate?.message}
-              {...register("startDate")}
-            />
-            <Input
-              id="endDate"
-              type="datetime-local"
-              label="Ends"
-              min={now}
-              error={errors.endDate?.message}
-              {...register("endDate")}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Input
-              id="capacity"
-              type="number"
-              label="Capacity"
-              min={1}
-              error={errors.capacity?.message}
-              {...register("capacity")}
-            />
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="eventType" className="text-sm font-medium text-foreground">
-                Event type
-              </label>
-              <select
-                id="eventType"
-                className="flex h-10 w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                {...register("eventType", {
-                  onChange: (e) => {
-                    if (e.target.value === "FREE") setValue("price", 0, { shouldValidate: true, shouldDirty: true })
-                  },
-                })}
-              >
-                <option value="FREE">Free</option>
-                <option value="PAID">Paid</option>
-              </select>
-              {errors.eventType?.message && <p className="text-xs text-destructive">{errors.eventType.message}</p>}
-            </div>
-          </div>
-
-          {eventType === "PAID" && (
-            <Input
-              id="price"
-              type="number"
-              label="Ticket price (USD)"
-              min={1}
-              step="0.01"
-              placeholder="e.g. 25.00"
-              error={errors.price?.message}
-              {...register("price")}
-            />
-          )}
-
-          <Input
-            id="tags"
-            label="Tags (comma separated)"
-            placeholder="e.g. react, networking, beginner-friendly"
-            error={errors.tags?.message}
-            {...register("tags")}
-          />
-
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => navigate("/organizer/events")}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              {isEdit ? "Save changes" : "Create draft"}
-            </Button>
-          </div>
+          </aside>
         </form>
-      </Card>
+      </div>
     </div>
   )
 }

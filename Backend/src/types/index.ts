@@ -90,6 +90,8 @@ export interface IEvent extends Document {
   status: EventStatus;
   organizerId: Types.ObjectId;
   views: number;
+  viewedBy: Types.ObjectId[];
+  guestViews: number;
   feedbackNotified?: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -203,13 +203,13 @@ export default function AdminNotifications() {
                 {isExpanded && (
                   <div className="border-t border-border bg-muted/30 px-5 py-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Full Message
+                      Message
                     </p>
                     <p className="whitespace-pre-wrap text-sm text-foreground">{n.message}</p>
                     {n.recipients.length > 0 && (
                       <>
                         <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          Sample Recipients
+                          Recipients
                         </p>
                         <div className="flex flex-col gap-1">
                           {n.recipients.map((r, ri) => (

@@ -37,7 +37,7 @@ export function EventCard({ event, detailPath }: { event: EventItem; detailPath?
           <div>
             <h3 className="font-extrabold leading-snug tracking-tight text-foreground text-balance">{event.title}</h3>
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              {event.organizerName}
+              <span className="font-medium text-muted-foreground">{event.organizerOrganization}</span>
               {event.organizerVerified && (
                 <BadgeCheck className="size-3.5 text-primary" aria-label="Verified organizer" />
               )}

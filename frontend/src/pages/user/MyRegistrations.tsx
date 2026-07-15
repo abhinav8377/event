@@ -171,9 +171,6 @@ export default function MyRegistrations() {
                     {event.mode === "ONLINE" ? "Online" : `${event.venue}, ${event.city}`}
                   </span>
                 </div>
-                {reg.status !== "PENDING" && reg.status !== "PAYMENT_PENDING" && (
-                  <p className="mt-1 text-xs font-mono text-muted-foreground">Ticket {reg.ticketNumber}</p>
-                )}
                 {reg.status === "PENDING" && (
                   <p className="mt-1 text-xs text-warning">
                     <Clock className="mr-1 inline size-3" aria-hidden="true" />
