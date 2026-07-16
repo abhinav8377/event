@@ -12,7 +12,7 @@ type QrScannerProps = {
   paused?: boolean
 }
 
-type ScannerState = "idle" | "starting" | "active" | "denied" | "unavailable"
+type ScannerState = "idle" | "starting" | "active" | "denied" | "unavailable" | "insecure"
 
 export function QrScanner({ onScan, paused = false }: QrScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -63,8 +63,20 @@ export function QrScanner({ onScan, paused = false }: QrScannerProps) {
   }, [])
 
   const start = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setState("unavailable")
+    // Cameras require a secure context (HTTPS or localhost). Over a plain-HTTP
+    // LAN address (e.g. http://192.168.x.x) mediaDevices is undefined on phones,
+    // which is why it works on laptop/localhost but fails on mobile.
+    const md = navigator.mediaDevices
+    if (!md?.getUserMedia) {
+      if (
+        typeof window !== "undefined" &&
+        window.isSecureContext === false &&
+        !["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
+      ) {
+        setState("insecure")
+      } else {
+        setState("unavailable")
+      }
       return
     }
     setState("starting")
@@ -123,6 +135,14 @@ export function QrScanner({ onScan, paused = false }: QrScannerProps) {
                   Camera access denied. Allow camera permission in your browser and try again.
                 </p>
               </>
+            ) : state === "insecure" ? (
+              <>
+                <CameraOff className="size-8 text-destructive" aria-hidden="true" />
+                <p className="text-sm text-white">
+                  Camera needs a secure connection. Open this page over <b>HTTPS</b> (or via
+                  localhost) instead of a plain http:// LAN address.
+                </p>
+              </>
             ) : state === "unavailable" ? (
               <>
                 <CameraOff className="size-8 text-muted-foreground" aria-hidden="true" />
@@ -148,7 +168,7 @@ export function QrScanner({ onScan, paused = false }: QrScannerProps) {
       ) : (
         <Button onClick={start} loading={state === "starting"}>
           <Camera className="size-4" aria-hidden="true" />
-          {state === "denied" || state === "unavailable" ? "Retry camera" : "Start camera scan"}
+          {state === "denied" || state === "unavailable" || state === "insecure" ? "Retry camera" : "Start camera scan"}
         </Button>
       )}
     </div>
