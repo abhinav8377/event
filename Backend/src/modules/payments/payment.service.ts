@@ -92,11 +92,16 @@ export const verifyPayment = async (payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
   registrationId: string;
+  userId: string;
 }) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, registrationId } = payload;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, registrationId, userId } = payload;
 
   const registration = await Registration.findById(registrationId).populate('eventId');
   if (!registration) throwErr('Registration not found', 404);
+
+  if (String(registration.userId) !== userId) {
+    throwErr('You are not authorized to verify this registration', 403);
+  }
 
   const event = registration.eventId as any;
   const integration = await PaymentIntegration.findOne({ organizerId: event.organizerId, isActive: true });

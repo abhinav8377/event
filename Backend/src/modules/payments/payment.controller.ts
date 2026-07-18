@@ -59,6 +59,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response, next: NextF
       razorpay_payment_id,
       razorpay_signature,
       registrationId,
+      userId: String(req.user!._id),
     });
     success(res, 'Payment verified successfully', data);
   } catch (err) {
