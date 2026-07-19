@@ -15,11 +15,11 @@ export default defineConfig({
     host: true,
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "https://event-production-2b1c.up.railway.app",
         changeOrigin: true,
       },
       "/socket.io": {
-        target: "http://localhost:5000",
+        target: "https://event-production-2b1c.up.railway.app",
         changeOrigin: true,
         ws: true,
       },
