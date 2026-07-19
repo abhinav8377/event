@@ -14,6 +14,7 @@ import {
   Search,
   CreditCard,
   ClipboardList,
+  MessagesSquare,
 } from "lucide-react"
 import PublicLayout from "@/layouts/PublicLayout"
 import DashboardLayout, { type NavItem } from "@/layouts/DashboardLayout"
@@ -45,7 +46,9 @@ import OrganizerAnalytics from "@/pages/organizer/OrganizerAnalytics"
 import OrganizerNotifications from "@/pages/organizer/OrganizerNotifications"
 import OrganizerRegistrations from "@/pages/organizer/OrganizerRegistrations"
 import PaymentIntegrationPage from "@/pages/organizer/PaymentIntegrationPage"
+import OrganizerCommunities from "@/pages/organizer/OrganizerCommunities"
 import PaymentSuccessPage from "@/pages/user/PaymentSuccessPage"
+import UserCommunities from "@/pages/user/UserCommunities"
 
 import AdminDashboard from "@/pages/admin/AdminDashboard"
 import AdminUsers from "@/pages/admin/AdminUsers"
@@ -63,6 +66,7 @@ const userNav: NavItem[] = [
   { to: "/user/browse", label: "Browse Events", icon: Search },
   { to: "/user/registrations", label: "My Registrations", icon: Ticket },
   { to: "/user/certificates", label: "Certificates", icon: Award },
+  { to: "/user/communities", label: "Communities", icon: MessagesSquare },
   { to: "/user/notifications", label: "Notifications", icon: Bell },
   { to: "/user/profile", label: "Profile", icon: UserRound },
 ]
@@ -76,6 +80,7 @@ const organizerNav: NavItem[] = [
   { to: "/organizer/payment-integration", label: "Payment Setup", icon: CreditCard },
   { to: "/organizer/notifications", label: "Notifications", icon: Bell },
   { to: "/organizer/send-notifications", label: "Send Notifications", icon: Megaphone },
+  { to: "/organizer/communities", label: "Community", icon: MessagesSquare },
   { to: "/organizer/profile", label: "Profile", icon: UserRound },
 ]
 
@@ -124,6 +129,7 @@ export default function App() {
             <Route path="/user/events/:id" element={<EventDetailPage />} />
             <Route path="/user/registrations" element={<MyRegistrations />} />
             <Route path="/user/certificates" element={<MyCertificates />} />
+            <Route path="/user/communities" element={<UserCommunities />} />
             <Route path="/user/notifications" element={<NotificationsPage />} />
             <Route path="/user/profile" element={<ProfilePage />} />
           </Route>
@@ -148,6 +154,7 @@ export default function App() {
             <Route path="/organizer/payment-integration" element={<PaymentIntegrationPage />} />
             <Route path="/organizer/notifications" element={<NotificationsPage />} />
             <Route path="/organizer/send-notifications" element={<OrganizerNotifications />} />
+            <Route path="/organizer/communities" element={<OrganizerCommunities />} />
             <Route path="/organizer/profile" element={<ProfilePage />} />
           </Route>
         </Route>

@@ -26,7 +26,8 @@
     "nodemailer": "^9.0.3",
     "pdfkit": "^0.15.0",
     "qrcode": "^1.5.3",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

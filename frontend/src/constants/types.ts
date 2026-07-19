@@ -184,6 +184,46 @@ export interface RazorpayOrder {
   eventPrice: number
 }
 
+export type CommunityMemberStatus = "PENDING" | "APPROVED" | "DENIED"
+
+export interface Community {
+  id: string
+  eventId: string | { _id: string; title: string; date: string; bannerUrl?: string }
+  organizerId: string
+  name: string
+  description: string
+  createdAt: string
+  memberCount: number
+  pendingCount?: number
+  myStatus?: CommunityMemberStatus | null
+}
+
+export interface CommunityMember {
+  id: string
+  userId: string
+  name: string
+  email: string
+  status: CommunityMemberStatus
+  joinedAt?: string
+  createdAt: string
+  isOrganizer?: boolean
+}
+
+export interface CommunityMessage {
+  id: string
+  senderId: string
+  senderName: string
+  message: string
+  createdAt: string
+  isOrganizer?: boolean
+}
+
+export interface CommunityChatData {
+  community: Community
+  members: { id: string; name: string; email: string }[]
+  messages: CommunityMessage[]
+}
+
 export interface RegistrationWithDetails {
   id: string
   userId: string | { _id: string; name: string; email: string }

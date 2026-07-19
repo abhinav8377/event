@@ -223,6 +223,38 @@ export interface AnalyticsSummary {
   averageRating: number;
 }
 
+// Community membership status
+export type CommunityMemberStatus = 'PENDING' | 'APPROVED' | 'DENIED';
+
+// Community document
+export interface ICommunity extends Document {
+  eventId: Types.ObjectId;
+  organizerId: Types.ObjectId;
+  name: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Community membership document
+export interface ICommunityMember extends Document {
+  communityId: Types.ObjectId;
+  userId: Types.ObjectId;
+  status: CommunityMemberStatus;
+  joinedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Community message document
+export interface ICommunityMessage extends Document {
+  communityId: Types.ObjectId;
+  senderId: Types.ObjectId;
+  message: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Request log document
 export interface IRequestLog extends Document {
   method: string;

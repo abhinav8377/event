@@ -40,6 +40,52 @@ Replaced the frontend mock API layer with real HTTP calls to the Express backend
 ### New Endpoint
 - **admin.routes.ts** + **admin.controller.ts** + **admin.service.ts** — Added `GET /api/admin/events` to list all events (any status) with organizer population
 
+---
+
+# Community Feature (Complete Community Workflow)
+
+## Overview
+Organizers can create per-event communities. Registered attendees request to join; organizers approve/deny from a
+dedicated "Manage Community Members" panel; approved members chat in real time via Socket.IO (two-panel chat:
+member list + live messages).
+
+### Rules
+- A community is tied 1:1 to an event (`eventId` unique).
+- Only users with a CONFIRMED/ALLOWED registration for that event can request to join.
+- Organizer is the community admin (APPROVED member) and can approve, deny, remove, or (for others) delete members.
+- Approved members chat; leaving returns them to the community cards (conditional rendering, same route).
+
+## Backend Changes
+- **New module** `src/modules/communities/`:
+  - `community.model.ts` — `Community` (eventId, organizerId, name, description)
+  - `communityMember.model.ts` — `CommunityMember` (communityId, userId, status: PENDING|APPROVED|DENIED)
+  - `communityMessage.model.ts` — `CommunityMessage` (communityId, senderId, message)
+  - `community.service.ts` / `community.controller.ts` / `community.routes.ts`
+- **routes** mounted at `/api/communities`:
+  - `GET /my` — communities visible to a registered user
+  - `GET /organizer/list` — organizer's communities (with pending/member counts)
+  - `POST /` (ORGANIZER/ADMIN) — create community for an event
+  - `POST /:communityId/join` — send join approval request
+  - `GET /:communityId/members` (ORGANIZER/ADMIN) — list members + search filter
+  - `PATCH /:communityId/members/:userId/approve` — approve
+  - `PATCH /:communityId/members/:userId/deny` — deny
+  - `DELETE /:communityId/members/:userId` — remove (organizer only)
+  - `POST /:communityId/leave` — leave community (non-admin)
+  - `GET /:communityId/chat` — chat data (community + members + history)
+- **`src/types/index.ts`** — added `ICommunity`, `ICommunityMember`, `ICommunityMessage`, `CommunityMemberStatus`.
+- **`src/socket.ts`** (new) — Socket.IO server; `community:join`, `community:leave`, `community:message` events.
+  Auth via JWT from `auth.token`/query. Messages broadcast to room `community:<id>`.
+- **`server.ts`** — creates HTTP server and attaches Socket.IO.
+- **`app.ts`** — registers `communityRoutes`.
+- **deps** — `socket.io` added to backend, `socket.io-client` to frontend. Vite proxy gained `/socket.io` (ws).
+
+## Frontend Changes
+- **`src/api/communityApi.ts`** + **`src/api/socket.ts`** (socket.io-client wrapper).
+- **`src/constants/types.ts`** — `Community`, `CommunityMember`, `CommunityMessage`, `CommunityChatData`.
+- **`src/pages/organizer/OrganizerCommunities.tsx`** — "Community" nav item; create community per event; "Manage Members" modal with search + approve/deny/remove.
+- **`src/pages/user/UserCommunities.tsx`** — "Communities" nav item; cards for registered events only; "Join Community" → approval popup ("your request has been sent, wait for approval to join"); on approve "Join" becomes "Chat Now" (same route, conditional render); two-panel chat (member list + live messages) with Leave / Close Chat returning to cards.
+- **`src/App.tsx`** — routes `/organizer/communities`, `/user/communities` + nav items.
+
 ## Running the Project
 
 ```bash

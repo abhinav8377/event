@@ -13,6 +13,7 @@ import analyticsRoutes from "./src/modules/analytics/analytics.routes.js";
 import organizerRoutes from "./src/modules/organizer/organizer.routes.js";
 import adminRoutes from "./src/modules/admin/admin.routes.js";
 import paymentRoutes from "./src/modules/payments/payment.routes.js";
+import communityRoutes from "./src/modules/communities/community.routes.js";
 import loggingMiddleware from "./src/common/middleware/logging.middleware.js";
 import errorMiddleware from "./src/common/middleware/error.middleware.js";
 import type { Request, Response } from "express";
@@ -43,6 +44,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/organizer", organizerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/communities", communityRoutes);
 
 app.use((req: Request, res: Response) =>
   res
