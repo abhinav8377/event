@@ -11,6 +11,5 @@ const paymentIntegrationSchema = new Schema<IPaymentIntegration>(
   { timestamps: true }
 );
 
-paymentIntegrationSchema.index({ organizerId: 1 }, { unique: true });
-
-export default mongoose.model<IPaymentIntegration>('PaymentIntegration', paymentIntegrationSchema);
+export default (mongoose.models.PaymentIntegration as mongoose.Model<IPaymentIntegration>) ||
+  mongoose.model<IPaymentIntegration>('PaymentIntegration', paymentIntegrationSchema);
