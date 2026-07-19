@@ -12,4 +12,5 @@ const communityMessageSchema = new Schema<ICommunityMessage>(
 
 communityMessageSchema.index({ communityId: 1, createdAt: 1 });
 
-export default mongoose.model<ICommunityMessage>('CommunityMessage', communityMessageSchema);
+export default (mongoose.models.CommunityMessage as mongoose.Model<ICommunityMessage>) ||
+  mongoose.model<ICommunityMessage>('CommunityMessage', communityMessageSchema);

@@ -11,4 +11,5 @@ const communitySchema = new Schema<ICommunity>(
   { timestamps: true }
 );
 
-export default mongoose.model<ICommunity>('Community', communitySchema);
+export default (mongoose.models.Community as mongoose.Model<ICommunity>) ||
+  mongoose.model<ICommunity>('Community', communitySchema);

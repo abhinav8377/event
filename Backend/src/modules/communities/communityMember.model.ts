@@ -13,4 +13,5 @@ const communityMemberSchema = new Schema<ICommunityMember>(
 
 communityMemberSchema.index({ communityId: 1, userId: 1 }, { unique: true });
 
-export default mongoose.model<ICommunityMember>('CommunityMember', communityMemberSchema);
+export default (mongoose.models.CommunityMember as mongoose.Model<ICommunityMember>) ||
+  mongoose.model<ICommunityMember>('CommunityMember', communityMemberSchema);
