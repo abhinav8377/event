@@ -25,12 +25,7 @@ const appTree = (
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {clerkPublishableKey ? (
-      <ClerkProvider
-        publishableKey={clerkPublishableKey}
-        afterSignInUrl="/sso-complete"
-        afterSignUpUrl="/sso-complete"
-        afterSignOutUrl="/"
-      >
+      <ClerkProvider publishableKey={clerkPublishableKey}>
         {appTree}
       </ClerkProvider>
     ) : (

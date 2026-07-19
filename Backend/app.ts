@@ -24,7 +24,24 @@ const app = express();
 // the real client IP instead of the proxy's internal address (::1 / 127.0.0.1).
 app.set('trust proxy', 1);
 
-app.use(cors());
+const allowedOrigins = [
+  'https://event-hub.in',
+  'https://www.event-hub.in',
+  /\.vercel\.app$/,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed = allowedOrigins.some((o) =>
+        o instanceof RegExp ? o.test(origin) : o === origin
+      );
+      callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(loggingMiddleware);
 
