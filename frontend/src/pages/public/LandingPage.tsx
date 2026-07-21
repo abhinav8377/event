@@ -193,7 +193,7 @@ export default function LandingPage() {
               variants={fadeInUp}
               className="display mt-6 text-5xl text-foreground md:text-7xl"
             >
-              Real events to <span className="bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">discover</span>,
+              Reassss events to <span className="bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">discover</span>,
               join, and <span className="italic">explore</span>.
             </motion.h1>
             <motion.p
