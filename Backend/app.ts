@@ -24,11 +24,15 @@ const app = express();
 // the real client IP instead of the proxy's internal address (::1 / 127.0.0.1).
 app.set('trust proxy', 1);
 
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
 const allowedOrigins = [
   'https://event-hub.in',
   'https://www.event-hub.in',
   /\.vercel\.app$/,
-  'http://localhost:3000/'
+  /\.up\.railway\.app$/,
+  frontendUrl,
+  'http://localhost:3000',
 ];
 
 app.use(
