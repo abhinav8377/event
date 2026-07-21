@@ -29,6 +29,8 @@ import NotFoundPage from "@/pages/public/NotFoundPage"
 import ForbiddenPage from "@/pages/public/ForbiddenPage"
 import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage"
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage"
 import VerificationPendingPage from "@/pages/auth/VerificationPendingPage"
 import SSOCallbackPage from "@/pages/auth/SSOCallbackPage"
 import SSOCompletePage from "@/pages/auth/SSOCompletePage"
@@ -108,10 +110,11 @@ export default function App() {
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="*" element={<NotFoundPage />} />
         </Route>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verification-pending" element={<VerificationPendingPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         {clerkEnabled && (
@@ -172,6 +175,7 @@ export default function App() {
             <Route path="/admin/profile" element={<ProfilePage />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

@@ -59,6 +59,16 @@ export async function logout() {
   return res.data
 }
 
+export async function forgotPassword(email: string) {
+  const res = await api.post<ApiResponse<{}>>("/api/auth/forgot-password", { email })
+  return res.data
+}
+
+export async function resetPassword(token: string, password: string) {
+  const res = await api.post<ApiResponse<{}>>("/api/auth/reset-password", { token, password })
+  return res.data
+}
+
 export async function me(token: string) {
   const res = await api.get<ApiResponse<{ user: any }>>("/api/auth/me", {
     headers: { Authorization: `Bearer ${token}` },

@@ -6,6 +6,8 @@ import { signToken } from '../../common/utils/jwt.util.js';
 import { sendEmail } from '../../common/utils/email.util.js';
 import type { ServiceError } from '../../types/index.js';
 
+const FRONTEND_URL = process.env.FRONTEND_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+
 function throwErr(message: string, status: number): never {
   const err = new Error(message) as ServiceError;
   err.status = status;
@@ -220,10 +222,31 @@ export const forgotPassword = async ({ email }: { email: string }) => {
     user.resetPasswordToken = token;
     user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`;
     await sendEmail({
       to: user.email,
-      subject: 'Password Reset',
-      html: `<p>Use this token to reset your password (valid 15 minutes):</p><p><b>${token}</b></p>`,
+      subject: 'Password Reset — EventHub',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2 style="color: #1e293b;">Reset your password</h2>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+            We received a request to reset your password. Click the button below to set a new one.
+            This link expires in <strong>15 minutes</strong>.
+          </p>
+          <a href="${resetLink}"
+             style="display: inline-block; margin: 16px 0; padding: 12px 28px; background: #6366f1; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">
+            Reset password
+          </a>
+          <p style="color: #94a3b8; font-size: 13px;">
+            If you didn't request this, you can safely ignore this email.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="color: #94a3b8; font-size: 12px;">
+            Or copy this link into your browser:<br/>
+            <span style="color: #6366f1;">${resetLink}</span>
+          </p>
+        </div>
+      `,
     });
   }
 };
