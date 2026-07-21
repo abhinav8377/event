@@ -152,6 +152,3 @@ export const changePassword = async (userId: string, { currentPassword, newPassw
   await user.save();
 };
 
-export const deleteUserAccount = async (userId: string) => {
-  await User.deleteOne({ _id: userId });
-};

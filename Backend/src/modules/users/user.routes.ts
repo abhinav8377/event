@@ -10,6 +10,5 @@ router.get('/dashboard', controller.getDashboard);
 router.get('/profile', controller.getProfile);
 router.patch('/profile', controller.updateProfile);
 router.patch('/change-password', controller.changePassword);
-router.delete('/account', controller.deleteAccount);
 
 export default router;

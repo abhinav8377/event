@@ -31,15 +31,6 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
   }
 };
 
-export const deleteAccount = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    await userService.deleteUserAccount(req.user!._id.toString());
-    success(res, 'Account deleted');
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getDashboard = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const data = await userService.getDashboard(req.user!._id.toString());
