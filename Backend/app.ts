@@ -28,6 +28,7 @@ const allowedOrigins = [
   'https://event-hub.in',
   'https://www.event-hub.in',
   /\.vercel\.app$/,
+  'http://localhost:3000/'
 ];
 
 app.use(
