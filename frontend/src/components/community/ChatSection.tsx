@@ -125,7 +125,7 @@ export default function ChatSection({
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
         {/* Left panel */}
-        <Card className="flex h-full flex-col p-4">
+        <Card className="flex h-full min-h-0 flex-col p-4">
           <div className="border-b border-border pb-3">
             <h2 className="text-sm font-bold text-foreground">{chat.community.name}</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -167,7 +167,7 @@ export default function ChatSection({
         </Card>
 
         {/* Right panel (chat) */}
-        <Card className="flex h-full flex-col p-4">
+        <Card className="flex h-full min-h-0 flex-col p-4">
           <div className="flex-1 space-y-3 overflow-y-auto pr-1">
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
