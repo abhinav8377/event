@@ -220,7 +220,9 @@ export interface CommunityMessage {
 
 export interface CommunityChatData {
   community: Community
-  members: { id: string; name: string; email: string }[]
+  members: {
+    isOrganizer: any id: string; name: string; email: string 
+}[]
   messages: CommunityMessage[]
 }
 
