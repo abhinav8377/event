@@ -136,7 +136,7 @@ export default function ChatSection({
             </p>
           </div>
           <p className="py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">Members</p>
-          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
+          <div className="scrollbar-hide min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
             {chat.members.map((m) => (
               <div key={m.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
@@ -168,7 +168,7 @@ export default function ChatSection({
 
         {/* Right panel (chat) */}
         <Card className="flex h-full min-h-0 flex-col p-4">
-          <div className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1">
+          <div className="scrollbar-hide flex-1 min-h-0 space-y-3 overflow-y-auto pr-1">
             {messages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
                 <MessageCircle className="size-8" />
