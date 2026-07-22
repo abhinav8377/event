@@ -166,10 +166,10 @@ export default function OrganizerEvents() {
                     Publish
                   </Button>
                 )}
-                {(event.status === "PUBLISHED" || event.status === "COMPLETED") && (
+                {event.status === "COMPLETED" && (
                   <Button size="sm" variant="success" onClick={() => generateCerts(event)}>
                     <Award className="size-4" aria-hidden="true" />
-                    Certificates
+                    Generate Certificates
                   </Button>
                 )}
                 {event.status === "PUBLISHED" && (
@@ -178,16 +178,20 @@ export default function OrganizerEvents() {
                     Cancel
                   </Button>
                 )}
-                <Link to={`/organizer/events/${event.id}/edit`}>
-                  <Button size="sm" variant="outline">
-                    <Pencil className="size-4" aria-hidden="true" />
-                    Edit
+                {event.status !== "COMPLETED" && event.status !== "CANCELLED" && (
+                  <Link to={`/organizer/events/${event.id}/edit`}>
+                    <Button size="sm" variant="outline">
+                      <Pencil className="size-4" aria-hidden="true" />
+                      Edit
+                    </Button>
+                  </Link>
+                )}
+                {event.status !== "COMPLETED" && event.status !== "CANCELLED" && (
+                  <Button size="sm" variant="destructive" onClick={() => setDeleting(event)}>
+                    <Trash2 className="size-4" aria-hidden="true" />
+                    Delete
                   </Button>
-                </Link>
-                <Button size="sm" variant="destructive" onClick={() => setDeleting(event)}>
-                  <Trash2 className="size-4" aria-hidden="true" />
-                  Delete
-                </Button>
+                )}
               </div>
             </Card>
           ))}
