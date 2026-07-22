@@ -247,10 +247,21 @@ export interface ICommunityMember extends Document {
 }
 
 // Community message document
+export interface ICommunityPollOption {
+  text: string;
+  votes: Types.ObjectId[];
+}
+
 export interface ICommunityMessage extends Document {
   communityId: Types.ObjectId;
   senderId: Types.ObjectId;
   message: string;
+  type: 'text' | 'poll' | 'system';
+  replyToId?: Types.ObjectId;
+  replyToMessage?: string;
+  replyToSender?: string;
+  pollQuestion?: string;
+  pollOptions?: ICommunityPollOption[];
   createdAt: Date;
   updatedAt: Date;
 }

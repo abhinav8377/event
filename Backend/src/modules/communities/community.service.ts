@@ -22,6 +22,24 @@ async function assertRegistered(userId: string, eventId: string) {
   if (!reg) throwErr('You must be registered for the event to access its community', 403);
 }
 
+function mapMessage(msg: any, organizerId: string) {
+  const senderId = String((msg.senderId as any)._id || msg.senderId);
+  return {
+    id: msg._id,
+    senderId,
+    senderName: (msg.senderId as any).name || 'Unknown',
+    isOrganizer: String(senderId) === organizerId,
+    message: msg.message,
+    type: msg.type || 'text',
+    createdAt: msg.createdAt,
+    replyToId: msg.replyToId || undefined,
+    replyToMessage: msg.replyToMessage || undefined,
+    replyToSender: msg.replyToSender || undefined,
+    pollQuestion: msg.pollQuestion || undefined,
+    pollOptions: msg.pollOptions ? msg.pollOptions.map((o: any) => ({ text: o.text, votes: o.votes.map((v: any) => String(v)) })) : undefined,
+  };
+}
+
 export const createCommunity = async (organizerId: string, eventId: string, name: string, description = '') => {
   const event = await Event.findById(eventId);
   if (!event) throwErr('Event not found', 404);
@@ -167,6 +185,26 @@ export const setMemberStatus = async (organizerId: string, communityId: string, 
   member.joinedAt = status === 'APPROVED' ? new Date() : undefined;
   await member.save();
 
+  // Auto-send welcome message when member is approved
+  if (status === 'APPROVED') {
+    const approvedUser = await User.findById(memberUserId).select('name');
+    const userName = approvedUser?.name || 'A new member';
+    try {
+      const welcomeMsg = await CommunityMessage.create({
+        communityId: community._id,
+        senderId: organizerId,
+        message: `${userName} joined the community!`,
+        type: 'system',
+      });
+      await welcomeMsg.populate('senderId', 'name');
+      const io = (await import('../../socket.js')).getIO();
+      const welcomeData = mapMessage(welcomeMsg, organizerId);
+      io.to(`community:${communityId}`).emit('community:message', welcomeData);
+    } catch {
+      // welcome message is best-effort
+    }
+  }
+
   return { member: { id: member._id, status: member.status } };
 };
 
@@ -218,31 +256,80 @@ export const getCommunityForChat = async (userId: string, communityId: string) =
       email: (m.userId as any).email,
       isOrganizer: String((m.userId as any)._id) === organizerId,
     })),
-    messages: messages.map((msg) => {
-      const senderId = (msg.senderId as any)._id || msg.senderId;
-      return {
-        id: msg._id,
-        senderId,
-        senderName: (msg.senderId as any).name || 'Unknown',
-        isOrganizer: String(senderId) === organizerId,
-        message: msg.message,
-        createdAt: msg.createdAt,
-      };
-    }),
+    messages: messages.map((msg) => mapMessage(msg, organizerId)),
   };
 };
 
-export const saveMessage = async (communityId: string, senderId: string, message: string) => {
-  const msg = await CommunityMessage.create({ communityId, senderId, message });
+export const saveMessage = async (
+  communityId: string,
+  senderId: string,
+  message: string,
+  replyToId?: string,
+) => {
+  const extra: Record<string, any> = {};
+  if (replyToId) {
+    const replyToMsg = await CommunityMessage.findById(replyToId).populate('senderId', 'name');
+    if (replyToMsg) {
+      extra.replyToId = replyToMsg._id;
+      extra.replyToMessage = replyToMsg.message?.slice(0, 150);
+      extra.replyToSender = (replyToMsg.senderId as any).name || 'Unknown';
+    }
+  }
+  const msg = await CommunityMessage.create({ communityId, senderId, message, type: 'text', ...extra });
   await msg.populate('senderId', 'name');
   const community = await Community.findById(communityId).select('organizerId');
   const organizerId = community ? String(community.organizerId) : '';
-  return {
-    id: msg._id,
+  return mapMessage(msg, organizerId);
+};
+
+export const savePollMessage = async (
+  communityId: string,
+  senderId: string,
+  pollQuestion: string,
+  pollOptions: string[],
+) => {
+  const options = pollOptions.filter(Boolean).map((text) => ({ text, votes: [] }));
+  const msg = await CommunityMessage.create({
+    communityId,
     senderId,
-    senderName: (msg.senderId as any).name || 'Unknown',
-    isOrganizer: String(senderId) === organizerId,
-    message: msg.message,
-    createdAt: msg.createdAt,
-  };
+    message: pollQuestion,
+    type: 'poll',
+    pollQuestion,
+    pollOptions: options,
+  });
+  await msg.populate('senderId', 'name');
+  const community = await Community.findById(communityId).select('organizerId');
+  const organizerId = community ? String(community.organizerId) : '';
+  return mapMessage(msg, organizerId);
+};
+
+export const votePoll = async (
+  communityId: string,
+  messageId: string,
+  optionIndex: number,
+  userId: string,
+) => {
+  const msg = await CommunityMessage.findOne({ _id: messageId, communityId, type: 'poll' });
+  if (!msg) throwErr('Poll not found', 404);
+  if (!msg.pollOptions || optionIndex < 0 || optionIndex >= msg.pollOptions.length) {
+    throwErr('Invalid poll option', 400);
+  }
+
+  const userObjectId = userId as any;
+  const option = msg.pollOptions[optionIndex];
+
+  // Toggle vote: if already voted, remove; otherwise add
+  const idx = option.votes.findIndex((v) => String(v) === String(userId));
+  if (idx !== -1) {
+    option.votes.splice(idx, 1);
+  } else {
+    option.votes.push(userObjectId);
+  }
+
+  msg.markModified('pollOptions');
+  await msg.save();
+
+  const community = await Community.findById(communityId).select('organizerId');
+  const organizerId = community ? String(community.organizerId) : '';
+  return mapMessage(msg, organizerId);
 };
