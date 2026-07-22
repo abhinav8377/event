@@ -1,5 +1,6 @@
 import Event from './event.model.js';
 import * as feedbackService from '../feedback/feedback.service.js';
+import * as certificateService from '../certificates/certificate.service.js';
 
 const CHECK_INTERVAL_MS = 60_000;
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -36,6 +37,11 @@ export const runLifecycleCheck = async (): Promise<{ completed: number; closedRe
     ev.status = 'COMPLETED';
     await ev.save();
     completed++;
+    try {
+      await certificateService.autoGenerateCertificatesForEvent(String(ev._id));
+    } catch (e) {
+      console.error('Failed to auto-generate certificates for event', String(ev._id), e);
+    }
   }
 
   return { completed, closedRegistrations: 0 };

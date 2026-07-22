@@ -4,10 +4,9 @@ import { useState } from "react"
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { CalendarRange, Plus, Pencil, Trash2, Upload, Ban, Award } from "lucide-react"
+import { CalendarRange, Plus, Pencil, Trash2, Upload, Ban } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as eventApi from "@/api/eventApi"
-import * as certificateApi from "@/api/certificateApi"
 import { pushToast } from "@/features/toast/toastSlice"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Modal } from "@/components/common/Modal"
@@ -51,15 +50,6 @@ export default function OrganizerEvents() {
   if (!myEvents) return <Loader />
 
   const filtered = filter === "All" ? myEvents : myEvents.filter((e) => e.status === filter)
-
-  const generateCerts = async (event: EventItem) => {
-    try {
-      const res = await certificateApi.generateCertificates(event.id)
-      dispatch(pushToast({ type: "success", message: `Generated ${res.data.generated} certificate(s) for ${event.title}` }))
-    } catch (e) {
-      dispatch(pushToast({ type: "error", message: (e as Error).message }))
-    }
-  }
 
   const setStatus = async (event: EventItem, status: EventStatus) => {
     try {
@@ -166,12 +156,7 @@ export default function OrganizerEvents() {
                     Publish
                   </Button>
                 )}
-                {event.status === "COMPLETED" && (
-                  <Button size="sm" variant="success" onClick={() => generateCerts(event)}>
-                    <Award className="size-4" aria-hidden="true" />
-                    Generate Certificates
-                  </Button>
-                )}
+
                 {event.status === "PUBLISHED" && (
                   <Button size="sm" variant="outline" onClick={() => setStatus(event, "CANCELLED")}>
                     <Ban className="size-4" aria-hidden="true" />

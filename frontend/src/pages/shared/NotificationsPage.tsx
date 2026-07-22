@@ -58,7 +58,7 @@ export default function NotificationsPage() {
         />
       ) : (
         <Card className="overflow-hidden">
-          <div className="scroll-area max-h-[460px] divide-y divide-border">
+          <div className="scrollbar-hide scroll-area max-h-[660px] divide-y divide-border">
             {notifications.map((n) => {
               const Icon = typeIcon[n.type]
               return (

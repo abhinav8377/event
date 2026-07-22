@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { CheckCircle, XCircle, Filter, Search, Users, Eye, EyeOff } from "lucide-react"
+import { CheckCircle, XCircle, Filter, Search, Users, Eye } from "lucide-react"
 import dayjs from "dayjs"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { getAllRegistrations, allowRegistration, denyRegistration } from "@/api/registrationApi"
@@ -45,17 +45,8 @@ export default function OrganizerRegistrations() {
   const [searchQuery, setSearchQuery] = useState("")
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [denyModal, setDenyModal] = useState<RegistrationWithDetails | null>(null)
-  const [revealed, setRevealed] = useState<Set<string>>(new Set())
+  const [detailsModal, setDetailsModal] = useState<RegistrationWithDetails | null>(null)
   const fetchIdRef = useRef(0)
-
-  const toggleReveal = (id: string) => {
-    setRevealed((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
 
   const loadData = useCallback(async () => {
     const thisFetch = ++fetchIdRef.current
@@ -219,7 +210,6 @@ export default function OrganizerRegistrations() {
       ) : (
         <div className="mt-6 space-y-3">
           {filtered.map((reg) => {
-            const isRevealed = revealed.has(reg.id)
             return (
             <Card key={reg.id} className="p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -241,15 +231,7 @@ export default function OrganizerRegistrations() {
                         </span>
                       )}
                     </div>
-                    {isRevealed && (
-                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        {getRegistrantPhone(reg) && (
-                          <span className="font-medium text-foreground">{getRegistrantPhone(reg)}</span>
-                        )}
-                        <span>{reg.paymentAmount ? `₹${reg.paymentAmount}` : "Free"}</span>
-                        <span>{dayjs(reg.registeredAt).format("MMM D, YYYY h:mm A")}</span>
-                      </div>
-                    )}
+
                   </div>
                 </div>
 
@@ -257,11 +239,11 @@ export default function OrganizerRegistrations() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleReveal(reg.id)}
-                    aria-label={isRevealed ? "Hide registrant details" : "Show registrant details"}
+                    onClick={() => setDetailsModal(reg)}
+                    aria-label="View registrant details"
                   >
-                    {isRevealed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    {isRevealed ? "Hide" : "Details"}
+                    <Eye className="size-4" />
+                    Details
                   </Button>
                   {reg.status === "PENDING" && (
                     <>
@@ -298,6 +280,139 @@ export default function OrganizerRegistrations() {
           })}
         </div>
       )}
+
+      <Modal
+        open={!!detailsModal}
+        onClose={() => setDetailsModal(null)}
+        title="Registrant Details"
+        panelClassName="max-w-xl sm:max-w-2xl"
+      >
+        {detailsModal && (
+          <div className="scrollbar-hide space-y-5 max-h-[65vh] overflow-y-auto">
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contact Information</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Full Name</p>
+                  <p className="text-sm font-medium text-foreground">{getRegistrantName(detailsModal)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-foreground break-all">{getRegistrantEmail(detailsModal)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantPhone || "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Alternate Phone</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantAltPhone || "\u2014"}</p>
+                </div>
+              </div>
+            </div>
+            <hr className="border-border" />
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Personal Information</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Age</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantAge ?? "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Gender</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantGender || "\u2014"}</p>
+                </div>
+              </div>
+            </div>
+            <hr className="border-border" />
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Professional Information</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Profession</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantProfession || "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Organization / University</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantOrganization || "\u2014"}</p>
+                </div>
+              </div>
+            </div>
+            <hr className="border-border" />
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Location</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Country</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantCountry || "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">State</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantState || "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">City</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantCity || "\u2014"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Pincode</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.registrantPincode || "\u2014"}</p>
+                </div>
+              </div>
+            </div>
+            {(detailsModal.registrantSocialLinks || detailsModal.registrantReason || detailsModal.registrantSpecialRequest) && (
+              <>
+                <hr className="border-border" />
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Information</h3>
+                  <div className="space-y-3">
+                    {detailsModal.registrantSocialLinks && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Social Account Links</p>
+                        <p className="text-sm font-medium text-foreground">{detailsModal.registrantSocialLinks}</p>
+                      </div>
+                    )}
+                    {detailsModal.registrantReason && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Reason for Participation</p>
+                        <p className="text-sm font-medium text-foreground">{detailsModal.registrantReason}</p>
+                      </div>
+                    )}
+                    {detailsModal.registrantSpecialRequest && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Special Request</p>
+                        <p className="text-sm font-medium text-foreground">{detailsModal.registrantSpecialRequest}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+            <hr className="border-border" />
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registration Info</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Ticket Number</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.ticketNumber}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <Badge variant={statusVariant[detailsModal.status]}>{statusLabel[detailsModal.status]}</Badge>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Payment</p>
+                  <p className="text-sm font-medium text-foreground">{detailsModal.paymentAmount ? `\u20B9${detailsModal.paymentAmount}` : "Free"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Registered At</p>
+                  <p className="text-sm font-medium text-foreground">{dayjs(detailsModal.registeredAt).format("MMM D, YYYY h:mm A")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal open={!!denyModal} onClose={() => setDenyModal(null)} title="Deny Registration">
         <p className="text-sm leading-relaxed text-muted-foreground">

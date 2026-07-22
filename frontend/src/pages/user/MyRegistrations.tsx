@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { QRCodeSVG } from "qrcode.react"
-import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock } from "lucide-react"
+import { QRCodeCanvas } from "qrcode.react"
+import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock, Download } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as registrationApi from "@/api/registrationApi"
 import * as eventApi from "@/api/eventApi"
@@ -24,6 +24,7 @@ export default function MyRegistrations() {
   const dispatch = useAppDispatch()
   const [tab, setTab] = useState<Tab>("upcoming")
   const [ticketReg, setTicketReg] = useState<{ reg: Registration; event: EventItem } | null>(null)
+  const qrRef = useRef<HTMLCanvasElement>(null)
   const [feedbackFor, setFeedbackFor] = useState<{ reg: Registration; event: EventItem } | null>(null)
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState("")
@@ -60,6 +61,16 @@ export default function MyRegistrations() {
     } catch (e) {
       dispatch(pushToast({ type: "error", message: (e as Error).message }))
     }
+  }
+
+  const handleDownloadQR = () => {
+    const canvas = qrRef.current
+    if (!canvas) return
+    const url = canvas.toDataURL("image/png")
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `ticket-${ticketReg?.reg.ticketNumber || "qr"}.png`
+    a.click()
   }
 
   const submitReview = async () => {
@@ -218,8 +229,12 @@ export default function MyRegistrations() {
         {ticketReg && (
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-white">
-              <QRCodeSVG value={ticketReg.reg.qrValue} size={180} aria-label="Ticket QR code" />
+              <QRCodeCanvas ref={qrRef} value={ticketReg.reg.qrValue} size={180} aria-label="Ticket QR code" />
             </div>
+            <Button variant="outline" size="sm" onClick={handleDownloadQR}>
+              <Download className="size-4" aria-hidden="true" />
+              Download QR
+            </Button>
             <div>
               <p className="font-bold text-foreground">{ticketReg.event.title}</p>
               <p className="text-sm text-muted-foreground">

@@ -45,6 +45,39 @@ export const generateCertificates = async (eventId: string, userId: string, role
   return { generated: created, totalEligible: attendances.length };
 };
 
+export const autoGenerateCertificatesForEvent = async (eventId: string) => {
+  const event = await Event.findById(eventId);
+  if (!event) return { generated: 0, totalEligible: 0 };
+
+  const attendances = await Attendance.find({
+    eventId: event._id,
+    status: { $in: ['PRESENT', 'LATE'] },
+  });
+
+  let created = 0;
+  for (const attendance of attendances) {
+    const exists = await Certificate.findOne({ attendanceId: attendance._id });
+    if (exists) continue;
+    const cert = await Certificate.create({
+      attendanceId: attendance._id,
+      userId: attendance.userId,
+      eventId: event._id,
+      certificateId: `CERT-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
+    });
+    created += 1;
+    notificationService
+      .notify({
+        userId: attendance.userId as unknown as string,
+        title: 'Certificate Ready',
+        message: `Your certificate for "${event.title}" is ready to download. ID: ${cert.certificateId}`,
+        type: 'CERTIFICATE',
+      })
+      .catch(() => {});
+  }
+
+  return { generated: created, totalEligible: attendances.length };
+};
+
 export const getMyCertificates = async (userId: string) => {
   return Certificate.find({ userId })
     .populate('eventId', 'title date')
