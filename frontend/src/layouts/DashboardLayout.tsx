@@ -15,6 +15,7 @@ import { logoutUser } from "@/features/auth/authSlice"
 import { fetchNotifications } from "@/features/notifications/notificationSlice"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
+import { useClerk } from "@clerk/clerk-react"
 
 export interface NavItem {
   to: string
@@ -35,6 +36,8 @@ export default function DashboardLayout({
   const notifications = useAppSelector((s) => s.notifications.items)
   const unread = notifications.filter((n) => !n.read).length
   const dispatch = useAppDispatch()
+  const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  const { signOut } = clerkEnabled ? useClerk() : { signOut: null }
 
   useEffect(() => {
     if (user) dispatch(fetchNotifications(user.id))
@@ -55,6 +58,7 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
+    if (signOut) await signOut()
     window.location.href = "/"
   }
 
