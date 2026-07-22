@@ -9,18 +9,13 @@ import "@/globals.css"
 
 initTheme()
 
-window.addEventListener("beforeunload", () => {
-  localStorage.removeItem("eventhub_token")
-  localStorage.removeItem("eventhub_user")
-})
-
-const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
 const appTree = (
   <Provider store={store}>
     <App />
   </Provider>
 )
+
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
