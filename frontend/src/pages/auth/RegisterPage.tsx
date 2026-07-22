@@ -10,7 +10,7 @@ import clsx from "clsx"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { registerUser, clearError } from "@/features/auth/authSlice"
 import { pushToast } from "@/features/toast/toastSlice"
-import { Button, Input, Card } from "@/components/common/ui"
+import { Button, Input, PasswordInput, Card } from "@/components/common/ui"
 
 const schema = z
   .object({
@@ -153,18 +153,16 @@ export default function RegisterPage() {
                 {...register("organization")}
               />
             )}
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               label="Password"
               placeholder="At least 6 characters"
               autoComplete="new-password"
               error={errors.password?.message}
               {...register("password")}
             />
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               label="Confirm password"
               placeholder="Re-enter your password"
               autoComplete="new-password"

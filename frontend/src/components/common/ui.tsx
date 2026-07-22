@@ -1,6 +1,6 @@
-import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react"
+import { forwardRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react"
 import clsx from "clsx"
-import { Loader2 } from "lucide-react"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 
 /* ----------------------------- Button ----------------------------- */
 
@@ -79,6 +79,46 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   ),
 )
 Input.displayName = "Input"
+
+export const PasswordInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & FieldProps>(
+  ({ label, error, className, id, ...props }, ref) => {
+    const [visible, setVisible] = useState(false)
+    return (
+      <div className="flex flex-col gap-1.5">
+        {label && (
+          <label htmlFor={id} className="text-sm font-medium text-foreground">
+            {label}
+          </label>
+        )}
+        <div className="relative">
+          <input
+            ref={ref}
+            id={id}
+            type={visible ? "text" : "password"}
+            className={clsx(
+              "h-10 w-full rounded-lg border border-input bg-card px-3 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-offset-1 focus:outline-ring",
+              error && "border-destructive",
+              className,
+            )}
+            aria-invalid={!!error}
+            {...props}
+          />
+          <button
+            type="button"
+            onClick={() => setVisible((v) => !v)}
+            className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground"
+            aria-label={visible ? "Hide password" : "Show password"}
+            tabIndex={-1}
+          >
+            {visible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+          </button>
+        </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
+      </div>
+    )
+  },
+)
+PasswordInput.displayName = "PasswordInput"
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement> & FieldProps>(
   ({ label, error, className, id, ...props }, ref) => (
