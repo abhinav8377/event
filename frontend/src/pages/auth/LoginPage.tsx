@@ -9,7 +9,7 @@ import { CalendarRange } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import { login, clearError } from "@/features/auth/authSlice"
 import { pushToast } from "@/features/toast/toastSlice"
-import { Button, Input, Card } from "@/components/common/ui"
+import { Button, Input, PasswordInput, Card } from "@/components/common/ui"
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 
 const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -130,9 +130,8 @@ export default function LoginPage() {
               error={errors.email?.message}
               {...register("email")}
             />
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               label="Password"
               placeholder="Enter your password"
               autoComplete="current-password"
