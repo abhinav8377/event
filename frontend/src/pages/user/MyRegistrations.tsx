@@ -28,6 +28,7 @@ export default function MyRegistrations() {
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [feedbackGiven, setFeedbackGiven] = useState<Set<string>>(new Set())
 
   const { data: regs, mutate } = useSWR(["my-registrations", user.id], () =>
     registrationApi.getMyRegistrations(user.id).then((r) => r.data),
@@ -110,6 +111,7 @@ export default function MyRegistrations() {
         review,
       })
       dispatch(pushToast({ type: "success", message: res.message }))
+      setFeedbackGiven((prev) => new Set(prev).add(feedbackFor.event.id))
       setFeedbackFor(null)
       setReview("")
       setRating(5)
@@ -237,7 +239,7 @@ export default function MyRegistrations() {
                     Cancel
                   </Button>
                 )}
-                {tab === "past" && reg.attendance === "PRESENT" && (
+                {tab === "past" && !feedbackGiven.has(event.id) && (
                   <Button size="sm" variant="outline" onClick={() => setFeedbackFor({ reg, event })}>
                     <Star className="size-4" aria-hidden="true" />
                     Leave feedback
