@@ -8,6 +8,7 @@ import { logoutUser } from "@/features/auth/authSlice"
 import { Button } from "@/components/common/ui"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
 import clsx from "clsx"
+import { useClerk } from "@clerk/clerk-react"
 
 const dashboardPath: Record<string, string> = {
   USER: "/user",
@@ -20,6 +21,8 @@ export function Navbar() {
   const user = useAppSelector((s) => s.auth.user)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  const { signOut } = clerkEnabled ? useClerk() : { signOut: null }
 
   const publicLinks = [
     { to: "/about", label: "about" },
@@ -28,6 +31,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await dispatch(logoutUser())
+    if (signOut) await signOut()
     setOpen(false)
     window.location.href = "/"
   }
