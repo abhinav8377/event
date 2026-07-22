@@ -8,7 +8,6 @@ import { QRCodeCanvas } from "qrcode.react"
 import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock, Download } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as registrationApi from "@/api/registrationApi"
-import * as eventApi from "@/api/eventApi"
 import * as feedbackApi from "@/api/feedbackApi"
 import { pushToast } from "@/features/toast/toastSlice"
 import { PageHeader } from "@/components/common/PageHeader"
@@ -33,16 +32,42 @@ export default function MyRegistrations() {
   const { data: regs, mutate } = useSWR(["my-registrations", user.id], () =>
     registrationApi.getMyRegistrations(user.id).then((r) => r.data),
   )
-  const { data: allEvents } = useSWR("all-published-events", () =>
-    eventApi.getEvents().then((r) => r.data),
-  )
 
-  if (!regs || !allEvents) return <Loader />
+  if (!regs) return <Loader />
 
-  const eventById = new Map(allEvents.map((e) => [e.id, e]))
   const rows = regs
-    .map((reg) => ({ reg, event: eventById.get(reg.eventId) }))
-    .filter((x): x is { reg: Registration; event: EventItem } => !!x.event)
+    .map((reg): { reg: Registration; event: EventItem } | null => {
+      if (!reg.eventTitle) return null
+      return {
+        reg,
+        event: {
+          id: reg.eventId,
+          title: reg.eventTitle,
+          startDate: reg.eventStartDate || "",
+          endDate: reg.eventEndDate || "",
+          banner: reg.eventBanner || "",
+          venue: reg.eventVenue || "",
+          city: reg.eventCity || "",
+          mode: (reg.eventMode as EventItem["mode"]) || "IN_PERSON",
+          description: "",
+          longDescription: "",
+          category: "OTHER",
+          status: "PUBLISHED",
+          latitude: null,
+          longitude: null,
+          capacity: 0,
+          registeredCount: 0,
+          attendanceCount: 0,
+          views: 0,
+          price: 0,
+          rating: 0,
+          ratingCount: 0,
+          organizerId: "",
+          organizerName: "",
+        },
+      }
+    })
+    .filter((x): x is { reg: Registration; event: EventItem } => x !== null)
 
   const now = Date.now()
   const filtered = rows.filter(({ reg, event }) => {

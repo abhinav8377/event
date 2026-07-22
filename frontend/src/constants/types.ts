@@ -79,6 +79,13 @@ export interface Registration {
   registrantReason?: string
   registrantSpecialRequest?: string
   registeredAt: string
+  eventTitle?: string
+  eventStartDate?: string
+  eventEndDate?: string
+  eventBanner?: string
+  eventVenue?: string
+  eventCity?: string
+  eventMode?: string
 }
 
 export interface Certificate {
