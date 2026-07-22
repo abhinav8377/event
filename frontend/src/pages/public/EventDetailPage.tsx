@@ -204,7 +204,11 @@ export default function EventDetailPage() {
   const isPast = !isNaN(endMs) && endMs < Date.now()
   const isStarted = !isNaN(startMs) && startMs <= Date.now()
   const isFull = event.registeredCount >= event.capacity
-  const attended = myReg?.attendance === "PRESENT" || myReg?.attendance === "LATE"
+  const canReview = !!(
+    myReg &&
+    (myReg.status === "CONFIRMED" || myReg.status === "ALLOWED") &&
+    isPast
+  )
   const alreadyReviewed = user ? feedback.some((f) => f.userId === user.id) : false
   const isPaid = event.price > 0
 
@@ -453,7 +457,7 @@ export default function EventDetailPage() {
               Reviews {feedback.length > 0 && `(${feedback.length})`}
             </h2>
 
-            {user && attended && !alreadyReviewed && (
+            {user && canReview && !alreadyReviewed && (
               <Card className="mt-4 p-5">
                 <p className="mb-3 text-sm font-semibold text-foreground">Leave your feedback</p>
                 <div className="mb-3 flex items-center gap-1" role="radiogroup" aria-label="Rating">
