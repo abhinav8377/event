@@ -183,6 +183,10 @@ export const allowRegistration = async (registrationId: string, organizerId: str
 
   const user = await User.findById(registration.userId);
   if (user) {
+    const cid = `qrcode-${registration._id}`;
+    const base64Data = registration.qrCode?.replace(/^data:image\/\w+;base64,/, '');
+    const qrBuffer = base64Data ? Buffer.from(base64Data, 'base64') : undefined;
+
     const emailHtml = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background-color:#f9fafb;border-radius:12px;">
         <div style="text-align:center;padding:20px 0;">
@@ -197,7 +201,7 @@ export const allowRegistration = async (registrationId: string, organizerId: str
           </div>
           <div style="text-align:center;margin:20px 0;">
             <p style="color:#374151;font-size:13px;margin:0 0 8px 0;">Your QR Code</p>
-            <img src="${registration.qrCode}" alt="QR Code" style="border-radius:8px;border:1px solid #e5e7eb;" />
+            <img src="cid:${cid}" alt="QR Code" style="border-radius:8px;border:1px solid #e5e7eb;" />
           </div>
           <div style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:16px;">
             <p style="color:#6b7280;font-size:13px;margin:0;"><strong>Event:</strong> ${event.title}</p>
@@ -213,6 +217,9 @@ export const allowRegistration = async (registrationId: string, organizerId: str
       to: user.email,
       subject: `Registration Confirmed for ${event.title}`,
       html: emailHtml,
+      attachments: qrBuffer
+        ? [{ filename: `qrcode-${registration._id}.png`, content: qrBuffer, cid }]
+        : undefined,
     }).catch(() => {});
 
     notificationService

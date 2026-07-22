@@ -436,7 +436,7 @@ export default function EventDetailPage() {
           <div className="mt-6">
             <h2 className="text-lg font-bold text-foreground">About this event</h2>
             <div
-              className="event-prose mt-3 overflow-x-hidden break-words"
+              className="event-prose mt-3 overflow-x-hidden wrap-break-word"
               dangerouslySetInnerHTML={{
                 __html: sanitizeHtml(event.longDescription || event.description),
               }}
