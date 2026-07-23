@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 
 import authRoutes from "./src/modules/auth/auth.routes.js";
 import userRoutes from "./src/modules/users/user.routes.js";
@@ -20,8 +21,6 @@ import type { Request, Response } from "express";
 
 const app = express();
 
-// Trust a single reverse proxy (e.g. Nginx, Heroku, Vercel) so req.ip reflects
-// the real client IP instead of the proxy's internal address (::1 / 127.0.0.1).
 app.set('trust proxy', 1);
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -35,6 +34,7 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
+app.use(compression());
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -47,7 +47,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(loggingMiddleware);
 
 app.get("/api/health", (req: Request, res: Response) =>

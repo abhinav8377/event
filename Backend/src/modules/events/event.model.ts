@@ -39,5 +39,8 @@ const eventSchema = new Schema<IEvent>(
 );
 
 eventSchema.index({ title: 'text', description: 'text' });
+eventSchema.index({ status: 1, date: -1 });
+eventSchema.index({ organizerId: 1, status: 1 });
+eventSchema.index({ status: 1, category: 1, date: -1 });
 
 export default mongoose.model<IEvent>('Event', eventSchema);

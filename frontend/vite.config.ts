@@ -29,5 +29,20 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "react-vendor": ["react", "react-dom", "react-router-dom"],
+            "state": ["@reduxjs/toolkit", "react-redux", "swr"],
+            "ui-vendor": ["framer-motion", "lucide-react", "clsx"],
+            "charts": ["recharts"],
+            "maps": ["leaflet", "react-leaflet"],
+            "editor": ["react-quill-new"],
+            "auth": ["@clerk/clerk-react"],
+          },
+        },
+      },
+    },
   }
 })

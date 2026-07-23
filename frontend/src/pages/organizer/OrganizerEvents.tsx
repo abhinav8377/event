@@ -127,6 +127,7 @@ export default function OrganizerEvents() {
               <img
                 src={event.banner || "/placeholder.svg"}
                 alt=""
+                loading="lazy"
                 className="h-24 w-full rounded-lg object-cover sm:w-40"
               />
               <div className="min-w-0 flex-1">

@@ -31,5 +31,7 @@ const registrationSchema = new Schema<IRegistration>(
 );
 
 registrationSchema.index({ userId: 1, eventId: 1 }, { unique: true });
+registrationSchema.index({ eventId: 1, status: 1 });
+registrationSchema.index({ userId: 1, createdAt: -1 });
 
 export default mongoose.model<IRegistration>('Registration', registrationSchema);

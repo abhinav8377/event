@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { lazy, Suspense } from "react"
 import {
   LayoutDashboard,
   Ticket,
@@ -20,48 +21,49 @@ import PublicLayout from "@/layouts/PublicLayout"
 import DashboardLayout, { type NavItem } from "@/layouts/DashboardLayout"
 import ProtectedRoute from "@/routes/ProtectedRoute"
 import { Toaster } from "@/components/common/Toaster"
+import { Loader } from "@/components/common/ui"
 
-import LandingPage from "@/pages/public/LandingPage"
-import EventDetailPage from "@/pages/public/EventDetailPage"
-import AboutPage from "@/pages/public/AboutPage"
-import ContactPage from "@/pages/public/ContactPage"
-import NotFoundPage from "@/pages/public/NotFoundPage"
-import ForbiddenPage from "@/pages/public/ForbiddenPage"
-import LoginPage from "@/pages/auth/LoginPage"
-import RegisterPage from "@/pages/auth/RegisterPage"
-import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage"
-import ResetPasswordPage from "@/pages/auth/ResetPasswordPage"
-import VerificationPendingPage from "@/pages/auth/VerificationPendingPage"
-import SSOCallbackPage from "@/pages/auth/SSOCallbackPage"
-import SSOCompletePage from "@/pages/auth/SSOCompletePage"
+const LandingPage = lazy(() => import("@/pages/public/LandingPage"))
+const EventDetailPage = lazy(() => import("@/pages/public/EventDetailPage"))
+const AboutPage = lazy(() => import("@/pages/public/AboutPage"))
+const ContactPage = lazy(() => import("@/pages/public/ContactPage"))
+const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"))
+const ForbiddenPage = lazy(() => import("@/pages/public/ForbiddenPage"))
+const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
+const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"))
+const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"))
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"))
+const VerificationPendingPage = lazy(() => import("@/pages/auth/VerificationPendingPage"))
+const SSOCallbackPage = lazy(() => import("@/pages/auth/SSOCallbackPage"))
+const SSOCompletePage = lazy(() => import("@/pages/auth/SSOCompletePage"))
 
-import UserDashboard from "@/pages/user/UserDashboard"
-import MyRegistrations from "@/pages/user/MyRegistrations"
-import MyCertificates from "@/pages/user/MyCertificates"
-import BrowseEventsPage from "@/pages/user/BrowseEventsPage"
+const UserDashboard = lazy(() => import("@/pages/user/UserDashboard"))
+const MyRegistrations = lazy(() => import("@/pages/user/MyRegistrations"))
+const MyCertificates = lazy(() => import("@/pages/user/MyCertificates"))
+const BrowseEventsPage = lazy(() => import("@/pages/user/BrowseEventsPage"))
 
-import OrganizerDashboard from "@/pages/organizer/OrganizerDashboard"
-import OrganizerEvents from "@/pages/organizer/OrganizerEvents"
-import EventFormPage from "@/pages/organizer/EventFormPage"
-import AttendancePage from "@/pages/organizer/AttendancePage"
-import OrganizerAnalytics from "@/pages/organizer/OrganizerAnalytics"
-import OrganizerNotifications from "@/pages/organizer/OrganizerNotifications"
-import OrganizerRegistrations from "@/pages/organizer/OrganizerRegistrations"
-import PaymentIntegrationPage from "@/pages/organizer/PaymentIntegrationPage"
-import OrganizerCommunities from "@/pages/organizer/OrganizerCommunities"
-import PaymentSuccessPage from "@/pages/user/PaymentSuccessPage"
-import UserCommunities from "@/pages/user/UserCommunities"
+const OrganizerDashboard = lazy(() => import("@/pages/organizer/OrganizerDashboard"))
+const OrganizerEvents = lazy(() => import("@/pages/organizer/OrganizerEvents"))
+const EventFormPage = lazy(() => import("@/pages/organizer/EventFormPage"))
+const AttendancePage = lazy(() => import("@/pages/organizer/AttendancePage"))
+const OrganizerAnalytics = lazy(() => import("@/pages/organizer/OrganizerAnalytics"))
+const OrganizerNotifications = lazy(() => import("@/pages/organizer/OrganizerNotifications"))
+const OrganizerRegistrations = lazy(() => import("@/pages/organizer/OrganizerRegistrations"))
+const PaymentIntegrationPage = lazy(() => import("@/pages/organizer/PaymentIntegrationPage"))
+const OrganizerCommunities = lazy(() => import("@/pages/organizer/OrganizerCommunities"))
+const PaymentSuccessPage = lazy(() => import("@/pages/user/PaymentSuccessPage"))
+const UserCommunities = lazy(() => import("@/pages/user/UserCommunities"))
 
-import AdminDashboard from "@/pages/admin/AdminDashboard"
-import AdminUsers from "@/pages/admin/AdminUsers"
-import AdminOrganizers from "@/pages/admin/AdminOrganizers"
-import AdminEvents from "@/pages/admin/AdminEvents"
-import AdminAnalytics from "@/pages/admin/AdminAnalytics"
-import AdminNotifications from "@/pages/admin/AdminNotifications"
-import AdminSecurity from "@/pages/admin/AdminSecurity"
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"))
+const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"))
+const AdminOrganizers = lazy(() => import("@/pages/admin/AdminOrganizers"))
+const AdminEvents = lazy(() => import("@/pages/admin/AdminEvents"))
+const AdminAnalytics = lazy(() => import("@/pages/admin/AdminAnalytics"))
+const AdminNotifications = lazy(() => import("@/pages/admin/AdminNotifications"))
+const AdminSecurity = lazy(() => import("@/pages/admin/AdminSecurity"))
 
-import NotificationsPage from "@/pages/shared/NotificationsPage"
-import ProfilePage from "@/pages/shared/ProfilePage"
+const NotificationsPage = lazy(() => import("@/pages/shared/NotificationsPage"))
+const ProfilePage = lazy(() => import("@/pages/shared/ProfilePage"))
 
 const userNav: NavItem[] = [
   { to: "/user", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -104,78 +106,74 @@ export default function App() {
     <BrowserRouter>
       <Toaster />
       <Routes>
-        {/* Public */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/events/:id" element={<EventDetailPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/" element={<Suspense fallback={<Loader />}><LandingPage /></Suspense>} />
+          <Route path="/events/:id" element={<Suspense fallback={<Loader />}><EventDetailPage /></Suspense>} />
+          <Route path="/about" element={<Suspense fallback={<Loader />}><AboutPage /></Suspense>} />
+          <Route path="/contact" element={<Suspense fallback={<Loader />}><ContactPage /></Suspense>} />
         </Route>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/verification-pending" element={<VerificationPendingPage />} />
-        <Route path="/403" element={<ForbiddenPage />} />
+        <Route path="/login" element={<Suspense fallback={<Loader />}><LoginPage /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<Loader />}><RegisterPage /></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<Loader />}><ForgotPasswordPage /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<Loader />}><ResetPasswordPage /></Suspense>} />
+        <Route path="/verification-pending" element={<Suspense fallback={<Loader />}><VerificationPendingPage /></Suspense>} />
+        <Route path="/403" element={<Suspense fallback={<Loader />}><ForbiddenPage /></Suspense>} />
         {clerkEnabled && (
           <>
-            <Route path="/sso-callback" element={<SSOCallbackPage />} />
-            <Route path="/sso-complete" element={<SSOCompletePage />} />
+            <Route path="/sso-callback" element={<Suspense fallback={<Loader />}><SSOCallbackPage /></Suspense>} />
+            <Route path="/sso-complete" element={<Suspense fallback={<Loader />}><SSOCompletePage /></Suspense>} />
           </>
         )}
 
-        {/* User dashboard */}
         <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
           <Route element={<DashboardLayout title="Attendee" navItems={userNav} />}>
-            <Route path="/user" element={<UserDashboard />} />
-            <Route path="/user/browse" element={<BrowseEventsPage />} />
-            <Route path="/user/events/:id" element={<EventDetailPage />} />
-            <Route path="/user/registrations" element={<MyRegistrations />} />
-            <Route path="/user/certificates" element={<MyCertificates />} />
-            <Route path="/user/communities" element={<UserCommunities />} />
-            <Route path="/user/notifications" element={<NotificationsPage />} />
-            <Route path="/user/profile" element={<ProfilePage />} />
+            <Route path="/user" element={<Suspense fallback={<Loader />}><UserDashboard /></Suspense>} />
+            <Route path="/user/browse" element={<Suspense fallback={<Loader />}><BrowseEventsPage /></Suspense>} />
+            <Route path="/user/events/:id" element={<Suspense fallback={<Loader />}><EventDetailPage /></Suspense>} />
+            <Route path="/user/registrations" element={<Suspense fallback={<Loader />}><MyRegistrations /></Suspense>} />
+            <Route path="/user/certificates" element={<Suspense fallback={<Loader />}><MyCertificates /></Suspense>} />
+            <Route path="/user/communities" element={<Suspense fallback={<Loader />}><UserCommunities /></Suspense>} />
+            <Route path="/user/notifications" element={<Suspense fallback={<Loader />}><NotificationsPage /></Suspense>} />
+            <Route path="/user/profile" element={<Suspense fallback={<Loader />}><ProfilePage /></Suspense>} />
           </Route>
         </Route>
         <Route path="/payment-success" element={<ProtectedRoute allowedRoles={["USER"]} />}>
           <Route element={<DashboardLayout title="Attendee" navItems={userNav} />}>
-            <Route index element={<PaymentSuccessPage />} />
+            <Route index element={<Suspense fallback={<Loader />}><PaymentSuccessPage /></Suspense>} />
           </Route>
         </Route>
         <Route path="/dashboard" element={<Navigate to="/user" replace />} />
 
-        {/* Organizer dashboard */}
         <Route element={<ProtectedRoute allowedRoles={["ORGANIZER"]} />}>
           <Route element={<DashboardLayout title="Organizer" navItems={organizerNav} />}>
-            <Route path="/organizer" element={<OrganizerDashboard />} />
-            <Route path="/organizer/events" element={<OrganizerEvents />} />
-            <Route path="/organizer/events/new" element={<EventFormPage />} />
-            <Route path="/organizer/events/:id/edit" element={<EventFormPage />} />
-            <Route path="/organizer/registrations" element={<OrganizerRegistrations />} />
-            <Route path="/organizer/attendance" element={<AttendancePage />} />
-            <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
-            <Route path="/organizer/payment-integration" element={<PaymentIntegrationPage />} />
-            <Route path="/organizer/notifications" element={<NotificationsPage />} />
-            <Route path="/organizer/send-notifications" element={<OrganizerNotifications />} />
-            <Route path="/organizer/communities" element={<OrganizerCommunities />} />
-            <Route path="/organizer/profile" element={<ProfilePage />} />
+            <Route path="/organizer" element={<Suspense fallback={<Loader />}><OrganizerDashboard /></Suspense>} />
+            <Route path="/organizer/events" element={<Suspense fallback={<Loader />}><OrganizerEvents /></Suspense>} />
+            <Route path="/organizer/events/new" element={<Suspense fallback={<Loader />}><EventFormPage /></Suspense>} />
+            <Route path="/organizer/events/:id/edit" element={<Suspense fallback={<Loader />}><EventFormPage /></Suspense>} />
+            <Route path="/organizer/registrations" element={<Suspense fallback={<Loader />}><OrganizerRegistrations /></Suspense>} />
+            <Route path="/organizer/attendance" element={<Suspense fallback={<Loader />}><AttendancePage /></Suspense>} />
+            <Route path="/organizer/analytics" element={<Suspense fallback={<Loader />}><OrganizerAnalytics /></Suspense>} />
+            <Route path="/organizer/payment-integration" element={<Suspense fallback={<Loader />}><PaymentIntegrationPage /></Suspense>} />
+            <Route path="/organizer/notifications" element={<Suspense fallback={<Loader />}><NotificationsPage /></Suspense>} />
+            <Route path="/organizer/send-notifications" element={<Suspense fallback={<Loader />}><OrganizerNotifications /></Suspense>} />
+            <Route path="/organizer/communities" element={<Suspense fallback={<Loader />}><OrganizerCommunities /></Suspense>} />
+            <Route path="/organizer/profile" element={<Suspense fallback={<Loader />}><ProfilePage /></Suspense>} />
           </Route>
         </Route>
 
-        {/* Admin dashboard */}
         <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
           <Route element={<DashboardLayout title="Admin" navItems={adminNav} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/organizers" element={<AdminOrganizers />} />
-            <Route path="/admin/events" element={<AdminEvents />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/security" element={<AdminSecurity />} />
-            <Route path="/admin/notifications" element={<AdminNotifications />} />
-            <Route path="/admin/profile" element={<ProfilePage />} />
+            <Route path="/admin" element={<Suspense fallback={<Loader />}><AdminDashboard /></Suspense>} />
+            <Route path="/admin/users" element={<Suspense fallback={<Loader />}><AdminUsers /></Suspense>} />
+            <Route path="/admin/organizers" element={<Suspense fallback={<Loader />}><AdminOrganizers /></Suspense>} />
+            <Route path="/admin/events" element={<Suspense fallback={<Loader />}><AdminEvents /></Suspense>} />
+            <Route path="/admin/analytics" element={<Suspense fallback={<Loader />}><AdminAnalytics /></Suspense>} />
+            <Route path="/admin/security" element={<Suspense fallback={<Loader />}><AdminSecurity /></Suspense>} />
+            <Route path="/admin/notifications" element={<Suspense fallback={<Loader />}><AdminNotifications /></Suspense>} />
+            <Route path="/admin/profile" element={<Suspense fallback={<Loader />}><ProfilePage /></Suspense>} />
           </Route>
         </Route>
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="*" element={<Suspense fallback={<Loader />}><NotFoundPage /></Suspense>} />
       </Routes>
     </BrowserRouter>
   )

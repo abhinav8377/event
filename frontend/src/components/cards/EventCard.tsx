@@ -17,6 +17,7 @@ export function EventCard({ event, detailPath }: { event: EventItem; detailPath?
           <img
             src={event.banner || "/placeholder.svg"}
             alt={event.title}
+            loading="lazy"
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute left-3 top-3 flex gap-2">

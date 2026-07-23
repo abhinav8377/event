@@ -338,7 +338,7 @@ export default function EventFormPage() {
 
               {customBanner ? (
                 <div className="group relative mb-4 overflow-hidden rounded-xl border border-border bg-muted">
-                  <img src={customBanner} alt="Custom banner" className="h-44 w-full object-cover" />
+                  <img src={customBanner} alt="Custom banner" loading="lazy" className="h-44 w-full object-cover" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute bottom-3 left-3 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
@@ -355,6 +355,7 @@ export default function EventFormPage() {
                       <img
                         src={b.value || "/placeholder.svg"}
                         alt={b.label}
+                        loading="lazy"
                         className={
                           banner === b.value
                             ? "h-14 w-full rounded-lg border-2 border-primary object-cover ring-1 ring-primary/30"
@@ -527,6 +528,7 @@ export default function EventFormPage() {
                   <img
                     src={previewBanner || "/placeholder.svg"}
                     alt="Event banner preview"
+                    loading="lazy"
                     className="h-40 w-full object-cover"
                   />
                   <div className="absolute right-3 top-3 flex gap-2">

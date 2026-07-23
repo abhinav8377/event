@@ -37,6 +37,9 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   { timestamps: true },
 );
 
+userSchema.index({ roleId: 1, isBlocked: 1 });
+userSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
