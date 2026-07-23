@@ -223,7 +223,7 @@ export const allowRegistration = async (registrationId: string, organizerId: str
       attachments: qrBuffer
         ? [{ filename: `qrcode-${registration._id}.png`, content: qrBuffer, cid }]
         : undefined,
-    }).catch(() => {});
+    }).catch((err) => console.error("Failed to send confirmation email:", (err as Error).message));
 
     notificationService
       .notify({
