@@ -100,7 +100,7 @@ export default function AdminDashboard() {
               View all
             </Link>
           </div>
-          <table className="mt-3 w-full min-w-[520px] text-sm">
+          <table className="mt-3 w-full min-w-130 text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-2 font-semibold">Event</th>

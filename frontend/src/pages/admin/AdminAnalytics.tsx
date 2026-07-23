@@ -164,10 +164,10 @@ export default function AdminAnalytics() {
 
   const priceRanges = [
     { label: "Free", min: 0, max: 0 },
-    { label: "$1 – $25", min: 1, max: 25 },
-    { label: "$26 – $50", min: 26, max: 50 },
-    { label: "$51 – $100", min: 51, max: 100 },
-    { label: "$100+", min: 101, max: Infinity },
+    { label: "₹1 – ₹25", min: 1, max: 25 },
+    { label: "₹26 – ₹50", min: 26, max: 50 },
+    { label: "₹51 – ₹100", min: 51, max: 100 },
+    { label: "₹100+", min: 101, max: Infinity },
   ]
   const priceData = priceRanges.map((r) => ({
     name: r.label,
@@ -230,7 +230,7 @@ export default function AdminAnalytics() {
         <StatCard
           icon={DollarSign}
           label="Est. Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={`₹${totalRevenue.toLocaleString()}`}
           sub="from paid events"
           color="bg-warning/10 text-warning"
         />
@@ -270,7 +270,7 @@ export default function AdminAnalytics() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Top events by registrations</h2>
-          <div className="scroll-x h-80 min-w-[380px]">
+          <div className="scroll-x h-80 min-w-95">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topEvents} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
@@ -304,7 +304,7 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Events by status</h2>
-          <div className="scroll-x h-72 min-w-[380px]">
+          <div className="scroll-x h-72 min-w-95">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={statusData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -359,7 +359,7 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Price distribution</h2>
-          <div className="scroll-x h-72 min-w-[380px]">
+          <div className="scroll-x h-72 min-w-95">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={priceData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -374,13 +374,13 @@ export default function AdminAnalytics() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-bold text-foreground">Capacity utilization</h2>
-          <div className="scroll-x h-72 min-w-[380px]">
+          <div className="scroll-x h-72 min-w-95">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={capacityUtil} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 24 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
-                <Tooltip content={<ChartTooltip />} formatter={(v: number) => `${v}%`} cursor={{ fill: "var(--color-muted)", opacity: 0.5 }} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--color-muted)", opacity: 0.5 }} />
                 <Bar dataKey="Utilization %" fill={CHART_COLORS[5]} radius={[0, 4, 4, 0]} barSize={14} />
               </BarChart>
             </ResponsiveContainer>

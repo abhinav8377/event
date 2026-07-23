@@ -82,7 +82,7 @@ export default function AdminEvents() {
         <EmptyState title="No events found" description="Try a different search term." />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-190 text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-3 font-semibold">Event</th>
