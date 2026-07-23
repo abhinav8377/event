@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { QRCodeCanvas } from "qrcode.react"
+
 import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock, Download } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as registrationApi from "@/api/registrationApi"
@@ -23,12 +23,18 @@ export default function MyRegistrations() {
   const dispatch = useAppDispatch()
   const [tab, setTab] = useState<Tab>("upcoming")
   const [ticketReg, setTicketReg] = useState<{ reg: Registration; event: EventItem } | null>(null)
-  const qrRef = useRef<HTMLCanvasElement>(null)
   const [feedbackFor, setFeedbackFor] = useState<{ reg: Registration; event: EventItem } | null>(null)
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState("")
   const [submitting, setSubmitting] = useState(false)
-  const [feedbackGiven, setFeedbackGiven] = useState<Set<string>>(new Set())
+  const [feedbackGiven, setFeedbackGiven] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("feedbackGiven");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  })
 
   const { data: regs, mutate } = useSWR(["my-registrations", user.id], () =>
     registrationApi.getMyRegistrations(user.id).then((r) => r.data),
@@ -52,7 +58,7 @@ export default function MyRegistrations() {
           mode: (reg.eventMode as EventItem["mode"]) || "IN_PERSON",
           description: "",
           longDescription: "",
-          category: "OTHER",
+          category: "Technology",
           status: "PUBLISHED",
           latitude: null,
           longitude: null,
@@ -65,6 +71,8 @@ export default function MyRegistrations() {
           ratingCount: 0,
           organizerId: "",
           organizerName: "",
+          organizerVerified: false,
+          tags: []
         },
       }
     })
@@ -90,11 +98,10 @@ export default function MyRegistrations() {
   }
 
   const handleDownloadQR = () => {
-    const canvas = qrRef.current
-    if (!canvas) return
-    const url = canvas.toDataURL("image/png")
+    const qr = ticketReg?.reg.qrValue
+    if (!qr) return
     const a = document.createElement("a")
-    a.href = url
+    a.href = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
     a.download = `ticket-${ticketReg?.reg.ticketNumber || "qr"}.png`
     a.click()
   }
@@ -111,7 +118,12 @@ export default function MyRegistrations() {
         review,
       })
       dispatch(pushToast({ type: "success", message: res.message }))
-      setFeedbackGiven((prev) => new Set(prev).add(feedbackFor.event.id))
+      setFeedbackGiven((prev) => {
+        const next = new Set(prev);
+        next.add(feedbackFor.event.id);
+        localStorage.setItem("feedbackGiven", JSON.stringify([...next]));
+        return next;
+      })
       setFeedbackFor(null)
       setReview("")
       setRating(5)
@@ -256,7 +268,11 @@ export default function MyRegistrations() {
         {ticketReg && (
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-white">
-              <QRCodeCanvas ref={qrRef} value={ticketReg.reg.qrValue} size={180} aria-label="Ticket QR code" />
+              <img
+                src={ticketReg.reg.qrValue.startsWith("data:") ? ticketReg.reg.qrValue : `data:image/png;base64,${ticketReg.reg.qrValue}`}
+                alt="Ticket QR code"
+                className="size-30"
+              />
             </div>
             <Button variant="outline" size="sm" onClick={handleDownloadQR}>
               <Download className="size-4" aria-hidden="true" />
@@ -270,7 +286,7 @@ export default function MyRegistrations() {
               <p className="mt-2 font-mono text-sm text-foreground">{ticketReg.reg.ticketNumber}</p>
             </div>
             <p className="text-xs text-muted-foreground text-pretty">
-              Show this QR code at the venue entrance for check-in.
+              Show this QR code or Ticket at the venue entrance for check-in.
             </p>
           </div>
         )}

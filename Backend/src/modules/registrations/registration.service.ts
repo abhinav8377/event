@@ -202,6 +202,9 @@ export const allowRegistration = async (registrationId: string, organizerId: str
           <div style="text-align:center;margin:20px 0;">
             <p style="color:#374151;font-size:13px;margin:0 0 8px 0;">Your QR Code</p>
             <img src="cid:${cid}" alt="QR Code" style="border-radius:8px;border:1px solid #e5e7eb;" />
+            <div style="margin-top:12px;">
+              <a href="data:image/png;base64,${base64Data}" download="qrcode-${registration._id}.png" style="display:inline-block;background-color:#16a34a;color:white;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:bold;">Download QR Code</a>
+            </div>
           </div>
           <div style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:16px;">
             <p style="color:#6b7280;font-size:13px;margin:0;"><strong>Event:</strong> ${event.title}</p>

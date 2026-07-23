@@ -48,8 +48,8 @@ export interface EventItem {
   organizerId: string
   organizerName: string
   organizerOrganization?: string
-  organizerVerified: boolean
-  tags: string[]
+  organizerVerified?: boolean
+  tags?: string[]
 }
 
 export type RegistrationStatus = "CONFIRMED" | "CANCELLED" | "WAITLISTED" | "PENDING" | "ALLOWED" | "PAYMENT_PENDING" | "DENIED"

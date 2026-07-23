@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import { store } from "@/app/store"
 import App from "@/App"
 import { initTheme } from "@/hooks/useTheme"
+import "leaflet/dist/leaflet.css"
 import "@/globals.css"
 
 initTheme()
