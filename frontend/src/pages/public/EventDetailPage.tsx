@@ -393,7 +393,7 @@ export default function EventDetailPage() {
             <img
               src={event.banner || "/placeholder.svg"}
               alt={event.title}
-              loading="lazy"
+              fetchpriority="high"
               className="aspect-video w-full object-cover"
             />
           </div>

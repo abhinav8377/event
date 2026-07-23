@@ -338,7 +338,7 @@ export default function EventFormPage() {
 
               {customBanner ? (
                 <div className="group relative mb-4 overflow-hidden rounded-xl border border-border bg-muted">
-                  <img src={customBanner} alt="Custom banner" loading="lazy" className="h-44 w-full object-cover" />
+                  <img src={customBanner} alt="Custom banner" loading="lazy" fetchpriority="low" className="h-44 w-full object-cover" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="absolute bottom-3 left-3 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">

@@ -9,11 +9,12 @@
     <link rel="preconnect" href="https://unpkg.com" />
     <link rel="dns-prefetch" href="https://event-production-2b1c.up.railway.app" />
     <link rel="dns-prefetch" href="https://unpkg.com" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" fetchpriority="low" />
     <title>EventHub — Event Discovery & Management Platform</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx" fetchpriority="high"></script>
   </body>
 </html>
