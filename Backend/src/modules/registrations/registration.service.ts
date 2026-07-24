@@ -1,15 +1,15 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import Registration from './registration.model.js';
-import Event from '../events/event.model.js';
-import User from '../users/user.model.js';
-import { generateQR } from '../../common/utils/qrcode.util.js';
-import { sendEmail } from '../../common/utils/email.util.js';
-import * as analyticsService from '../analytics/analytics.service.js';
-import * as notificationService from '../notifications/notification.service.js';
-import { isEventStarted } from '../events/event.lifecycle.js';
-import type { ServiceError } from '../../types/index.js';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import Registration from "./registration.model.js";
+import Event from "../events/event.model.js";
+import User from "../users/user.model.js";
+import { generateQR } from "../../common/utils/qrcode.util.js";
+import { sendEmail } from "../../common/utils/email.util.js";
+import * as analyticsService from "../analytics/analytics.service.js";
+import * as notificationService from "../notifications/notification.service.js";
+import { isEventStarted } from "../events/event.lifecycle.js";
+import type { ServiceError } from "../../types/index.js";
 
 function throwErr(message: string, status: number): never {
   const err = new Error(message) as ServiceError;
@@ -39,24 +39,31 @@ export const registerForEvent = async (
   },
 ) => {
   const event = await Event.findById(eventId);
-  if (!event || event.status !== 'PUBLISHED') throwErr('Event not found or not open for registration', 404);
+  if (!event || event.status !== "PUBLISHED")
+    throwErr("Event not found or not open for registration", 404);
 
-  if (isEventStarted(event)) throwErr('Registration is closed — the event has already started', 400);
+  if (isEventStarted(event))
+    throwErr("Registration is closed — the event has already started", 400);
 
   const confirmedCount = await Registration.countDocuments({
     eventId: event._id,
-    status: { $in: ['CONFIRMED', 'ALLOWED'] },
+    status: { $in: ["CONFIRMED", "ALLOWED"] },
   });
-  if (confirmedCount >= event.capacity) throwErr('Event is full', 409);
+  if (confirmedCount >= event.capacity) throwErr("Event is full", 409);
 
   let registration = await Registration.findOne({ userId, eventId: event._id });
-  if (registration && (registration.status === 'CONFIRMED' || registration.status === 'ALLOWED' || registration.status === 'PENDING'))
-    throwErr('Already registered for this event', 409);
+  if (
+    registration &&
+    (registration.status === "CONFIRMED" ||
+      registration.status === "ALLOWED" ||
+      registration.status === "PENDING")
+  )
+    throwErr("Already registered for this event", 409);
 
   const isPaid = event.price && event.price > 0;
 
   if (registration) {
-    registration.status = isPaid ? 'PAYMENT_PENDING' : 'PENDING';
+    registration.status = isPaid ? "PAYMENT_PENDING" : "PENDING";
     if (registrantDetails) {
       registration.registrantName = registrantDetails.name;
       registration.registrantEmail = registrantDetails.email;
@@ -76,12 +83,12 @@ export const registerForEvent = async (
     }
     await registration.save();
   } else {
-    const ticketNumber = `TKT-${Date.now()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const ticketNumber = `TKT-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
     registration = await Registration.create({
       userId,
       eventId: event._id,
       ticketNumber,
-      status: isPaid ? 'PAYMENT_PENDING' : 'PENDING',
+      status: isPaid ? "PAYMENT_PENDING" : "PENDING",
       paymentAmount: isPaid ? event.price : 0,
       registrantName: registrantDetails?.name,
       registrantEmail: registrantDetails?.email,
@@ -108,35 +115,40 @@ export const registerForEvent = async (
     notificationService
       .notify({
         userId,
-        title: 'Registration Submitted',
+        title: "Registration Submitted",
         message: `Your registration for "${event.title}" has been submitted and is pending organizer verification.`,
-        type: 'REGISTRATION',
+        type: "REGISTRATION",
       })
       .catch(() => {});
   }
 
-  return { registration, isPaid, eventTitle: event.title, eventPrice: event.price };
+  return {
+    registration,
+    isPaid,
+    eventTitle: event.title,
+    eventPrice: event.price,
+  };
 };
 
 export const handlePaymentSuccess = async (eventId: string, userId: string) => {
   const event = await Event.findById(eventId);
-  if (!event) throwErr('Event not found', 404);
+  if (!event) throwErr("Event not found", 404);
 
   let registration = await Registration.findOne({ userId, eventId: event._id });
-  if (!registration) throwErr('Registration not found', 404);
+  if (!registration) throwErr("Registration not found", 404);
 
-  registration.status = 'PENDING';
+  registration.status = "PENDING";
   registration.qrCode = await generateQR(String(registration._id));
   await registration.save();
 
-  analyticsService.increment(event._id, 'registrations').catch(() => {});
+  analyticsService.increment(event._id, "registrations").catch(() => {});
 
   notificationService
     .notify({
       userId,
-      title: 'Payment Received',
+      title: "Payment Received",
       message: `Payment for "${event.title}" received. Your registration is pending organizer verification. Your QR will be in your inbox within 24 hours after verification.`,
-      type: 'REGISTRATION',
+      type: "REGISTRATION",
     })
     .catch(() => {});
 
@@ -147,54 +159,72 @@ export const cancelRegistration = async (eventId: string, userId: string) => {
   const registration = await Registration.findOne({
     userId,
     eventId,
-    status: { $in: ['CONFIRMED', 'ALLOWED', 'PENDING'] },
+    status: { $in: ["CONFIRMED", "ALLOWED", "PENDING"] },
   });
-  if (!registration) throwErr('Registration not found', 404);
-  registration.status = 'CANCELLED';
+  if (!registration) throwErr("Registration not found", 404);
+  registration.status = "CANCELLED";
   await registration.save();
-  analyticsService.increment(eventId, 'registrations', -1).catch(() => {});
+  analyticsService.increment(eventId, "registrations", -1).catch(() => {});
 };
 
 export const getMyRegistrations = async (userId: string) => {
   const registrations = await Registration.find({ userId })
-    .populate('eventId')
+    .populate("eventId")
     .sort({ createdAt: -1 });
   return { registrations };
 };
 
-export const getTicketById = async (registrationId: string, userId: string, role: string) => {
-  const registration = await Registration.findById(registrationId).populate('eventId');
-  if (!registration) throwErr('Ticket not found', 404);
-  if (String(registration.userId) !== String(userId) && role !== 'ADMIN') throwErr('Forbidden', 403);
+export const getTicketById = async (
+  registrationId: string,
+  userId: string,
+  role: string,
+) => {
+  const registration =
+    await Registration.findById(registrationId).populate("eventId");
+  if (!registration) throwErr("Ticket not found", 404);
+  if (String(registration.userId) !== String(userId) && role !== "ADMIN")
+    throwErr("Forbidden", 403);
   return { registration };
 };
 
-export const allowRegistration = async (registrationId: string, organizerId: string, role: string) => {
-  const registration = await Registration.findById(registrationId).populate('eventId');
-  if (!registration) throwErr('Registration not found', 404);
+export const allowRegistration = async (
+  registrationId: string,
+  organizerId: string,
+  role: string,
+) => {
+  const registration =
+    await Registration.findById(registrationId).populate("eventId");
+  if (!registration) throwErr("Registration not found", 404);
 
   const event = registration.eventId as any;
-  if (role !== 'ADMIN' && String(event.organizerId) !== String(organizerId)) throwErr('Forbidden', 403);
+  if (role !== "ADMIN" && String(event.organizerId) !== String(organizerId))
+    throwErr("Forbidden", 403);
 
-  if (registration.status === 'CONFIRMED') throwErr('Registration already confirmed', 400);
-  if (registration.status === 'DENIED') throwErr('Registration was denied', 400);
-  if (registration.status === 'CANCELLED') throwErr('Registration was cancelled', 400);
+  if (registration.status === "CONFIRMED")
+    throwErr("Registration already confirmed", 400);
+  if (registration.status === "DENIED")
+    throwErr("Registration was denied", 400);
+  if (registration.status === "CANCELLED")
+    throwErr("Registration was cancelled", 400);
 
-  registration.status = 'CONFIRMED';
+  registration.status = "CONFIRMED";
   await registration.save();
 
   const user = await User.findById(registration.userId);
   if (user) {
     const cid = `qrcode-${registration._id}`;
-    const base64Data = registration.qrCode?.replace(/^data:image\/\w+;base64,/, '');
-    const qrBuffer = base64Data ? Buffer.from(base64Data, 'base64') : undefined;
+    const base64Data = registration.qrCode?.replace(
+      /^data:image\/\w+;base64,/,
+      "",
+    );
+    const qrBuffer = base64Data ? Buffer.from(base64Data, "base64") : undefined;
 
     const qrFilename = `qrcode-${registration._id}.png`;
-    const qrDir = path.resolve('uploads', 'qrcodes');
+    const qrDir = path.resolve("uploads", "qrcodes");
     fs.mkdirSync(qrDir, { recursive: true });
     if (qrBuffer) fs.writeFileSync(path.join(qrDir, qrFilename), qrBuffer);
 
-    const baseUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const baseUrl = process.env.BACKEND_URL || "http://localhost:5000";
     const downloadUrl = `${baseUrl}/uploads/qrcodes/${qrFilename}`;
 
     const emailHtml = `
@@ -218,45 +248,81 @@ export const allowRegistration = async (registrationId: string, organizerId: str
           </div>
           <div style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:16px;">
             <p style="color:#6b7280;font-size:13px;margin:0;"><strong>Event:</strong> ${event.title}</p>
-            <p style="color:#6b7280;font-size:13px;margin:4px 0 0 0;"><strong>Date:</strong> ${new Date(event.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p style="color:#6b7280;font-size:13px;margin:4px 0 0 0;"><strong>Venue:</strong> ${event.venue}, ${event.city || ''}</p>
+            <p style="color:#6b7280;font-size:13px;margin:4px 0 0 0;"><strong>Date:</strong> ${new Date(event.date).toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+            <p style="color:#6b7280;font-size:13px;margin:4px 0 0 0;"><strong>Venue:</strong> ${event.venue}, ${event.city || ""}</p>
           </div>
         </div>
         <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:16px;">Please show this QR code at the venue for check-in.</p>
       </div>
     `;
 
-    sendEmail({
-      to: user.email,
-      subject: `Registration Confirmed for ${event.title}`,
-      html: emailHtml,
-      attachments: qrBuffer
-        ? [{ filename: `qrcode-${registration._id}.png`, content: qrBuffer, cid }]
-        : undefined,
-    }).catch((err) => console.error("Failed to send confirmation email:", (err as Error).message));
+    try {
+      console.log(`[MAIL] Sending confirmation email to ${user.email}`);
+
+      await sendEmail({
+        to: user.email,
+        subject: `Registration Confirmed for ${event.title}`,
+        html: emailHtml,
+        attachments: qrBuffer
+          ? [
+              {
+                filename: `qrcode-${registration._id}.png`,
+                content: qrBuffer,
+                cid,
+              },
+            ]
+          : undefined,
+      });
+
+      console.log(
+        `[MAIL] Confirmation email sent successfully to ${user.email}`,
+      );
+    } catch (error: any) {
+      console.error("[MAIL] Failed to send confirmation email", {
+        message: error.message,
+        code: error.code,
+        response: error.response,
+        responseCode: error.responseCode,
+        command: error.command,
+        stack: error.stack,
+      });
+    }
 
     notificationService
       .notify({
         userId: String(user._id),
-        title: 'Registration Confirmed',
+        title: "Registration Confirmed",
         message: `Your registration for "${event.title}" has been confirmed! Ticket: ${registration.ticketNumber}`,
-        type: 'REGISTRATION',
+        type: "REGISTRATION",
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error("[Notification Error]", err);
+      });
   }
 
   return { registration };
 };
 
-export const denyRegistration = async (registrationId: string, organizerId: string, role: string) => {
-  const registration = await Registration.findById(registrationId).populate('eventId');
-  if (!registration) throwErr('Registration not found', 404);
+export const denyRegistration = async (
+  registrationId: string,
+  organizerId: string,
+  role: string,
+) => {
+  const registration =
+    await Registration.findById(registrationId).populate("eventId");
+  if (!registration) throwErr("Registration not found", 404);
 
   const event = registration.eventId as any;
-  if (role !== 'ADMIN' && String(event.organizerId) !== String(organizerId)) throwErr('Forbidden', 403);
+  if (role !== "ADMIN" && String(event.organizerId) !== String(organizerId))
+    throwErr("Forbidden", 403);
 
-  if (registration.status === 'CONFIRMED') throwErr('Cannot deny a confirmed registration. User has already been notified.', 400);
-  if (registration.status === 'DENIED') throwErr('Registration already denied', 400);
+  if (registration.status === "CONFIRMED")
+    throwErr(
+      "Cannot deny a confirmed registration. User has already been notified.",
+      400,
+    );
+  if (registration.status === "DENIED")
+    throwErr("Registration already denied", 400);
 
   await Registration.findByIdAndDelete(registrationId);
 
