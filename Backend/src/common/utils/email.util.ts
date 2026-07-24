@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { google } from "googleapis";
 
 interface Attachment {
   filename: string;
@@ -13,18 +14,54 @@ interface EmailOptions {
   attachments?: Attachment[];
 }
 
+const OAUTH_PLAYGROUND = "https://developers.google.com/oauthplayground";
+
 let transporter: nodemailer.Transporter | null = null;
 
-function getTransporter(): nodemailer.Transporter {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not configured.`);
   }
+  return value;
+}
+
+async function getTransporter(): Promise<nodemailer.Transporter> {
+  if (transporter) {
+    return transporter;
+  }
+
+  const user = getRequiredEnv("EMAIL_USER");
+  const clientId = getRequiredEnv("GMAIL_CLIENT_ID");
+  const clientSecret = getRequiredEnv("GMAIL_CLIENT_SECRET");
+  const refreshToken = getRequiredEnv("GMAIL_REFRESH_TOKEN");
+
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    OAUTH_PLAYGROUND,
+  );
+
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+  const { token: accessToken } = await oauth2Client.getAccessToken();
+
+  if (!accessToken) {
+    throw new Error("Failed to retrieve Gmail OAuth2 access token.");
+  }
+
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user,
+      clientId,
+      clientSecret,
+      refreshToken,
+      accessToken,
+    },
+  });
+
   return transporter;
 }
 
@@ -45,6 +82,10 @@ async function attempt<T>(attempts: number, fn: () => Promise<T>): Promise<T> {
         command: err.command,
       });
 
+      // Force re-authentication on the next attempt in case the access
+      // token expired or the transporter is otherwise stale.
+      transporter = null;
+
       if (i < attempts) {
         const delay = i * 2000; // 2s, 4s, 6s...
         console.log(`[MAIL] Retrying in ${delay} ms...`);
@@ -63,15 +104,9 @@ export const sendEmail = async ({
   html,
   attachments,
 }: EmailOptions) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error("EMAIL_USER or EMAIL_PASS is not configured.");
+  if (!process.env.EMAIL_USER) {
+    throw new Error("EMAIL_USER is not configured.");
   }
-
-  const transporter = getTransporter();
-
-  // Verify SMTP connection before sending
-  await transporter.verify();
-  console.log("[MAIL] SMTP connection verified.");
 
   const mailOptions: nodemailer.SendMailOptions = {
     from: `"Event Management" <${process.env.EMAIL_USER}>`,
@@ -86,7 +121,10 @@ export const sendEmail = async ({
       })) ?? [],
   };
 
-  const info = await attempt(3, () => transporter.sendMail(mailOptions));
+  const info = await attempt(3, async () => {
+    const activeTransporter = await getTransporter();
+    return activeTransporter.sendMail(mailOptions);
+  });
 
   console.log("[MAIL] Email sent successfully.", {
     messageId: info.messageId,
