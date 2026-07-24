@@ -35,6 +35,7 @@ const allowedOrigins = [
 ];
 
 app.use(compression());
+app.use('/uploads', express.static('uploads'));
 app.use(
   cors({
     origin: (origin, callback) => {

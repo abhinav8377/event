@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import Registration from './registration.model.js';
 import Event from '../events/event.model.js';
 import User from '../users/user.model.js';
@@ -187,6 +189,14 @@ export const allowRegistration = async (registrationId: string, organizerId: str
     const base64Data = registration.qrCode?.replace(/^data:image\/\w+;base64,/, '');
     const qrBuffer = base64Data ? Buffer.from(base64Data, 'base64') : undefined;
 
+    const qrFilename = `qrcode-${registration._id}.png`;
+    const qrDir = path.resolve('uploads', 'qrcodes');
+    fs.mkdirSync(qrDir, { recursive: true });
+    if (qrBuffer) fs.writeFileSync(path.join(qrDir, qrFilename), qrBuffer);
+
+    const baseUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const downloadUrl = `${baseUrl}/uploads/qrcodes/${qrFilename}`;
+
     const emailHtml = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background-color:#f9fafb;border-radius:12px;">
         <div style="text-align:center;padding:20px 0;">
@@ -203,7 +213,7 @@ export const allowRegistration = async (registrationId: string, organizerId: str
             <p style="color:#374151;font-size:13px;margin:0 0 8px 0;">Your QR Code</p>
             <img src="cid:${cid}" alt="QR Code" style="border-radius:8px;border:1px solid #e5e7eb;" />
             <div style="margin-top:12px;">
-              <a href="data:image/png;base64,${base64Data}" download="qrcode-${registration._id}.png" style="display:inline-block;background-color:#16a34a;color:white;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:bold;">Download QR Code</a>
+              <a href="${downloadUrl}" style="display:inline-block;background-color:#16a34a;color:white;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:bold;">Download QR Code</a>
             </div>
           </div>
           <div style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:16px;">
