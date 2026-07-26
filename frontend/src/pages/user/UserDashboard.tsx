@@ -34,15 +34,8 @@ import { getUserDashboard } from "@/api/userApi"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/cards/StatCard"
 import { Card, Badge, Button, Loader, EmptyState } from "@/components/common/ui"
-
-const CHART_COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899"]
-
-function greeting() {
-  const hour = new Date().getHours()
-  if (hour < 12) return "Good morning"
-  if (hour < 18) return "Good afternoon"
-  return "Good evening"
-}
+import { getGreeting } from "@/utils/greeting"
+import { CHART_COLORS } from "@/constants/chartColors"
 
 const CATEGORY_LABELS: Record<string, string> = {
   TECH: "Technology",
@@ -80,7 +73,7 @@ export default function UserDashboard() {
       <div>
         <PageHeader
           eyebrow="your dashboard"
-          title={`${greeting()}, ${user.name.split(" ")[0]}.`}
+          title={`${getGreeting()}, ${user.name.split(" ")[0]}.`}
           description="Your event activity at a glance."
           action={
             <Button size="sm" variant="outline" onClick={() => refresh()}>
@@ -111,7 +104,7 @@ export default function UserDashboard() {
     <div>
       <PageHeader
         eyebrow="your dashboard"
-        title={`${greeting()}, ${user.name.split(" ")[0]}.`}
+        title={`${getGreeting()}, ${user.name.split(" ")[0]}.`}
         description="Your event activity at a glance."
         action={
           <Button size="sm" variant="outline" onClick={() => refresh()}>

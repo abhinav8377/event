@@ -115,9 +115,7 @@ export default function DashboardLayout({
     <div
       className={clsx(
         "flex h-screen overflow-hidden",
-        user?.role === "ORGANIZER" && "theme-organizer",
-        user?.role === "USER" && "theme-landing",
-        user?.role === "ADMIN" && "theme-admin",
+        user?.role && "theme-landing",
       )}
     >
       {/* Desktop sidebar */}
