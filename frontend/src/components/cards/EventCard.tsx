@@ -11,7 +11,7 @@ export function EventCard({ event, detailPath }: { event: EventItem; detailPath?
   const isPast = new Date(event.endDate).getTime() < Date.now()
 
   return (
-    <Card className="group flex flex-col overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
+    <Card className="group flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5">
       <Link to={`${detailPath || "/events"}/${event.id}`} className="flex h-full flex-col">
         <div className="relative aspect-video overflow-hidden">
           <img

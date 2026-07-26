@@ -86,12 +86,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
-      <div className="bg-grid bg-grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+    <main className="theme-landing relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+      <div className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-primary/[0.16] blur-3xl"
+          aria-hidden="true"
+        />
+      </div>
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 text-primary">
-            <CalendarRange className="size-8" aria-hidden="true" />
+          <Link to="/" className="flex items-center gap-2.5">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <CalendarRange className="size-4" aria-hidden="true" />
+            </span>
             <span className="text-2xl font-extrabold tracking-tight text-foreground">
               Event<span className="text-primary">Hub</span>
             </span>
@@ -99,8 +107,13 @@ export default function LoginPage() {
           <p className="font-mono text-xs text-muted-foreground">sign in to continue</p>
         </div>
 
-        <Card className="p-6 sm:p-8">
-          <h1 className="display mb-6 text-2xl text-foreground">Welcome back.</h1>
+        <Card className="p-6 shadow-[0_0_60px_-25px_var(--primary)] sm:p-8">
+          <h1
+            className="display !normal-case mb-6 text-2xl text-foreground"
+            style={{ letterSpacing: "-0.02em" }}
+          >
+            Welcome back.
+          </h1>
 
           {error && (
             <div

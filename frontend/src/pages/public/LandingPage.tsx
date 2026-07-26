@@ -1,99 +1,77 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, type Variants } from "framer-motion";
 import { useRef } from "react";
 import {
   ArrowRight,
-  QrCode,
-  Award,
-  BellRing,
-  BarChart3,
-  Search,
   CalendarCheck,
-  ChevronRight,
-  Sparkles,
+  ChevronDown,
+  FileText,
+  MessageCircle,
+  Sheet,
+  Users,
+  CheckCircle2,
+  Cpu,
+  Briefcase,
+  GraduationCap,
+  Palette,
+  Trophy,
+  UsersRound,
 } from "lucide-react";
-import { getUpcomingEvents, getPopularEvents } from "@/api/eventApi";
-import type { EventItem } from "@/constants/types";
-import { EventCard } from "@/components/cards/EventCard";
-import { Button, Skeleton, Eyebrow } from "@/components/common/ui";
+import { Button, Eyebrow } from "@/components/common/ui";
+import { PlatformLifecycle } from "@/components/landing/PlatformLifecycle";
+import { JourneyTree } from "@/components/landing/JourneyTree";
+import { FeatureCoverflow } from "@/components/landing/FeatureCoverflow";
+import { CommunityPreview } from "@/components/landing/CommunityPreview";
+import { HeroMapBackdrop } from "@/components/landing/HeroMapBackdrop";
+import { CapabilitiesMarquee } from "@/components/landing/CapabilitiesMarquee";
+import { EventFlashCards } from "@/components/landing/EventFlashCards";
 
-const features = [
-  {
-    icon: Search,
-    title: "Discovery",
-    tag: "search + filters",
-    description:
-      "Search and filter events by category, city, and mode. Everything in one place instead of scattered group chats.",
-    rows: [
-      "Filter by category, city & mode",
-      "Online, offline & hybrid events",
-    ],
-  },
-  {
-    icon: CalendarCheck,
-    title: "Registration",
-    tag: "one tap",
-    description:
-      "Register in seconds and instantly receive a ticket with a unique QR code. No more Google Forms.",
-    rows: ["One-tap registration", "Ticket + QR issued instantly"],
-  },
-  {
-    icon: QrCode,
-    title: "QR check-in",
-    tag: "at the door",
-    description:
-      "Organizers scan your QR at the door. Attendance is tracked automatically and accurately.",
-    rows: ["Scan tickets at the door", "Attendance marked automatically"],
-  },
-  {
-    icon: Award,
-    title: "Certificates",
-    tag: "auto-issued",
-    description:
-      "Attend an event and your certificate is generated automatically. Download it anytime.",
-    rows: ["Issued on attendance", "Download anytime"],
-  },
-  {
-    icon: BellRing,
-    title: "Notifications",
-    tag: "smart inbox",
-    description:
-      "Registration confirmations, reminders, venue changes, and certificate alerts in one inbox.",
-    rows: ["Confirmations & reminders", "Venue change alerts"],
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics",
-    tag: "live",
-    description:
-      "Organizers get live dashboards for registrations, attendance, ratings, and views.",
-    rows: ["Registrations over time", "Attendance & ratings"],
-  },
+const oldWay = [
+  { icon: FileText, label: "Google Forms", tag: "registrations" },
+  { icon: MessageCircle, label: "WhatsApp groups", tag: "updates" },
+  { icon: Sheet, label: "Spreadsheets", tag: "tracking" },
+  { icon: Users, label: "Manual lists", tag: "check-in" },
 ];
 
-const steps = [
+const newWayChecklist = [
+  "A single source of truth",
+  "Real-time attendance records",
+  "Automatic attendee notifications",
+  "Certificates tied to verified attendance",
+];
+
+const categories = [
+  { icon: Cpu, label: "Technology" },
+  { icon: Briefcase, label: "Business" },
+  { icon: GraduationCap, label: "Education" },
+  { icon: Palette, label: "Arts" },
+  { icon: Trophy, label: "Sports" },
+  { icon: UsersRound, label: "Community" },
+];
+
+const faqs = [
   {
-    step: "01",
-    title: "Create an account",
-    text: "Sign up free as an attendee or a verified organization.",
+    q: "Is EventHub free to use?",
+    a: "Yes. Discovering and registering for events is free for attendees. Organizers can publish events, manage check-ins, and issue certificates at no cost.",
   },
   {
-    step: "02",
-    title: "Discover & register",
-    text: "Find events you love and register with one tap.",
+    q: "Who can host an event?",
+    a: "Any verified organization can create an account and start publishing events once approved. Every organizer is reviewed before their events go live.",
   },
   {
-    step: "03",
-    title: "Check in with QR",
-    text: "Show your QR ticket at the venue for instant check-in.",
+    q: "How does QR check-in work?",
+    a: "Every registration generates a unique QR ticket. Organizers scan it at the door with any camera, and attendance is recorded instantly — no manual lists.",
   },
   {
-    step: "04",
-    title: "Get your certificate",
-    text: "Certificates are issued automatically after attendance.",
+    q: "When are certificates issued?",
+    a: "Certificates are generated automatically the moment your attendance is marked at check-in, and stay available to download from your profile.",
+  },
+  {
+    q: "Does EventHub support online and hybrid events?",
+    a: "Yes. Events can be marked in-person, online, or hybrid, and discovery filters let attendees search by mode and city.",
   },
 ];
 
@@ -102,14 +80,6 @@ const fadeInUp: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
-const fadeIn: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
     transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   },
 };
@@ -139,257 +109,205 @@ const scaleIn: Variants = {
   },
 };
 
+/** Shared mock-panel chrome (macOS-style dots) used by hero and spotlight sections. */
+function PanelChrome({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="font-mono text-xs text-muted-foreground">{label}</span>
+      <span className="flex gap-1.5" aria-hidden="true">
+        <span className="size-2.5 rounded-full bg-destructive/60" />
+        <span className="size-2.5 rounded-full bg-warning/60" />
+        <span className="size-2.5 rounded-full bg-success/60" />
+      </span>
+    </div>
+  );
+}
+
+/** Flat bordered mock-UI panel, matching the design's "your event journey" / "registration flow" cards. */
+function GlowPanel({
+  children,
+  rounded = "rounded-3xl",
+  innerClassName = "bg-card p-6",
+  glow = true,
+}: {
+  children: ReactNode;
+  rounded?: string;
+  innerClassName?: string;
+  glow?: boolean;
+}) {
+  return (
+    <div
+      className={`${rounded} border border-border ${glow ? "shadow-[0_0_60px_-20px_var(--primary)]" : ""} ${innerClassName}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function LandingPage() {
-  const [upcoming, setUpcoming] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const heroRef = useRef<HTMLDivElement>(null);
-  const eventsRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const stepsRef = useRef<HTMLDivElement>(null);
+  const comparisonRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const organizerRef = useRef<HTMLDivElement>(null);
+  const faqRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
 
   const heroInView = useInView(heroRef, { once: true, amount: 0.3, margin: "0px" });
-  const eventsInView = useInView(eventsRef, { once: true, amount: 0.2, margin: "0px" });
-  const featuresInView = useInView(featuresRef, { once: true, amount: 0.2, margin: "0px" });
-  const stepsInView = useInView(stepsRef, { once: true, amount: 0.2, margin: "0px" });
+  const comparisonInView = useInView(comparisonRef, { once: true, amount: 0.2, margin: "0px" });
+  const categoriesInView = useInView(categoriesRef, { once: true, amount: 0.2, margin: "0px" });
+  const organizerInView = useInView(organizerRef, { once: true, amount: 0.3, margin: "0px" });
+  const faqInView = useInView(faqRef, { once: true, amount: 0.2, margin: "0px" });
   const ctaInView = useInView(ctaRef, { once: true, amount: 0.3, margin: "0px" });
 
-  useEffect(() => {
-    Promise.all([getUpcomingEvents(), getPopularEvents()])
-      .then(([up]) => setUpcoming(up.data.slice(0, 3)))
-      .catch(() => setUpcoming([]))
-      .finally(() => setLoading(false));
-  }, []);
-
   return (
-    <div className="overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* Hero */}
-      <section className="relative">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="bg-grid bg-grid-fade opacity-50" aria-hidden="true" />
-          <div
-            className="absolute -left-24 -top-24 size-96 rounded-full bg-primary/20 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -right-20 top-32 size-80 rounded-full bg-accent/40 blur-3xl"
-            aria-hidden="true"
-          />
-        </div>
-
+      <section className="relative overflow-hidden">
+        <HeroMapBackdrop />
         <div
           ref={heroRef}
-          className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-16 md:grid-cols-[1.05fr_0.95fr] md:items-center md:px-6 md:pb-24 md:pt-24"
+          className="relative mx-auto grid max-w-6xl gap-14 px-4 pb-20 pt-20 md:grid-cols-[1fr_1fr] md:items-center md:px-6 md:pb-28 md:pt-28"
         >
           <motion.div initial="hidden" animate={heroInView ? "visible" : "hidden"} variants={staggerContainer}>
-            <motion.div variants={fadeInUp}>
-              <Eyebrow>
-                <Sparkles className="size-3.5 text-primary" aria-hidden="true" />
-                events · tickets · certificates
-              </Eyebrow>
-            </motion.div>
             <motion.h1
               variants={fadeInUp}
-              className="display mt-6 text-5xl text-foreground md:text-7xl"
+              className="display mt-7 text-5xl !normal-case text-foreground md:text-7xl"
+              style={{ letterSpacing: "-0.04em", lineHeight: 0.92 }}
             >
-              Real events to <span className="bg-gradient-to-r from-primary to-warning bg-clip-text text-transparent">discover</span>,
-              join, and <span className="italic">explore</span>.
+              Real events to <span className="text-primary">discover</span>,
+              join &amp; <span className="italic">explore.</span>
             </motion.h1>
-            <motion.p
-              variants={fadeInUp}
-              className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground text-pretty"
-            >
-              EventHub is a hub for the full event lifecycle — discovery,
-              registration, QR check-in, and automatic certificates — so
-              communities stop juggling forms and spreadsheets.
-            </motion.p>
-            <motion.div variants={fadeInUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link to="/login" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Explore events
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Button>
-              </Link>
-              <Link to="/register" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Host an event
-                </Button>
-              </Link>
+            <motion.div variants={fadeInUp} className="mt-10 flex flex-wrap items-center gap-6">
+              <div className="flex flex-wrap gap-3">
+                <Link to="/login" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Explore events
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </Button>
+                </Link>
+                <Link to="/register" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    Host an event
+                  </Button>
+                </Link>
+              </div>
             </motion.div>
-            <motion.dl
-              variants={fadeInUp}
-              className="mt-12 grid grid-cols-3 gap-4 border-t border-border pt-6 sm:gap-6"
-            >
-              {[
-                ["4,200+", "events hosted"],
-                ["58k+", "registrations"],
-                ["31k+", "certificates"],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <dt className="sr-only">{label}</dt>
-                  <dd className="display text-2xl text-foreground md:text-3xl">{value}</dd>
-                  <dd className="mt-1 font-mono text-xs text-muted-foreground">{label}</dd>
-                </div>
-              ))}
-            </motion.dl>
           </motion.div>
 
-          {/* Attendee journey card */}
+          {/* Featured events scatter */}
           <motion.div
             initial="hidden"
             animate={heroInView ? "visible" : "hidden"}
             variants={scaleIn}
-            className="relative hidden md:block"
+            className="relative mx-auto hidden aspect-square w-full max-w-[480px] md:block"
           >
-            <div className="rounded-3xl border border-border bg-card/80 p-6 shadow-2xl shadow-black/10 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-muted-foreground">your event journey</span>
-                <span className="flex gap-1.5" aria-hidden="true">
-                  <span className="size-2.5 rounded-full bg-destructive/60" />
-                  <span className="size-2.5 rounded-full bg-warning/60" />
-                  <span className="size-2.5 rounded-full bg-success/60" />
-                </span>
-              </div>
-              <div className="mt-5 flex flex-col gap-2.5">
-                {[
-                  { icon: Search, label: "Discover events", note: "browse", active: false },
-                  { icon: CalendarCheck, label: "Register in one tap", note: "ticket + QR", active: true },
-                  { icon: QrCode, label: "Check in at the door", note: "scanned", active: false },
-                  { icon: Award, label: "Receive certificate", note: "auto-issued", active: false },
-                ].map((row) => (
-                  <div
-                    key={row.label}
-                    className={
-                      row.active
-                        ? "flex items-center justify-between rounded-xl border border-primary/40 bg-accent px-4 py-3"
-                        : "flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3"
-                    }
-                  >
-                    <span className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
-                      <row.icon
-                        className={row.active ? "size-4 text-primary" : "size-4 text-muted-foreground"}
-                        aria-hidden="true"
-                      />
-                      {row.label}
+            <EventFlashCards />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Capabilities marquee */}
+      <CapabilitiesMarquee />
+
+      {/* Platform lifecycle */}
+      <PlatformLifecycle />
+
+      {/* Journey tree */}
+      <JourneyTree />
+
+      {/* Featured events coverflow */}
+      <FeatureCoverflow />
+
+      {/* Comparison */}
+      <section className="border-t border-border">
+        <div ref={comparisonRef} className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+          <motion.div initial="hidden" animate={comparisonInView ? "visible" : "hidden"} variants={staggerContainer}>
+            <motion.div variants={fadeInUp}>
+              <Eyebrow>why eventhub</Eyebrow>
+            </motion.div>
+            <motion.h2 variants={fadeInUp} className="display mt-5 max-w-2xl text-3xl !normal-case text-foreground md:text-5xl">
+              One connected workflow, <span className="text-primary">not four disconnected tools.</span>
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Most communities stitch together forms, chats, and spreadsheets
+              by hand. EventHub replaces all of it with a single system.
+            </motion.p>
+
+            <div className="mt-14 grid gap-6 md:grid-cols-2">
+              <motion.div variants={fadeInUp} className="flex flex-col gap-3">
+                <p className="font-mono text-xs text-muted-foreground">the traditional way</p>
+                {oldWay.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+                    <span className="flex items-center gap-3 text-sm font-semibold text-foreground">
+                      <item.icon className="size-4 text-muted-foreground" aria-hidden="true" />
+                      {item.label}
                     </span>
-                    <span
-                      className={row.active ? "font-mono text-xs text-accent-foreground" : "font-mono text-xs text-muted-foreground"}
-                    >
-                      {row.note}
-                    </span>
+                    <span className="font-mono text-xs text-muted-foreground">{item.tag}</span>
                   </div>
                 ))}
-              </div>
-              <div className="mt-5 rounded-xl bg-secondary p-4">
-                <p className="font-mono text-xs leading-relaxed text-muted-foreground">
-                  <span className="text-success">✓</span> ticket scanned at the door
-                  <br />
-                  <span className="text-success">✓</span> attendance marked present
-                  <br />
-                  <span className="text-primary">→</span> certificate issued automatically
-                </p>
-              </div>
+              </motion.div>
+
+              <motion.div variants={fadeInUp}>
+                <GlowPanel rounded="rounded-2xl" innerClassName="bg-accent p-7" glow={false}>
+                  <p className="font-mono text-xs text-accent-foreground">the eventhub way</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                      <CalendarCheck className="size-5" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="font-extrabold tracking-tight text-foreground">One connected platform</p>
+                      <p className="font-mono text-xs text-muted-foreground">discover → register → check in → certify</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex flex-col gap-2.5 border-t border-primary/20 pt-5">
+                    {newWayChecklist.map((row) => (
+                      <p key={row} className="flex items-center gap-2.5 text-sm text-foreground">
+                        <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                        {row}
+                      </p>
+                    ))}
+                  </div>
+                </GlowPanel>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Upcoming events */}
-      <section className="border-t border-border">
-        <div ref={eventsRef} className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <motion.div initial="hidden" animate={eventsInView ? "visible" : "hidden"} variants={staggerContainer}>
-            <motion.div variants={fadeInUp}>
-              <Eyebrow>happening soon</Eyebrow>
-            </motion.div>
-            <motion.div
-              variants={fadeInUp}
-              className="mt-5 mb-10 flex flex-wrap items-end justify-between gap-4"
-            >
-              <h2 className="display text-3xl text-foreground md:text-5xl">
-                Filling <span className="text-primary">fast.</span> Grab a seat.
-              </h2>
-              <Link
-                to="/login"
-                className="hidden items-center gap-1 font-mono text-sm text-primary hover:underline sm:flex"
-              >
-                view all events
-                <ArrowRight className="size-4" aria-hidden="true" />
+      {/* Browse by category */}
+      <section className="border-t border-border bg-card/40">
+        <div ref={categoriesRef} className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+          <motion.div initial="hidden" animate={categoriesInView ? "visible" : "hidden"} variants={staggerContainer}>
+            <motion.div variants={fadeInUp} className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <Eyebrow>browse by category</Eyebrow>
+                <h2 className="display mt-5 text-3xl !normal-case text-foreground md:text-5xl">
+                  A track for every <span className="text-primary">community.</span>
+                </h2>
+              </div>
+              <Link to="/login" className="group hidden items-center gap-1 font-mono text-sm text-primary hover:underline sm:flex">
+                explore all
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
             </motion.div>
-            {loading ? (
-              <motion.div variants={fadeIn} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} className="h-96" />
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div variants={cardStagger} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {upcoming.map((e) => (
-                  <motion.div key={e.id} variants={fadeInUp}>
-                    <EventCard event={e} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-            {!loading && upcoming.length === 0 && (
-              <p className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
-                No upcoming events right now — check back soon.
-              </p>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-t border-border bg-card/40">
-        <div ref={featuresRef} className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <motion.div initial="hidden" animate={featuresInView ? "visible" : "hidden"} variants={staggerContainer}>
-            <motion.div variants={fadeInUp}>
-              <Eyebrow>everything you need</Eyebrow>
-            </motion.div>
-            <motion.h2
-              variants={fadeInUp}
-              className="display mt-5 text-3xl text-foreground md:text-5xl"
-            >
-              Six lanes. <span className="text-primary">One platform.</span>
-            </motion.h2>
-            <motion.p
-              variants={fadeInUp}
-              className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground"
-            >
-              Each piece mirrors how real events actually run — so the whole
-              lifecycle lives in one place, from the first search to the final
-              certificate.
-            </motion.p>
-            <motion.div
-              variants={cardStagger}
-              className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {features.map((f) => (
-                <motion.div
-                  key={f.title}
-                  variants={fadeInUp}
-                  className="group rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5"
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-background text-primary">
-                      <f.icon className="size-5" aria-hidden="true" />
+            <motion.div variants={cardStagger} className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((c) => (
+                <motion.div key={c.label} variants={fadeInUp}>
+                  <Link
+                    to="/login"
+                    className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-black/5"
+                  >
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-primary">
+                      <c.icon className="size-5" aria-hidden="true" />
                     </span>
-                    <span className="rounded-full border border-border px-2.5 py-1 font-mono text-xs text-muted-foreground">
-                      {f.tag}
-                    </span>
-                  </div>
-                  <h3 className="mt-5 text-lg font-extrabold tracking-tight text-foreground">{f.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-                  <div className="mt-4 flex flex-col gap-1.5 border-t border-border pt-4">
-                    {f.rows.map((row) => (
-                      <p key={row} className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-                        <ChevronRight className="size-3 text-primary" aria-hidden="true" />
-                        {row}
-                      </p>
-                    ))}
-                  </div>
+                    <span className="font-extrabold tracking-tight text-foreground">{c.label}</span>
+                    <ArrowRight
+                      className="ml-auto size-4 -translate-x-1 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
+                      aria-hidden="true"
+                    />
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>
@@ -397,63 +315,155 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* Community preview */}
+      <CommunityPreview />
+
+      {/* For organizers */}
       <section className="border-t border-border">
-        <div ref={stepsRef} className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <motion.div initial="hidden" animate={stepsInView ? "visible" : "hidden"} variants={staggerContainer}>
+        <div
+          ref={organizerRef}
+          className="mx-auto grid max-w-6xl gap-14 px-4 py-20 md:grid-cols-2 md:items-center md:px-6 md:py-28"
+        >
+          <motion.div initial="hidden" animate={organizerInView ? "visible" : "hidden"} variants={staggerContainer}>
             <motion.div variants={fadeInUp}>
-              <Eyebrow>how it works</Eyebrow>
+              <Eyebrow>for organizers</Eyebrow>
             </motion.div>
-            <motion.h2
-              variants={fadeInUp}
-              className="display mt-5 max-w-2xl text-3xl text-foreground md:text-5xl"
-            >
-              From <span className="text-primary">sign-up</span> to certificate — four steps.
+            <motion.h2 variants={fadeInUp} className="display mt-5 text-3xl !normal-case text-foreground md:text-5xl">
+              Know what's happening, <span className="text-primary">as it happens.</span>
             </motion.h2>
-            <motion.ol variants={cardStagger} className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {steps.map((s) => (
-                <motion.li key={s.step} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6">
-                  <span className="font-mono text-sm text-primary">{s.step}</span>
-                  <h3 className="mt-3 font-extrabold tracking-tight text-foreground">{s.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
-                </motion.li>
-              ))}
-            </motion.ol>
+            <motion.p variants={fadeInUp} className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground text-pretty">
+              A focused command center for registrations, check-ins, and event
+              performance — without turning organizers into analysts.
+            </motion.p>
+            <motion.div variants={fadeInUp} className="mt-8">
+              <Link to="/register">
+                <Button size="lg">
+                  Start organizing
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          <motion.div initial="hidden" animate={organizerInView ? "visible" : "hidden"} variants={scaleIn}>
+            <GlowPanel>
+              <PanelChrome label="organizer overview" />
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  ["12", "Total events"],
+                  ["2,480", "Registrations"],
+                  ["1,916", "Check-ins"],
+                  ["4.8/5", "Avg. rating"],
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-xl border border-border bg-background p-3.5 text-center">
+                    <p className="display text-xl text-foreground">{value}</p>
+                    <p className="mt-1 font-mono text-[10px] leading-tight text-muted-foreground">{label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 rounded-xl border border-border bg-background p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-foreground">Registrations</p>
+                  <p className="font-mono text-xs text-success">+18.4%</p>
+                </div>
+                <div className="mt-4 flex h-20 items-end gap-1.5">
+                  {[35, 45, 40, 55, 50, 62, 70, 58, 75, 68].map((h, i) => (
+                    <span
+                      key={i}
+                      className="flex-1 rounded-t-sm bg-primary/70"
+                      style={{ height: `${h}%` }}
+                      aria-hidden="true"
+                    />
+                  ))}
+                </div>
+              </div>
+            </GlowPanel>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-t border-border bg-card/40">
+        <div ref={faqRef} className="mx-auto max-w-3xl px-4 py-20 md:px-6 md:py-28">
+          <motion.div initial="hidden" animate={faqInView ? "visible" : "hidden"} variants={staggerContainer}>
+            <motion.div variants={fadeInUp} className="text-center">
+              <Eyebrow className="mx-auto">frequently asked</Eyebrow>
+              <h2 className="display mt-5 text-3xl !normal-case text-foreground md:text-5xl">
+                Questions, <span className="text-primary">answered.</span>
+              </h2>
+            </motion.div>
+            <motion.div variants={cardStagger} className="mt-12 flex flex-col gap-3">
+              {faqs.map((item, i) => {
+                const open = openFaq === i;
+                return (
+                  <motion.div
+                    key={item.q}
+                    variants={fadeInUp}
+                    className="overflow-hidden rounded-2xl border border-border bg-card"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(open ? null : i)}
+                      aria-expanded={open}
+                      className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-muted"
+                    >
+                      <span className="font-extrabold tracking-tight text-foreground">{item.q}</span>
+                      <ChevronDown
+                        className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {open && (
+                      <p className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground text-pretty">
+                        {item.a}
+                      </p>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="border-t border-border">
-        <div ref={ctaRef} className="relative mx-auto max-w-6xl overflow-hidden px-4 py-20 md:px-6 md:py-24">
-          <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+      <section className="px-4 pb-24 pt-10 md:px-6">
+        <div ref={ctaRef} className="mx-auto max-w-6xl">
           <motion.div
             initial="hidden"
             animate={ctaInView ? "visible" : "hidden"}
             variants={staggerContainer}
-            className="relative flex flex-col items-center gap-6 rounded-3xl border border-border bg-gradient-to-br from-accent/40 to-card px-6 py-14 text-center md:py-20"
+            className="flex flex-col items-center gap-6 rounded-[28px] bg-primary px-6 py-18 text-center md:px-12 md:py-24"
           >
-            <motion.div variants={fadeInUp}>
-              <Eyebrow>no forms · no spreadsheets · just events</Eyebrow>
-            </motion.div>
+            <motion.span
+              variants={fadeInUp}
+              className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 px-3.5 py-1.5 font-mono text-xs text-primary-foreground"
+            >
+              no forms · no spreadsheets · just events
+            </motion.span>
             <motion.h2
               variants={fadeInUp}
-              className="display max-w-3xl text-4xl text-foreground md:text-6xl text-balance"
+              className="display max-w-3xl text-4xl !normal-case text-primary-foreground md:text-6xl text-balance"
+              style={{ letterSpacing: "-0.04em", lineHeight: 0.92 }}
             >
-              Ready to bring your community <span className="text-primary">together?</span>
+              Ready to bring your community together?
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="max-w-md text-sm leading-relaxed text-muted-foreground text-pretty"
+              className="max-w-md text-sm leading-relaxed text-primary-foreground/75 text-pretty"
             >
               Create your organization account, publish your first event, and
               start scanning attendees in minutes.
             </motion.p>
             <motion.div variants={fadeInUp}>
               <Link to="/register">
-                <Button size="lg">
+                <Button
+                  size="lg"
+                  className="hover:opacity-90"
+                  style={{ backgroundColor: "var(--primary-foreground)", color: "var(--primary)" }}
+                >
                   Get started free
-                  <ArrowRight className="size-4" aria-hidden="true" />
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </Button>
               </Link>
             </motion.div>

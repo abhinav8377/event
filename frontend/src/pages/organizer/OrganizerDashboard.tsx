@@ -28,7 +28,11 @@ export default function OrganizerDashboard() {
   if (myEventsError) {
     return (
       <div>
-        <PageHeader title={`Hello, ${user.name.split(" ")[0]}`} description="Here's how your events are performing." />
+        <PageHeader
+          eyebrow="organizer dashboard"
+          title={`Hello, ${user.name.split(" ")[0]}`}
+          description="Here's how your events are performing."
+        />
         <EmptyState
           icon={<CalendarRange className="size-10" aria-hidden="true" />}
           title="Failed to load dashboard"
@@ -57,6 +61,7 @@ export default function OrganizerDashboard() {
   return (
     <div>
       <PageHeader
+        eyebrow="organizer dashboard"
         title={`Hello, ${user.name.split(" ")[0]}`}
         description="Here's how your events are performing."
         action={

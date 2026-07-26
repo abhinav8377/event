@@ -3,7 +3,7 @@
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { Users, Megaphone, CalendarRange, Ticket, Award, TrendingUp, RefreshCw } from "lucide-react"
+import { Users, Megaphone, CalendarRange, Ticket, Award, TrendingUp, RefreshCw, ShieldCheck } from "lucide-react"
 import * as adminApi from "@/api/adminApi"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/cards/StatCard"
@@ -44,6 +44,7 @@ export default function AdminDashboard() {
     return (
       <div>
         <PageHeader
+          eyebrow="platform admin"
           title="Platform overview"
           description="System-wide statistics and recent activity."
           action={
@@ -73,6 +74,7 @@ export default function AdminDashboard() {
   return (
     <div>
       <PageHeader
+        eyebrow="platform admin"
         title="Platform overview"
         description="System-wide statistics and recent activity."
         action={
@@ -132,7 +134,11 @@ export default function AdminDashboard() {
             </Link>
           </div>
           {pendingOrganizers.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No pending organizer verifications.</p>
+            <EmptyState
+              icon={<ShieldCheck className="size-9" aria-hidden="true" />}
+              title="All caught up"
+              description="No pending organizer verifications right now."
+            />
           ) : (
             <div className="flex flex-col divide-y divide-border">
               {pendingOrganizers.map((o) => (

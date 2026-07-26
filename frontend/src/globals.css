@@ -102,12 +102,10 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
   transition: background-color 200ms ease, color 200ms ease;
 }
 
 #root {
-  overflow-x: hidden;
   min-height: 100dvh;
 }
 
@@ -128,6 +126,31 @@ body {
 .bg-grid-fade {
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 75%);
   mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 75%);
+}
+
+/* two faint corner blobs for a breathable hero backdrop, biased toward the
+   vertical middle of the box so they read as centered rather than pinned
+   to the edges (which reads as a hard cutoff once the box is masked). */
+.mesh-bg {
+  background: radial-gradient(ellipse 70% 55% at 22% 35%, var(--primary), transparent),
+    radial-gradient(ellipse 60% 50% at 78% 60%, var(--primary), transparent);
+}
+@supports (color: color-mix(in lab, red, red)) {
+  .mesh-bg {
+    background: radial-gradient(
+        ellipse 70% 55% at 22% 35%,
+        color-mix(in srgb, var(--primary) 20%, transparent),
+        transparent
+      ),
+      radial-gradient(ellipse 60% 50% at 78% 60%, color-mix(in srgb, var(--primary) 14%, transparent), transparent);
+  }
+}
+
+/* fades the whole hero backdrop (grid + mesh) out before its bottom edge,
+   so it hands off to the next section without a visible seam */
+.fade-edge-bottom {
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 92%);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 92%);
 }
 
 /* ─── Date/Time picker calendar icon ─── */
@@ -465,6 +488,8 @@ body {
   --sidebar-foreground: #b9bce0;
   --sidebar-accent: #1c1f3a;
   --sidebar-accent-foreground: #ffffff;
+  --color-sidebar-accent: #1c1f3a;
+  --color-sidebar-accent-foreground: #ffffff;
 }
 
 .dark .theme-organizer {
@@ -473,6 +498,79 @@ body {
   --accent: #1e2147;
   --accent-foreground: #c7d2fe;
   --ring: #818cf8;
+}
+
+/* ─── Landing page theme (brick-red accent, marketing redesign) ───
+   Overrides both the semantic tokens AND their Tailwind `--color-*`
+   aliases: Tailwind's @theme mapping (e.g. --color-primary: var(--primary))
+   is only declared at :root, so its computed value resolves once there —
+   redeclaring --primary on a nested class won't cascade through an alias
+   that isn't itself redeclared at that same nesting level. */
+.theme-landing {
+  --primary: #c94f4f;
+  --primary-foreground: #fdf3f2;
+  --accent: #f7e2e0;
+  --accent-foreground: #a13f3f;
+  --ring: #c94f4f;
+  --color-primary: #c94f4f;
+  --color-primary-foreground: #fdf3f2;
+  --color-accent: #f7e2e0;
+  --color-accent-foreground: #a13f3f;
+  --color-ring: #c94f4f;
+  --sidebar-accent: #2a1414;
+  --sidebar-accent-foreground: #ffffff;
+  --color-sidebar-accent: #2a1414;
+  --color-sidebar-accent-foreground: #ffffff;
+  --landing-tint-foreground: #a13f3f;
+  --landing-secondary-foreground: var(--muted-foreground);
+}
+
+.dark .theme-landing {
+  --primary: #c94f4f;
+  --primary-foreground: #241010;
+  --accent: #3a1a1a;
+  --accent-foreground: #c94f4f;
+  --ring: #c94f4f;
+  --color-primary: #c94f4f;
+  --color-primary-foreground: #241010;
+  --color-accent: #3a1a1a;
+  --color-accent-foreground: #c94f4f;
+  --color-ring: #c94f4f;
+  --landing-tint-foreground: #e8b8b8;
+  --landing-secondary-foreground: #b8b5ac;
+}
+
+/* ─── Admin theme (cyan accent, distinct from organizer indigo / attendee red) ─── */
+.theme-admin {
+  --primary: #0891b2;
+  --primary-foreground: #f0fdff;
+  --accent: #e0f7fa;
+  --accent-foreground: #0e7490;
+  --ring: #0891b2;
+  --sidebar: #0a1518;
+  --sidebar-foreground: #a8c5cc;
+  --sidebar-accent: #123c46;
+  --sidebar-accent-foreground: #ffffff;
+  --color-primary: #0891b2;
+  --color-primary-foreground: #f0fdff;
+  --color-accent: #e0f7fa;
+  --color-accent-foreground: #0e7490;
+  --color-ring: #0891b2;
+  --color-sidebar-accent: #123c46;
+  --color-sidebar-accent-foreground: #ffffff;
+}
+
+.dark .theme-admin {
+  --primary: #22d3ee;
+  --primary-foreground: #083344;
+  --accent: #123c46;
+  --accent-foreground: #22d3ee;
+  --ring: #22d3ee;
+  --color-primary: #22d3ee;
+  --color-primary-foreground: #083344;
+  --color-accent: #123c46;
+  --color-accent-foreground: #22d3ee;
+  --color-ring: #22d3ee;
 }
 
 .scrollbar-hide {

@@ -14,7 +14,7 @@ export function StatCard({
   tone?: "primary" | "success" | "warning" | "destructive"
 }) {
   return (
-    <Card className="flex items-center gap-4 p-5">
+    <Card className="flex items-center gap-4 p-5 transition-colors hover:border-primary/40">
       <span
         className={clsx(
           "flex size-11 shrink-0 items-center justify-center rounded-lg",
@@ -27,10 +27,10 @@ export function StatCard({
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <div>
-        <p className="text-2xl font-extrabold tracking-tight text-foreground">
+        <p className="display !normal-case text-2xl text-foreground">
           {typeof value === "number" ? value.toLocaleString() : value}
         </p>
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="font-mono text-xs text-muted-foreground">{label}</p>
       </div>
     </Card>
   )
