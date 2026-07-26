@@ -26,6 +26,8 @@ import {
   Bell,
   RefreshCw,
   XCircle,
+  ArrowRight,
+  PieChart as PieChartIcon,
 } from "lucide-react"
 import { useAppSelector } from "@/app/store"
 import { getUserDashboard } from "@/api/userApi"
@@ -34,6 +36,13 @@ import { StatCard } from "@/components/cards/StatCard"
 import { Card, Badge, Button, Loader, EmptyState } from "@/components/common/ui"
 
 const CHART_COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899"]
+
+function greeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return "Good morning"
+  if (hour < 18) return "Good afternoon"
+  return "Good evening"
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   TECH: "Technology",
@@ -70,7 +79,8 @@ export default function UserDashboard() {
     return (
       <div>
         <PageHeader
-          title={`Welcome back, ${user.name.split(" ")[0]}`}
+          eyebrow="your dashboard"
+          title={`${greeting()}, ${user.name.split(" ")[0]}.`}
           description="Your event activity at a glance."
           action={
             <Button size="sm" variant="outline" onClick={() => refresh()}>
@@ -100,7 +110,8 @@ export default function UserDashboard() {
   return (
     <div>
       <PageHeader
-        title={`Welcome back, ${user.name.split(" ")[0]}`}
+        eyebrow="your dashboard"
+        title={`${greeting()}, ${user.name.split(" ")[0]}.`}
         description="Your event activity at a glance."
         action={
           <Button size="sm" variant="outline" onClick={() => refresh()}>
@@ -129,12 +140,27 @@ export default function UserDashboard() {
         <Card className="overflow-x-auto lg:col-span-2">
           <div className="flex items-center justify-between px-5 pt-5">
             <h2 className="font-bold text-foreground">Recent Activity</h2>
-            <Link to="/user/registrations" className="text-sm font-semibold text-primary hover:underline">
-              View all
+            <Link to="/user/registrations" className="flex items-center gap-1 font-mono text-xs text-primary hover:underline">
+              view all
+              <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
           </div>
           {recentActivity.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-muted-foreground">No activity yet. Register for an event to get started!</p>
+            <div className="px-5 pb-5">
+              <EmptyState
+                icon={<Ticket className="size-9" aria-hidden="true" />}
+                title="No activity yet"
+                description="Register for an event and it'll show up here."
+                action={
+                  <Link to="/user/browse">
+                    <Button size="sm">
+                      Browse events
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </Button>
+                  </Link>
+                }
+              />
+            </div>
           ) : (
             <table className="mt-3 w-full min-w-[580px] text-sm">
               <thead>
@@ -177,7 +203,10 @@ export default function UserDashboard() {
         <Card className="p-5">
           <h2 className="mb-4 font-bold text-foreground">Category Breakdown</h2>
           {categoryChartData.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No data yet.</p>
+            <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+              <PieChartIcon className="size-8 text-muted-foreground" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground">No data yet.</p>
+            </div>
           ) : (
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">

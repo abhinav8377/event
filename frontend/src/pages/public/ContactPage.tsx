@@ -54,14 +54,23 @@ export default function ContactPage() {
 
   return (
     <div className="relative overflow-hidden">
-      <div className="bg-grid bg-grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+      <div className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-primary/[0.16] blur-3xl"
+          aria-hidden="true"
+        />
+      </div>
 
-      <section className="relative mx-auto max-w-6xl px-4 pb-24 pt-16 md:px-6 md:pt-24">
+      <section className="relative mx-auto max-w-6xl px-4 pb-24 pt-20 md:px-6 md:pb-28 md:pt-28">
         <Eyebrow>contact</Eyebrow>
-        <h1 className="display mt-5 max-w-2xl text-4xl text-foreground md:text-6xl">
+        <h1
+          className="display !normal-case mt-6 max-w-2xl text-4xl text-foreground md:text-6xl"
+          style={{ letterSpacing: "-0.04em", lineHeight: 0.95 }}
+        >
           Let&apos;s <span className="text-primary">talk.</span>
         </h1>
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground text-pretty">
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-[color:var(--landing-secondary-foreground)] text-pretty">
           Questions about the platform, feedback on an event, a bug report, or a collaboration idea — pick whichever
           channel suits you. Messages usually get a reply within a day or two.
         </p>
@@ -77,8 +86,8 @@ export default function ContactPage() {
                 rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 className="group"
               >
-                <Card className="flex items-center gap-4 p-5 transition-colors group-hover:border-primary/40">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
+                <Card className="flex items-center gap-4 p-5 transition-all group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-black/5">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                     <c.icon className="size-5" aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
@@ -101,8 +110,10 @@ export default function ContactPage() {
           <Card className="p-6 md:p-8 lg:col-span-3">
             {sent ? (
               <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                <CheckCircle2 className="size-12 text-success" aria-hidden="true" />
-                <h2 className="display text-2xl text-foreground">Message on its way.</h2>
+                <span className="flex size-14 items-center justify-center rounded-full bg-success/10">
+                  <CheckCircle2 className="size-7 text-success" aria-hidden="true" />
+                </span>
+                <h2 className="display !normal-case mt-2 text-2xl text-foreground">Message on its way.</h2>
                 <p className="max-w-sm text-sm text-muted-foreground text-pretty">
                   Your email client should have opened with the message pre-filled. Didn&apos;t work? Email directly at{" "}
                   <a href="mailto:arnavm.396@gmail.com" className="font-semibold text-primary hover:underline">
@@ -116,7 +127,7 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={submit} className="flex flex-col gap-4">
-                <h2 className="display text-2xl text-foreground">Send a message.</h2>
+                <h2 className="display !normal-case text-2xl text-foreground">Send a message.</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
                     id="contact-name"
