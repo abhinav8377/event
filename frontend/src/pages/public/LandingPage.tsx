@@ -19,6 +19,7 @@ import {
   Palette,
   Trophy,
   UsersRound,
+  Sparkles,
 } from "lucide-react";
 import { Button, Eyebrow } from "@/components/common/ui";
 import { PlatformLifecycle } from "@/components/landing/PlatformLifecycle";
@@ -168,9 +169,15 @@ export default function LandingPage() {
         <HeroMapBackdrop />
         <div
           ref={heroRef}
-          className="relative mx-auto grid max-w-6xl gap-14 px-4 pb-20 pt-20 md:grid-cols-[1fr_1fr] md:items-center md:px-6 md:pb-28 md:pt-28"
+          className="relative mx-auto grid max-w-6xl gap-14 px-4 pb-20 pt-20 md:grid-cols-[1.15fr_0.85fr] md:items-center md:px-6 md:pb-28 md:pt-28"
         >
           <motion.div initial="hidden" animate={heroInView ? "visible" : "hidden"} variants={staggerContainer}>
+            <motion.div variants={fadeInUp}>
+              <Eyebrow>
+                <Sparkles className="size-3.5 text-primary" aria-hidden="true" />
+                events · tickets · certificates
+              </Eyebrow>
+            </motion.div>
             <motion.h1
               variants={fadeInUp}
               className="display mt-7 text-5xl !normal-case text-foreground md:text-7xl"
@@ -179,7 +186,12 @@ export default function LandingPage() {
               Real events to <span className="text-primary">discover</span>,
               join &amp; <span className="italic">explore.</span>
             </motion.h1>
-            <motion.div variants={fadeInUp} className="mt-10 flex flex-wrap items-center gap-6">
+            <motion.div variants={fadeInUp} className="mt-10 flex flex-col gap-7 border-t border-border pt-8">
+              <p className="max-w-md text-base leading-relaxed text-[color:var(--landing-secondary-foreground)] text-pretty">
+                EventHub is a hub for the full event lifecycle — discovery,
+                registration, QR check-in, and automatic certificates — so
+                communities stop juggling forms and spreadsheets.
+              </p>
               <div className="flex flex-wrap gap-3">
                 <Link to="/login" className="w-full sm:w-auto">
                   <Button size="lg" className="w-full sm:w-auto">
