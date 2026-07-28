@@ -29,8 +29,11 @@ function getClient(): Resend {
 }
 
 /**
- * Confirms the API key is valid without sending anything. Call at boot to surface
- * misconfiguration in the deploy logs rather than mid-request.
+ * Logs whether RESEND_API_KEY is present, at boot, so a missing key shows up in the
+ * deploy logs rather than mid-request. Deliberately does not call the Resend API:
+ * a key scoped to "Sending access only" (recommended) can't call GET /domains, so
+ * that check would misreport a correctly-scoped key as invalid. The only true test
+ * of the key is an actual send.
  */
 export const verifyEmailTransport = async () => {
   if (!isEmailConfigured()) {
@@ -38,13 +41,7 @@ export const verifyEmailTransport = async () => {
     return false;
   }
 
-  const { error } = await getClient().domains.list();
-  if (error) {
-    console.error(`[MAIL] Resend API key rejected – ${error.name}: ${error.message}`);
-    return false;
-  }
-
-  console.log("[MAIL] Resend API reachable and authenticated.");
+  console.log("[MAIL] RESEND_API_KEY is set.");
   return true;
 };
 
