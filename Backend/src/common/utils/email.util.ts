@@ -1,4 +1,4 @@
-import nodemailer, { type Transporter } from "nodemailer";
+import { Resend } from "resend";
 
 interface Attachment {
   filename: string;
@@ -13,114 +13,48 @@ interface EmailOptions {
   attachments?: Attachment[];
 }
 
-const EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
-// 587 (STARTTLS) is far more likely to be reachable from a PaaS container than 465.
-const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
-const EMAIL_DEBUG = process.env.EMAIL_DEBUG === "true";
+// Sends over HTTPS (port 443) instead of raw SMTP, so it isn't affected by hosts
+// (Railway, Render, etc.) that block outbound SMTP ports 25/465/587 by default.
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+// Must be on a domain verified in the Resend dashboard, or Resend rejects the send.
+const EMAIL_FROM = process.env.EMAIL_FROM || "EventHub <onboarding@resend.dev>";
 
-// Gmail shows app passwords in four-character groups; those spaces are display-only
-// and must be stripped before authenticating.
-const getPass = () => (process.env.EMAIL_PASS || "").replace(/\s+/g, "");
-const getUser = () => (process.env.EMAIL_USER || "").trim();
+export const isEmailConfigured = () => Boolean(RESEND_API_KEY);
 
-export const isEmailConfigured = () => Boolean(getUser() && getPass());
+let client: Resend | null = null;
 
-let transporter: Transporter | null = null;
-
-function getTransporter(): Transporter {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: EMAIL_HOST,
-      port: EMAIL_PORT,
-      secure: EMAIL_PORT === 465,
-      auth: { user: getUser(), pass: getPass() },
-      pool: true,
-      maxConnections: 2,
-      // Fail fast instead of hanging an HTTP request for the full OS TCP timeout.
-      connectionTimeout: 15_000,
-      greetingTimeout: 15_000,
-      socketTimeout: 30_000,
-      logger: EMAIL_DEBUG,
-      debug: EMAIL_DEBUG,
-    });
-  }
-  return transporter;
+function getClient(): Resend {
+  if (!client) client = new Resend(RESEND_API_KEY);
+  return client;
 }
 
 /**
- * Opens a connection and authenticates without sending anything. Call at boot to
- * surface SMTP misconfiguration in the deploy logs rather than mid-request.
+ * Confirms the API key is valid without sending anything. Call at boot to surface
+ * misconfiguration in the deploy logs rather than mid-request.
  */
 export const verifyEmailTransport = async () => {
   if (!isEmailConfigured()) {
-    console.warn("[MAIL] EMAIL_USER/EMAIL_PASS not set – emails are disabled");
+    console.warn("[MAIL] RESEND_API_KEY not set – emails are disabled");
     return false;
   }
 
-  try {
-    await getTransporter().verify();
-    console.log(`[MAIL] SMTP ready via ${EMAIL_HOST}:${EMAIL_PORT}`);
-    return true;
-  } catch (err: any) {
-    console.error(
-      `[MAIL] SMTP unreachable at ${EMAIL_HOST}:${EMAIL_PORT} – ${err.code || ""} ${err.message}`,
-    );
+  const { error } = await getClient().domains.list();
+  if (error) {
+    console.error(`[MAIL] Resend API key rejected – ${error.name}: ${error.message}`);
     return false;
   }
+
+  console.log("[MAIL] Resend API reachable and authenticated.");
+  return true;
 };
 
-// Retrying these only burns wall-clock time: the network has no route, the port is
-// closed, the host does not resolve, or the credentials are wrong. A blocked egress
-// would otherwise stall a request for the full timeout on every attempt.
-const PERMANENT_CODES = new Set([
-  "ENETUNREACH",
-  "EHOSTUNREACH",
-  "ECONNREFUSED",
-  "ENOTFOUND",
-  "EDNS",
-  "EAUTH",
-]);
-
-const isPermanent = (err: any) =>
-  PERMANENT_CODES.has(err?.code) || (err?.responseCode >= 500 && err?.responseCode < 600);
-
-async function attempt<T>(attempts: number, fn: () => Promise<T>): Promise<T> {
-  let lastError: unknown;
-
-  for (let i = 1; i <= attempts; i++) {
-    try {
-      return await fn();
-    } catch (err: any) {
-      lastError = err;
-
-      console.error(`[MAIL] Attempt ${i}/${attempts} failed`, {
-        message: err.message,
-        code: err.code,
-        response: err.response,
-        responseCode: err.responseCode,
-        command: err.command,
-      });
-
-      if (isPermanent(err)) {
-        console.error("[MAIL] Error is not retryable – giving up.");
-        break;
-      }
-
-      if (i < attempts) {
-        const delay = i * 2000; // 2s, 4s, 6s...
-        console.log(`[MAIL] Retrying in ${delay} ms...`);
-
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  throw lastError;
-}
+// Rate limiting and transient server errors are worth a retry; a bad key, a bad
+// request, or a bounced address will fail identically every time.
+const RETRYABLE_ERROR_NAMES = new Set(["rate_limit_exceeded", "internal_server_error"]);
 
 /**
- * Never rejects. Email is a side effect – a dead SMTP host must not fail the
- * request that triggered it. Returns whether the message was handed to the server.
+ * Never throws. Email is a side effect – a Resend outage must not fail the
+ * request that triggered it. Returns whether the message was accepted for delivery.
  */
 export const sendEmail = async ({
   to,
@@ -133,34 +67,41 @@ export const sendEmail = async ({
     return false;
   }
 
-  const mailOptions: nodemailer.SendMailOptions = {
-    from: `"EventHub" <${getUser()}>`,
+  const payload = {
+    from: EMAIL_FROM,
     to,
     subject,
     html,
-    attachments:
-      attachments?.map((a) => ({
-        filename: a.filename,
-        content: a.content,
-        cid: a.cid,
-      })) ?? [],
+    attachments: attachments?.map((a) => ({
+      filename: a.filename,
+      content: a.content,
+      contentId: a.cid,
+    })),
   };
 
-  try {
-    const info = await attempt(3, () => getTransporter().sendMail(mailOptions));
+  const maxAttempts = 3;
+  for (let i = 1; i <= maxAttempts; i++) {
+    const { data, error } = await getClient().emails.send(payload);
 
-    console.log("[MAIL] Email sent successfully.", {
-      messageId: info.messageId,
-      accepted: info.accepted,
-      rejected: info.rejected,
-      response: info.response,
+    if (!error) {
+      console.log("[MAIL] Email sent successfully.", { id: data?.id, to, subject });
+      return true;
+    }
+
+    console.error(`[MAIL] Attempt ${i}/${maxAttempts} failed`, {
+      name: error.name,
+      message: error.message,
     });
 
-    return true;
-  } catch (err: any) {
-    console.error(
-      `[MAIL] Failed to send "${subject}" to ${to} – ${err.code || ""} ${err.message}`,
-    );
-    return false;
+    if (!RETRYABLE_ERROR_NAMES.has(error.name) || i === maxAttempts) {
+      console.error(`[MAIL] Failed to send "${subject}" to ${to} – ${error.name}: ${error.message}`);
+      return false;
+    }
+
+    const delay = i * 2000; // 2s, 4s
+    console.log(`[MAIL] Retrying in ${delay} ms...`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
+
+  return false;
 };
