@@ -20,22 +20,22 @@ const steps = [
     icon: CheckCircle2,
     title: "Account Created",
     description: "Your organizer account has been successfully registered.",
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
+    color: "text-success",
+    bg: "bg-success/10",
   },
   {
     icon: Clock,
     title: "Under Review",
     description: "Our admin team is reviewing your application.",
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
+    color: "text-warning",
+    bg: "bg-warning/10",
   },
   {
     icon: ShieldCheck,
     title: "Verification",
     description: "Once verified, you'll get full access to your dashboard.",
-    color: "text-indigo-500",
-    bg: "bg-indigo-500/10",
+    color: "text-primary",
+    bg: "bg-primary/10",
   },
 ]
 
@@ -87,16 +87,16 @@ export default function VerificationPendingPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-              className="mb-6 flex size-20 items-center justify-center rounded-full bg-amber-500/10"
+              className="mb-6 flex size-20 items-center justify-center rounded-full bg-warning/10"
             >
-              <Clock className="size-10 text-amber-500" />
+              <Clock className="size-10 text-warning" />
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="display mb-2 text-2xl text-foreground"
+              className="display !normal-case mb-2 text-2xl text-foreground"
             >
               Verification Pending
             </motion.h1>
@@ -125,7 +125,7 @@ export default function VerificationPendingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mb-6 rounded-lg bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-400"
+              className="mb-6 rounded-lg bg-warning/10 px-4 py-3 text-sm text-warning"
             >
               Please wait up to <strong>24 hours</strong> for admin verification.
             </motion.div>
@@ -178,23 +178,23 @@ export default function VerificationPendingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.3 }}
-            className="mb-6 rounded-lg border border-blue-500/20 bg-blue-500/5 p-4"
+            className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4"
           >
             <div className="mb-2 flex items-center gap-2">
-              <Info className="size-4 text-blue-500" />
+              <Info className="size-4 text-primary" />
               <span className="text-sm font-semibold text-foreground">What Can You Do Now?</span>
             </div>
             <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-blue-500">•</span>
+                <span className="mt-0.5 text-primary">•</span>
                 Browse public events and discover what's happening
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-blue-500">•</span>
+                <span className="mt-0.5 text-primary">•</span>
                 Learn more about EventHub features
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 text-blue-500">•</span>
+                <span className="mt-0.5 text-primary">•</span>
                 Contact our support team if you have questions
               </li>
             </ul>
