@@ -224,7 +224,7 @@ export const forgotPassword = async ({ email }: { email: string }) => {
   user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
   await user.save();
   const resetLink = `${FRONTEND_URL}/reset-password?token=${token}`;
-  await sendEmail({
+  const sent = await sendEmail({
     to: user.email,
     subject: 'Password Reset — EventHub',
     html: `
@@ -249,6 +249,10 @@ export const forgotPassword = async ({ email }: { email: string }) => {
       </div>
     `,
   });
+
+  // sendEmail swallows transport errors; surface a clean message instead of a
+  // raw socket error, and never claim success when nothing was delivered.
+  if (!sent) throwErr('Could not send the reset email right now. Please try again shortly.', 502);
 };
 
 export const resetPassword = async ({ token, password }: ResetPasswordInput) => {
