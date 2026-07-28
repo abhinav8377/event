@@ -49,7 +49,7 @@ interface CreateEventInput {
 }
 
 export const listEvents = async ({ category, search, page = 1, limit = 12 }: ListParams) => {
-  const filter: Record<string, unknown> = { status: 'PUBLISHED' };
+  const filter: Record<string, unknown> = { status: { $in: ['PUBLISHED', 'COMPLETED'] } };
   if (category) filter.category = category;
   if (search) filter.$text = { $search: search };
 

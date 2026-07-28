@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useSignIn } from "@clerk/clerk-react"
+import { useSignIn, useAuth } from "@clerk/clerk-react"
 import { Loader2 } from "lucide-react"
 import { useAppDispatch } from "@/app/store"
 import { pushToast } from "@/features/toast/toastSlice"
@@ -28,14 +28,18 @@ function GoogleIcon() {
 }
 
 export default function GoogleSignInButton() {
-  const { signIn, isLoaded } = useSignIn()
+  const { signIn, isLoaded: signInLoaded } = useSignIn()
+  const { isLoaded: authLoaded, isSignedIn, signOut } = useAuth()
   const dispatch = useAppDispatch()
   const [loading, setLoading] = useState(false)
 
   const handleGoogle = async () => {
-    if (!isLoaded || !signIn) return
+    if (!signInLoaded || !signIn || !authLoaded) return
     setLoading(true)
     try {
+      if (isSignedIn && signOut) {
+        await signOut()
+      }
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
@@ -55,7 +59,7 @@ export default function GoogleSignInButton() {
     <button
       type="button"
       onClick={handleGoogle}
-      disabled={!isLoaded || loading}
+      disabled={!signInLoaded || !authLoaded || loading}
       className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-bold tracking-tight text-foreground transition-all hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
     >
       {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <GoogleIcon />}

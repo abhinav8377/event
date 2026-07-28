@@ -1,6 +1,4 @@
 import Notification from './notification.model.js';
-import User from '../users/user.model.js';
-import { sendEmail } from '../../common/utils/email.util.js';
 import type { ServiceError } from '../../types/index.js';
 
 function throwErr(message: string, status: number): never {
@@ -18,14 +16,6 @@ interface NotifyInput {
 
 export const notify = async ({ userId, title, message, type = 'GENERAL' }: NotifyInput) => {
   const notification = await Notification.create({ userId, title, message, type });
-  const user = await User.findById(userId);
-  if (user) {
-    await sendEmail({
-      to: user.email,
-      subject: title,
-      html: `<p>Hi ${user.name},</p><p>${message}</p>`,
-    });
-  }
   return notification;
 };
 

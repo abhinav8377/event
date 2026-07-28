@@ -48,8 +48,8 @@ export interface EventItem {
   organizerId: string
   organizerName: string
   organizerOrganization?: string
-  organizerVerified: boolean
-  tags: string[]
+  organizerVerified?: boolean
+  tags?: string[]
 }
 
 export type RegistrationStatus = "CONFIRMED" | "CANCELLED" | "WAITLISTED" | "PENDING" | "ALLOWED" | "PAYMENT_PENDING" | "DENIED"
@@ -79,6 +79,13 @@ export interface Registration {
   registrantReason?: string
   registrantSpecialRequest?: string
   registeredAt: string
+  eventTitle?: string
+  eventStartDate?: string
+  eventEndDate?: string
+  eventBanner?: string
+  eventVenue?: string
+  eventCity?: string
+  eventMode?: string
 }
 
 export interface Certificate {
@@ -209,20 +216,34 @@ export interface CommunityMember {
   isOrganizer?: boolean
 }
 
+export interface CommunityPollOption {
+  text: string
+  votes: string[]
+}
+
 export interface CommunityMessage {
   id: string
   senderId: string
   senderName: string
   message: string
+  type?: 'text' | 'poll' | 'system'
   createdAt: string
   isOrganizer?: boolean
+  replyToId?: string
+  replyToMessage?: string
+  replyToSender?: string
+  pollQuestion?: string
+  pollOptions?: CommunityPollOption[]
 }
 
 export interface CommunityChatData {
   community: Community
   members: {
-    isOrganizer: any id: string; name: string; email: string 
-}[]
+    id: string
+    name: string
+    email: string
+    isOrganizer: boolean
+  }[]
   messages: CommunityMessage[]
 }
 

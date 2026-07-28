@@ -26,6 +26,13 @@ function mapRegistration(r: any): Registration {
     registrantReason: r.registrantReason,
     registrantSpecialRequest: r.registrantSpecialRequest,
     registeredAt: r.createdAt || r.registeredAt || r.createdAt,
+    eventTitle: r.eventId?.title,
+    eventStartDate: r.eventId?.date || r.eventId?.startDate,
+    eventEndDate: r.eventId?.endDate,
+    eventBanner: r.eventId?.bannerUrl || r.eventId?.banner,
+    eventVenue: r.eventId?.venue,
+    eventCity: r.eventId?.city,
+    eventMode: r.eventId?.mode,
   }
 }
 

@@ -12,7 +12,9 @@ const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunctio
       return;
     }
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id).populate('roleId');
+    const user = await User.findById(decoded.id)
+      .select('name email roleId isBlocked lastLogoutAt')
+      .populate('roleId');
     if (!user || user.isBlocked) {
       res.status(401).json({ success: false, message: 'Unauthorized', errors: [] });
       return;

@@ -4,11 +4,10 @@ import { useState } from "react"
 import useSWR from "swr"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
-import { QRCodeSVG } from "qrcode.react"
-import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock } from "lucide-react"
+
+import { Ticket, MapPin, CalendarDays, Star, QrCode, Clock, Download } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/store"
 import * as registrationApi from "@/api/registrationApi"
-import * as eventApi from "@/api/eventApi"
 import * as feedbackApi from "@/api/feedbackApi"
 import { pushToast } from "@/features/toast/toastSlice"
 import { PageHeader } from "@/components/common/PageHeader"
@@ -28,20 +27,56 @@ export default function MyRegistrations() {
   const [rating, setRating] = useState(5)
   const [review, setReview] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [feedbackGiven, setFeedbackGiven] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("feedbackGiven");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  })
 
   const { data: regs, mutate } = useSWR(["my-registrations", user.id], () =>
     registrationApi.getMyRegistrations(user.id).then((r) => r.data),
   )
-  const { data: allEvents } = useSWR("all-published-events", () =>
-    eventApi.getEvents().then((r) => r.data),
-  )
 
-  if (!regs || !allEvents) return <Loader />
+  if (!regs) return <Loader />
 
-  const eventById = new Map(allEvents.map((e) => [e.id, e]))
   const rows = regs
-    .map((reg) => ({ reg, event: eventById.get(reg.eventId) }))
-    .filter((x): x is { reg: Registration; event: EventItem } => !!x.event)
+    .map((reg): { reg: Registration; event: EventItem } | null => {
+      if (!reg.eventTitle) return null
+      return {
+        reg,
+        event: {
+          id: reg.eventId,
+          title: reg.eventTitle,
+          startDate: reg.eventStartDate || "",
+          endDate: reg.eventEndDate || "",
+          banner: reg.eventBanner || "",
+          venue: reg.eventVenue || "",
+          city: reg.eventCity || "",
+          mode: (reg.eventMode as EventItem["mode"]) || "IN_PERSON",
+          description: "",
+          longDescription: "",
+          category: "Technology",
+          status: "PUBLISHED",
+          latitude: null,
+          longitude: null,
+          capacity: 0,
+          registeredCount: 0,
+          attendanceCount: 0,
+          views: 0,
+          price: 0,
+          rating: 0,
+          ratingCount: 0,
+          organizerId: "",
+          organizerName: "",
+          organizerVerified: false,
+          tags: []
+        },
+      }
+    })
+    .filter((x): x is { reg: Registration; event: EventItem } => x !== null)
 
   const now = Date.now()
   const filtered = rows.filter(({ reg, event }) => {
@@ -62,6 +97,15 @@ export default function MyRegistrations() {
     }
   }
 
+  const handleDownloadQR = () => {
+    const qr = ticketReg?.reg.qrValue
+    if (!qr) return
+    const a = document.createElement("a")
+    a.href = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
+    a.download = `ticket-${ticketReg?.reg.ticketNumber || "qr"}.png`
+    a.click()
+  }
+
   const submitReview = async () => {
     if (!feedbackFor) return
     setSubmitting(true)
@@ -74,6 +118,12 @@ export default function MyRegistrations() {
         review,
       })
       dispatch(pushToast({ type: "success", message: res.message }))
+      setFeedbackGiven((prev) => {
+        const next = new Set(prev);
+        next.add(feedbackFor.event.id);
+        localStorage.setItem("feedbackGiven", JSON.stringify([...next]));
+        return next;
+      })
       setFeedbackFor(null)
       setReview("")
       setRating(5)
@@ -130,6 +180,8 @@ export default function MyRegistrations() {
               <img
                 src={event.banner || "/placeholder.svg"}
                 alt=""
+                loading="lazy"
+                fetchPriority="low"
                 className="h-24 w-full rounded-lg object-cover sm:w-40"
               />
               <div className="min-w-0 flex-1">
@@ -201,7 +253,7 @@ export default function MyRegistrations() {
                     Cancel
                   </Button>
                 )}
-                {tab === "past" && reg.attendance === "PRESENT" && (
+                {tab === "past" && !feedbackGiven.has(event.id) && (
                   <Button size="sm" variant="outline" onClick={() => setFeedbackFor({ reg, event })}>
                     <Star className="size-4" aria-hidden="true" />
                     Leave feedback
@@ -218,8 +270,16 @@ export default function MyRegistrations() {
         {ticketReg && (
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-white">
-              <QRCodeSVG value={ticketReg.reg.qrValue} size={180} aria-label="Ticket QR code" />
+              <img
+                src={ticketReg.reg.qrValue.startsWith("data:") ? ticketReg.reg.qrValue : `data:image/png;base64,${ticketReg.reg.qrValue}`}
+                alt="Ticket QR code"
+                className="size-30"
+              />
             </div>
+            <Button variant="outline" size="sm" onClick={handleDownloadQR}>
+              <Download className="size-4" aria-hidden="true" />
+              Download QR
+            </Button>
             <div>
               <p className="font-bold text-foreground">{ticketReg.event.title}</p>
               <p className="text-sm text-muted-foreground">
@@ -228,7 +288,7 @@ export default function MyRegistrations() {
               <p className="mt-2 font-mono text-sm text-foreground">{ticketReg.reg.ticketNumber}</p>
             </div>
             <p className="text-xs text-muted-foreground text-pretty">
-              Show this QR code at the venue entrance for check-in.
+              Show this QR code or Ticket at the venue entrance for check-in.
             </p>
           </div>
         )}

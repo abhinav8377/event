@@ -68,8 +68,8 @@ export const sendFeedbackRequests = async (eventId: string, eventTitle: string) 
   );
   if (!registrations.length) return;
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-  const feedbackUrl = `${clientUrl}/events/${eventId}`;
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const feedbackUrl = `${clientUrl}/user/registrations/`;
 
   const emailPromises = registrations.map((reg) => {
     const user = reg.userId as any;

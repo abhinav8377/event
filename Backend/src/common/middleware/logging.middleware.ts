@@ -37,7 +37,11 @@ const loggingMiddleware = (req: Request, res: Response, next: NextFunction): voi
       isAdminRoute,
     };
 
-    RequestLog.create(logData).catch(() => {});
+    setImmediate(() => {
+      RequestLog.create(logData).catch((err) =>
+        console.error('Failed to write request log:', (err as Error).message)
+      );
+    });
 
     return originalJson(body);
   };

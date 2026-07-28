@@ -20,7 +20,6 @@ import * as eventApi from "@/api/eventApi"
 import * as feedbackApi from "@/api/feedbackApi"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Card, Loader, EmptyState, Button } from "@/components/common/ui"
-import useSWRImmutable from "swr/immutable"
 
 const CHART_COLORS = ["#f59e0b", "#22c55e", "#78716c", "#ef4444"]
 
@@ -65,8 +64,8 @@ export default function OrganizerAnalytics() {
   )
 
   const ratedEventIds = (myEvents ?? []).filter((e) => e.ratingCount > 0).map((e) => e.id)
-  const { data: reviews } = useSWRImmutable(
-    myEvents ? ["organizer-feedback", user.id] : null,
+  const { data: reviews } = useSWR(
+    myEvents ? ["organizer-feedback", user.id, ...ratedEventIds] : null,
     async () => {
       const all = await Promise.all(ratedEventIds.map((id) => feedbackApi.getEventFeedback(id).then((r) => r.data)))
       return all.flat()
