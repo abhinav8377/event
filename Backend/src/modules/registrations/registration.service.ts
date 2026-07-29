@@ -137,6 +137,9 @@ export const handlePaymentSuccess = async (eventId: string, userId: string) => {
   let registration = await Registration.findOne({ userId, eventId: event._id });
   if (!registration) throwErr("Registration not found", 404);
 
+  if (registration.paymentStatus !== "COMPLETED")
+    throwErr("Payment has not been verified for this registration", 400);
+
   registration.status = "PENDING";
   registration.qrCode = await generateQR(String(registration._id));
   await registration.save();
