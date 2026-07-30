@@ -134,7 +134,7 @@ export default function OrganizerDashboard() {
               />
             </div>
           ) : (
-            <table className="mt-3 w-full min-w-[580px] text-sm">
+            <table className="mt-3 w-full min-w-145 text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="px-5 py-2 font-semibold">Event</th>
@@ -148,9 +148,9 @@ export default function OrganizerDashboard() {
                 {upcoming.map((e) => (
                   <tr key={e.id} className="transition-colors hover:bg-muted/50">
                     <td className="px-5 py-3">
-                      <Link to={`/events/${e.id}`} className="font-semibold text-foreground hover:text-primary">
+                      <span className="font-semibold text-foreground hover:text-primary">
                         {e.title}
-                      </Link>
+                      </span>
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">
                       {dayjs(e.startDate).format("MMM D, YYYY")}
@@ -194,7 +194,7 @@ export default function OrganizerDashboard() {
               <p className="text-sm text-muted-foreground">No data yet.</p>
             </div>
           ) : (
-            <div className="h-[220px]">
+            <div className="h-55">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
