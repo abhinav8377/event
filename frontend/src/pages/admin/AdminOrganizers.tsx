@@ -51,7 +51,57 @@ export default function AdminOrganizers() {
         <EmptyState title="No organizers" description="Organizer accounts will appear here." />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          {/* Mobile: stacked cards */}
+          <div className="divide-y divide-border sm:hidden">
+            {organizers.map((o) => (
+              <div key={o.id} className="flex flex-col gap-3 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
+                    {o.name.charAt(0)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">{o.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{o.email}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>{o.organization ?? "—"}</span>
+                  <span>{eventCountByOrganizer[o.id] ?? 0} events</span>
+                  <span>Joined {dayjs(o.joinedAt).format("MMM D, YYYY")}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <Badge variant={o.verified ? "success" : "warning"}>
+                    {o.verified ? "Verified" : "Pending"}
+                  </Badge>
+                  {o.blocked && <Badge variant="destructive">Blocked</Badge>}
+                </div>
+                <div className="flex gap-2">
+                  {!o.verified && (
+                    <Button size="sm" variant="success" className="flex-1" onClick={() => verify(o.id)}>
+                      <BadgeCheck className="size-4" aria-hidden="true" />
+                      Verify
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant={o.blocked ? "success" : "destructive"}
+                    className="flex-1"
+                    onClick={() => toggleBlock(o.id)}
+                  >
+                    {o.blocked ? (
+                      <ShieldCheck className="size-4" aria-hidden="true" />
+                    ) : (
+                      <ShieldBan className="size-4" aria-hidden="true" />
+                    )}
+                    {o.blocked ? "Unblock" : "Block"}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* sm and up: full table */}
+          <table className="hidden w-full min-w-[720px] text-sm sm:table">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-3 font-semibold">Organizer</th>

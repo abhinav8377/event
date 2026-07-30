@@ -123,6 +123,35 @@ export default function AdminSecurity() {
   const logs = logsData?.logs || []
   const pagination = logsData?.pagination
 
+  const renderLogDetails = (log: RequestLog) => (
+    <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <span className="font-semibold text-muted-foreground">Full URL</span>
+        <p className="mt-0.5 break-all font-mono text-foreground">{log.url}</p>
+      </div>
+      <div>
+        <span className="font-semibold text-muted-foreground">User Agent</span>
+        <p className="mt-0.5 break-all text-foreground">{log.userAgent || "N/A"}</p>
+      </div>
+      <div>
+        <span className="font-semibold text-muted-foreground">Response Size</span>
+        <p className="mt-0.5 text-foreground">{log.contentLength ? `${(log.contentLength / 1024).toFixed(1)} KB` : "N/A"}</p>
+      </div>
+      <div>
+        <span className="font-semibold text-muted-foreground">Status Category</span>
+        <p className="mt-0.5 text-foreground">{getStatusStyle(log.statusCode).label}</p>
+      </div>
+      {log.isAdminRoute && (
+        <div className="col-span-full mt-1 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
+          <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-400">
+            <ShieldAlert className="size-4" />
+            Privilege Escalation Attempt — {log.userRole} "{log.userName}" accessed admin resource
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div className="mx-auto max-w-7xl">
       <PageHeader
@@ -239,7 +268,64 @@ export default function AdminSecurity() {
       ) : (
         <>
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Mobile: stacked cards, tap to expand details */}
+            <div className="divide-y divide-border sm:hidden">
+              {logs.map((log: RequestLog) => {
+                const status = getStatusStyle(log.statusCode)
+                const StatusIcon = status.icon
+                const isExpanded = expandedLog === log._id
+                return (
+                  <div key={log._id} className={clsx(isExpanded && "bg-muted/30")}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedLog(isExpanded ? null : log._id)}
+                      className="flex w-full flex-col gap-2 px-4 py-3 text-left"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className={clsx("inline-flex items-center rounded-md px-2 py-0.5 font-mono text-xs font-bold", METHOD_COLORS[log.method] || "bg-secondary text-muted-foreground")}>
+                            {log.method}
+                          </span>
+                          <span className={clsx("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-xs font-bold", status.bg)}>
+                            <StatusIcon className="size-3" aria-hidden="true" />
+                            {log.statusCode}
+                          </span>
+                          {log.isAdminRoute && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 font-mono text-[10px] font-bold text-red-700 dark:bg-red-900/40 dark:text-red-400">
+                              <ShieldAlert className="size-2.5" />
+                              ADMIN
+                            </span>
+                          )}
+                        </div>
+                        <Eye className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      </div>
+                      <p className="truncate font-mono text-xs text-foreground" title={log.url}>
+                        {extractEndpoint(log.url)}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        <span>{dayjs(log.createdAt).format("MMM D, HH:mm:ss")}</span>
+                        <span className={clsx(
+                          "font-mono font-medium",
+                          log.duration > 1000 ? "text-orange-500" : log.duration > 500 ? "text-yellow-500" : "text-emerald-500",
+                        )}>
+                          {formatDuration(log.duration)}
+                        </span>
+                        <span>{log.ip || "-"}</span>
+                        <span>{log.userName ? `${log.userName} (${log.userRole})` : "Anonymous"}</span>
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="border-t border-border bg-muted/20 px-4 py-4">
+                        {renderLogDetails(log)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* sm and up: full table */}
+            <div className="hidden overflow-x-auto sm:block">
               <table className="w-full min-w-[900px] text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -326,32 +412,7 @@ export default function AdminSecurity() {
                       {isExpanded && (
                         <tr key={`${log._id}-details`}>
                           <td colSpan={8} className="border-t border-border bg-muted/20 px-5 py-4">
-                            <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
-                              <div>
-                                <span className="font-semibold text-muted-foreground">Full URL</span>
-                                <p className="mt-0.5 break-all font-mono text-foreground">{log.url}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-muted-foreground">User Agent</span>
-                                <p className="mt-0.5 break-all text-foreground">{log.userAgent || "N/A"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-muted-foreground">Response Size</span>
-                                <p className="mt-0.5 text-foreground">{log.contentLength ? `${(log.contentLength / 1024).toFixed(1)} KB` : "N/A"}</p>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-muted-foreground">Status Category</span>
-                                <p className="mt-0.5 text-foreground">{getStatusStyle(log.statusCode).label}</p>
-                              </div>
-                              {log.isAdminRoute && (
-                                <div className="col-span-full mt-1 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-900/20">
-                                  <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-400">
-                                    <ShieldAlert className="size-4" />
-                                    Privilege Escalation Attempt — {log.userRole} "{log.userName}" accessed admin resource
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            {renderLogDetails(log)}
                           </td>
                         </tr>
                       )}
