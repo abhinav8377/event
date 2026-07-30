@@ -186,7 +186,7 @@ export default function MyRegistrations() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link to={`/events/${event.id}`} className="font-bold text-foreground hover:text-primary">
+                  <Link to={`/user/events/${event.id}`} className="font-bold text-foreground hover:text-primary">
                     {event.title}
                   </Link>
                   <Badge
