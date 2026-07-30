@@ -37,7 +37,7 @@ export const registerUser = async ({ name, email, password, role, organizationNa
   if (password.length < 6) throwErr('Password must be at least 6 characters', 400);
 
   const allowedDomains = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/;
-  if (!allowedDomains.test(email)) throwErr('This mail has not trusted', 400);
+  if (!allowedDomains.test(email)) throwErr('Please enter a valid email address', 400);
 
   const exists = await User.findOne({ email });
   if (exists) throwErr('Email already registered', 409);
@@ -132,7 +132,7 @@ export const loginUser = async ({ email, password }: LoginInput) => {
   if (!email || !password) throwErr('Email and password are required', 400);
 
   const allowedDomains = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/;
-  if (!allowedDomains.test(email)) throwErr('Only Gmail and Outlook email addresses are allowed', 400);
+  if (!allowedDomains.test(email)) throwErr('Please enter a valid email address', 400);
 
   const user = await User.findOne({ email })
     .select('+password')
