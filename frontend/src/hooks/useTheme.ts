@@ -7,9 +7,9 @@ type Theme = "dark" | "light"
 const listeners = new Set<() => void>()
 
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "dark"
+  if (typeof window === "undefined") return "light"
   const stored = window.localStorage.getItem("eventhub-theme")
-  return stored === "light" ? "light" : "dark"
+  return stored === "dark" ? "dark" : "light"
 }
 
 let currentTheme: Theme = getStoredTheme()
@@ -32,7 +32,7 @@ export function useTheme() {
       return () => listeners.delete(cb)
     },
     () => currentTheme,
-    () => "dark" as Theme,
+    () => "light" as Theme,
   )
   return { theme, toggle: () => applyTheme(theme === "dark" ? "light" : "dark") }
 }
