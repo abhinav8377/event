@@ -170,7 +170,7 @@ export default function OrganizerDashboard() {
               </div>
 
               {/* sm and up: full table */}
-              <table className="mt-3 hidden w-full min-w-[580px] text-sm sm:table">
+              <table className="mt-3 hidden w-full min-w-145 text-sm sm:table">
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-5 py-2 font-semibold">Event</th>
