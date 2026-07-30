@@ -231,7 +231,7 @@ export default function OrganizerDashboard() {
               <p className="text-sm text-muted-foreground">No data yet.</p>
             </div>
           ) : (
-            <div className="h-[220px]">
+            <div className="h-55">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
