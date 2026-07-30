@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { Link, NavLink, Outlet } from "react-router-dom"
+import { AnimatePresence, motion } from "framer-motion"
 import {
-  CalendarRange,
   Menu,
   X,
   Bell,
@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store"
 import { logoutUser } from "@/features/auth/authSlice"
 import { fetchNotifications } from "@/features/notifications/notificationSlice"
 import { ThemeToggle } from "@/components/common/ThemeToggle"
+import { BrandMark } from "@/components/common/BrandMark"
 import clsx from "clsx"
 import { useClerk } from "@clerk/clerk-react"
 
@@ -65,13 +66,8 @@ export default function DashboardLayout({
   const sidebar = (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="flex h-16 items-center gap-2 px-5">
-        <Link to={user ? dashboardPath[user.role] || "/user" : "/"} className="flex items-center gap-2.5 font-extrabold tracking-tight text-white">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <CalendarRange className="size-4" aria-hidden="true" />
-          </span>
-          <span>
-            Event<span className="text-primary">Hub</span>
-          </span>
+        <Link to={user ? dashboardPath[user.role] || "/user" : "/"} className="flex items-center">
+          <BrandMark forceVariant="dark" textClassName="text-white" />
         </Link>
       </div>
       <p className="px-5 pb-2 pt-4 font-mono text-xs uppercase tracking-wider text-sidebar-foreground/60">
@@ -124,19 +120,31 @@ export default function DashboardLayout({
       </aside>
 
       {/* Mobile sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label="Close sidebar"
-            className="absolute inset-0 bg-foreground/50"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <aside className="absolute inset-y-0 left-0 w-64 bg-sidebar shadow-xl">
-            {sidebar}
-          </aside>
-        </div>
-      )}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              type="button"
+              aria-label="Close sidebar"
+              className="absolute inset-0 bg-foreground/50"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-y-0 left-0 w-64 bg-sidebar shadow-xl"
+            >
+              {sidebar}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="z-40 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-4 md:px-6">

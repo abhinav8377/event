@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { Link, useSearchParams, useNavigate } from "react-router-dom"
-import { CalendarRange, Lock, CheckCircle } from "lucide-react"
+import { Lock, CheckCircle } from "lucide-react"
 import { resetPassword } from "@/api/authApi"
 import { Button, Input, Card } from "@/components/common/ui"
+import { BrandMark } from "@/components/common/BrandMark"
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
@@ -62,11 +63,8 @@ export default function ResetPasswordPage() {
       <div className="bg-grid bg-grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 text-primary">
-            <CalendarRange className="size-8" aria-hidden="true" />
-            <span className="text-2xl font-extrabold tracking-tight text-foreground">
-              Event<span className="text-primary">Hub</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <BrandMark iconClassName="size-9" textClassName="text-2xl" />
           </Link>
           <p className="font-mono text-xs text-muted-foreground">set a new password</p>
         </div>

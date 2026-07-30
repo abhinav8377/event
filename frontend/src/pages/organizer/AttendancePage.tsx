@@ -204,7 +204,27 @@ export default function AttendancePage() {
               <EmptyState title="No attendance records yet" description="Attendees will appear here once they check in." />
             ) : (
               <div className="scroll-area max-h-[520px] overflow-x-auto">
-                <table className="w-full min-w-[560px] text-sm">
+                {/* Mobile: stacked cards */}
+                <div className="divide-y divide-border sm:hidden">
+                  {attendance.map((r: any) => {
+                    const badge = attendanceBadge[r.status as AttendanceStatus] || attendanceBadge.NOT_MARKED
+                    return (
+                      <div key={r.id} className="flex items-start justify-between gap-3 px-3 py-2.5">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">{r.userName || "Unknown"}</p>
+                          <p className="truncate text-xs text-muted-foreground">{r.userEmail || "—"}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {r.checkedInAt ? dayjs(r.checkedInAt).format("MMM D, YYYY · h:mm A") : "—"}
+                          </p>
+                        </div>
+                        <Badge variant={badge.variant} className="shrink-0">{badge.label}</Badge>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* sm and up: full table */}
+                <table className="hidden w-full min-w-[560px] text-sm sm:table">
                   <thead>
                     <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-3 py-2 font-semibold">Attendee</th>

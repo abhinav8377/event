@@ -78,7 +78,12 @@ function useCardWidth() {
 }
 
 function clampCardWidth(viewportWidth: number) {
-  return Math.min(640, Math.max(320, viewportWidth * 0.4));
+  // Section gutter is px-4 (16px/side) below md, px-6 (24px/side) at md+ —
+  // the card must never exceed that, or it overlaps the prev/next arrows.
+  const sectionPadding = (viewportWidth >= 768 ? 24 : 16) * 2;
+  const available = viewportWidth - sectionPadding;
+  const preferred = Math.min(640, Math.max(320, viewportWidth * 0.4));
+  return Math.min(preferred, available);
 }
 
 function Coverflow() {
@@ -177,14 +182,14 @@ function Coverflow() {
       <button
         aria-label="Previous feature"
         onClick={() => go(-1)}
-        className="absolute left-2 top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/80 transition-colors hover:border-primary"
+        className="absolute left-2 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/80 transition-colors hover:border-primary sm:flex"
       >
         <ChevronLeft size={18} className="text-muted-foreground" />
       </button>
       <button
         aria-label="Next feature"
         onClick={() => go(1)}
-        className="absolute right-2 top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/80 transition-colors hover:border-primary"
+        className="absolute right-2 top-1/2 z-20 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/80 transition-colors hover:border-primary sm:flex"
       >
         <ChevronRight size={18} className="text-muted-foreground" />
       </button>

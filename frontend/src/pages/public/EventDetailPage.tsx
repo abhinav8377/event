@@ -386,7 +386,7 @@ export default function EventDetailPage() {
         Back to events
       </Link>
 
-      <div className="grid gap-8 lg:grid-cols-3 lg:items-start">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:items-start">
         {/* Main content */}
         <div className="lg:col-span-2">
           <div className="overflow-hidden rounded-2xl">

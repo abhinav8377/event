@@ -155,41 +155,64 @@ export default function UserDashboard() {
               />
             </div>
           ) : (
-            <table className="mt-3 w-full min-w-[580px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-5 py-2 font-semibold">Event</th>
-                  <th className="px-5 py-2 font-semibold">Category</th>
-                  <th className="px-5 py-2 font-semibold">Date</th>
-                  <th className="px-5 py-2 font-semibold">Status</th>
-                  <th className="px-5 py-2 font-semibold">Attendance</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <>
+              {/* Mobile: stacked cards — a 5-column table has no room on a phone screen */}
+              <div className="mt-3 divide-y divide-border sm:hidden">
                 {recentActivity.slice(0, 4).map((r) => (
-                  <tr key={r.id} className="hover:bg-muted/50">
-                    <td className="px-5 py-3">
+                  <div key={r.id} className="flex items-start justify-between gap-3 px-5 py-3">
+                    <div className="min-w-0">
                       <p className="truncate font-medium text-foreground">{r.eventTitle}</p>
-                      <p className="text-xs text-muted-foreground">{r.ticketNumber}</p>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {CATEGORY_LABELS[r.eventCategory] || r.eventCategory}
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {dayjs(r.registeredAt).format("MMM D, YYYY")}
-                    </td>
-                    <td className="px-5 py-3">
+                      <p className="text-xs text-muted-foreground">
+                        {CATEGORY_LABELS[r.eventCategory] || r.eventCategory} · {dayjs(r.registeredAt).format("MMM D, YYYY")}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
                       <Badge variant={STATUS_BADGE[r.status] || "default"}>{r.status}</Badge>
-                    </td>
-                    <td className="px-5 py-3">
                       <Badge variant={ATTENDANCE_BADGE[r.attendance] || "outline"}>
                         {r.attendance === "NOT_MARKED" ? "Pending" : r.attendance}
                       </Badge>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* sm and up: full table */}
+              <table className="mt-3 hidden w-full min-w-[580px] text-sm sm:table">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="px-5 py-2 font-semibold">Event</th>
+                    <th className="px-5 py-2 font-semibold">Category</th>
+                    <th className="px-5 py-2 font-semibold">Date</th>
+                    <th className="px-5 py-2 font-semibold">Status</th>
+                    <th className="px-5 py-2 font-semibold">Attendance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {recentActivity.slice(0, 4).map((r) => (
+                    <tr key={r.id} className="hover:bg-muted/50">
+                      <td className="px-5 py-3">
+                        <p className="truncate font-medium text-foreground">{r.eventTitle}</p>
+                        <p className="text-xs text-muted-foreground">{r.ticketNumber}</p>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {CATEGORY_LABELS[r.eventCategory] || r.eventCategory}
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {dayjs(r.registeredAt).format("MMM D, YYYY")}
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge variant={STATUS_BADGE[r.status] || "default"}>{r.status}</Badge>
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge variant={ATTENDANCE_BADGE[r.attendance] || "outline"}>
+                          {r.attendance === "NOT_MARKED" ? "Pending" : r.attendance}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </Card>
 
