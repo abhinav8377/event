@@ -98,10 +98,10 @@ export default function BrowseEventsPage() {
     refreshDash()
   }
 
-  const tabs: { key: Tab; label: string; icon: typeof Clock; count?: number }[] = [
-    { key: "all", label: "All Events", icon: Sparkles, count: filtered.length },
-    { key: "upcoming", label: "My Upcoming", icon: CalendarCheck, count: upcomingRegistered.length },
-    { key: "suggested", label: "Suggested For You", icon: Zap, count: suggestions.length },
+  const tabs: { key: Tab; label: string; shortLabel: string; icon: typeof Clock; count?: number }[] = [
+    { key: "all", label: "All Events", shortLabel: "All", icon: Sparkles, count: filtered.length },
+    { key: "upcoming", label: "My Upcoming", shortLabel: "Upcoming", icon: CalendarCheck, count: upcomingRegistered.length },
+    { key: "suggested", label: "Suggested For You", shortLabel: "For You", icon: Zap, count: suggestions.length },
   ]
 
   return (
@@ -155,18 +155,19 @@ export default function BrowseEventsPage() {
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={clsx(
-              "flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors",
+              "flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2 py-2.5 text-xs font-medium transition-colors sm:flex-none sm:justify-start sm:gap-2 sm:px-4 sm:text-sm",
               activeTab === tab.key
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <tab.icon className="size-4" aria-hidden="true" />
-            {tab.label}
+            <tab.icon className="hidden size-4 shrink-0 sm:block" aria-hidden="true" />
+            <span className="sm:hidden">{tab.shortLabel}</span>
+            <span className="hidden sm:inline">{tab.label}</span>
             {tab.count !== undefined && (
               <span
                 className={clsx(
-                  "ml-1 rounded-full px-1.5 py-0.5 text-xs font-semibold",
+                  "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:ml-1 sm:text-xs",
                   activeTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
                 )}
               >

@@ -28,6 +28,7 @@ const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 const allowedOrigins = [
   'https://event-hub.in',
   'https://www.event-hub.in',
+  'https://event-mclpdin30-abhinav8377s-projects.vercel.app',
   /\.vercel\.app$/,
   /\.up\.railway\.app$/,
   frontendUrl,

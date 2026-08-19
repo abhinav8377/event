@@ -102,7 +102,23 @@ export default function AdminDashboard() {
               View all
             </Link>
           </div>
-          <table className="mt-3 w-full min-w-130 text-sm">
+          {/* Mobile: stacked cards */}
+          <div className="mt-3 divide-y divide-border sm:hidden">
+            {recentEvents.map((e) => (
+              <div key={e.id} className="flex items-start justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-foreground">{e.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {e.organizerName} · {dayjs(e.startDate).format("MMM D, YYYY")}
+                  </p>
+                </div>
+                <Badge variant={statusVariant[e.status]} className="shrink-0">{e.status}</Badge>
+              </div>
+            ))}
+          </div>
+
+          {/* sm and up: full table */}
+          <table className="mt-3 hidden w-full min-w-130 text-sm sm:table">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-2 font-semibold">Event</th>

@@ -59,7 +59,41 @@ export default function AdminUsers() {
         <EmptyState title="No users found" description="Try a different search term." />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-160 text-sm">
+          {/* Mobile: stacked cards */}
+          <div className="divide-y divide-border sm:hidden">
+            {users.map((u) => (
+              <div key={u.id} className="flex flex-col gap-3 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
+                    {u.name.charAt(0)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">{u.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                  <span>Joined {dayjs(u.joinedAt).format("MMM D, YYYY")}</span>
+                  <Badge variant={u.blocked ? "destructive" : "success"}>{u.blocked ? "Blocked" : "Active"}</Badge>
+                </div>
+                <Button
+                  size="sm"
+                  variant={u.blocked ? "success" : "destructive"}
+                  onClick={() => toggleBlock(u.id)}
+                >
+                  {u.blocked ? (
+                    <ShieldCheck className="size-4" aria-hidden="true" />
+                  ) : (
+                    <ShieldBan className="size-4" aria-hidden="true" />
+                  )}
+                  {u.blocked ? "Unblock" : "Block"}
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {/* sm and up: full table */}
+          <table className="hidden w-full min-w-160 text-sm sm:table">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-3 font-semibold">User</th>

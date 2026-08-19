@@ -134,55 +134,92 @@ export default function OrganizerDashboard() {
               />
             </div>
           ) : (
-            <table className="mt-3 w-full min-w-145 text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-5 py-2 font-semibold">Event</th>
-                  <th className="px-5 py-2 font-semibold">Date</th>
-                  <th className="px-5 py-2 font-semibold">Registrations</th>
-                  <th className="px-5 py-2 font-semibold">Status</th>
-                  <th className="px-5 py-2 font-semibold">Views</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <>
+              {/* Mobile: stacked cards */}
+              <div className="mt-3 divide-y divide-border sm:hidden">
                 {upcoming.map((e) => (
-                  <tr key={e.id} className="transition-colors hover:bg-muted/50">
-                    <td className="px-5 py-3">
-                      <span className="font-semibold text-foreground hover:text-primary">
+                  <div key={e.id} className="flex flex-col gap-2 px-5 py-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link to={`/events/${e.id}`} className="font-semibold text-foreground hover:text-primary">
                         {e.title}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {dayjs(e.startDate).format("MMM D, YYYY")}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-foreground">
-                          {e.registeredCount}/{e.capacity}
-                        </span>
-                        <span className="h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
-                          <span
-                            className="block h-full rounded-full bg-primary"
-                            style={{
-                              width: `${e.capacity > 0 ? Math.min(100, (e.registeredCount / e.capacity) * 100) : 0}%`,
-                            }}
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge variant={statusVariant[e.status]}>{e.status}</Badge>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <Eye className="size-4" aria-hidden="true" />
+                      </Link>
+                      <Badge variant={statusVariant[e.status]} className="shrink-0">{e.status}</Badge>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                      <span>{dayjs(e.startDate).format("MMM D, YYYY")}</span>
+                      <span className="flex items-center gap-1.5">
+                        <Eye className="size-3.5" aria-hidden="true" />
                         {e.views.toLocaleString()}
                       </span>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-foreground">
+                        {e.registeredCount}/{e.capacity}
+                      </span>
+                      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                        <span
+                          className="block h-full rounded-full bg-primary"
+                          style={{
+                            width: `${e.capacity > 0 ? Math.min(100, (e.registeredCount / e.capacity) * 100) : 0}%`,
+                          }}
+                        />
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* sm and up: full table */}
+              <table className="mt-3 hidden w-full min-w-145 text-sm sm:table">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="px-5 py-2 font-semibold">Event</th>
+                    <th className="px-5 py-2 font-semibold">Date</th>
+                    <th className="px-5 py-2 font-semibold">Registrations</th>
+                    <th className="px-5 py-2 font-semibold">Status</th>
+                    <th className="px-5 py-2 font-semibold">Views</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {upcoming.map((e) => (
+                    <tr key={e.id} className="transition-colors hover:bg-muted/50">
+                      <td className="px-5 py-3">
+                        <Link to={`/events/${e.id}`} className="font-semibold text-foreground hover:text-primary">
+                          {e.title}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {dayjs(e.startDate).format("MMM D, YYYY")}
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-foreground">
+                            {e.registeredCount}/{e.capacity}
+                          </span>
+                          <span className="h-1.5 w-16 shrink-0 overflow-hidden rounded-full bg-muted">
+                            <span
+                              className="block h-full rounded-full bg-primary"
+                              style={{
+                                width: `${e.capacity > 0 ? Math.min(100, (e.registeredCount / e.capacity) * 100) : 0}%`,
+                              }}
+                            />
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge variant={statusVariant[e.status]}>{e.status}</Badge>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <Eye className="size-4" aria-hidden="true" />
+                          {e.views.toLocaleString()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </Card>
 

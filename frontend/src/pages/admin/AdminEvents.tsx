@@ -82,7 +82,42 @@ export default function AdminEvents() {
         <EmptyState title="No events found" description="Try a different search term." />
       ) : (
         <Card className="overflow-x-auto">
-          <table className="w-full min-w-190 text-sm">
+          {/* Mobile: stacked cards */}
+          <div className="divide-y divide-border sm:hidden">
+            {events.map((e) => (
+              <div key={e.id} className="flex flex-col gap-3 px-5 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link to={`/events/${e.id}`} className="font-medium text-foreground hover:text-primary">
+                      {e.title}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">{e.category}</p>
+                  </div>
+                  <Badge variant={statusVariant[e.status]} className="shrink-0">{e.status}</Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>{e.organizerOrganization}</span>
+                  <span>{dayjs(e.startDate).format("MMM D, YYYY")}</span>
+                  <span>{e.registeredCount} / {e.capacity} registered</span>
+                </div>
+                <div className="flex gap-2">
+                  {e.status === "PUBLISHED" && (
+                    <Button size="sm" variant="destructive" className="flex-1" onClick={() => cancelEvent(e.id)}>
+                      <Ban className="size-4" aria-hidden="true" />
+                      Cancel
+                    </Button>
+                  )}
+                  <Button size="sm" variant="destructive" className="flex-1" onClick={() => setDeleting(e)}>
+                    <Trash2 className="size-4" aria-hidden="true" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* sm and up: full table */}
+          <table className="hidden w-full min-w-190 text-sm sm:table">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-5 py-3 font-semibold">Event</th>

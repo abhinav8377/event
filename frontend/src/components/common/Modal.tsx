@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, type ReactNode } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import { X } from "lucide-react"
 
 export function Modal({
@@ -29,35 +30,47 @@ export function Modal({
     }
   }, [open, onClose])
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <button
-        type="button"
-        aria-label="Close modal"
-        className="absolute inset-0 bg-foreground/50"
-        onClick={onClose}
-      />
-      <div className={`relative z-10 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl ${panelClassName}`}>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-foreground">{title}</h2>
-          <button
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+        >
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             type="button"
+            aria-label="Close modal"
+            className="absolute inset-0 bg-foreground/50"
             onClick={onClose}
-            aria-label="Close"
-            className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className={`relative z-10 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl ${panelClassName}`}
           >
-            <X className="size-5" />
-          </button>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-foreground">{title}</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            {children}
+          </motion.div>
         </div>
-        {children}
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   )
 }

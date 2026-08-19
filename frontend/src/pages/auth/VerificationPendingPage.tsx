@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import {
-  CalendarRange,
   Clock,
   Mail,
   ShieldCheck,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react"
 import { useAppSelector } from "@/app/store"
 import { Button, Card } from "@/components/common/ui"
+import { BrandMark } from "@/components/common/BrandMark"
 
 const steps = [
   {
@@ -63,20 +63,23 @@ export default function VerificationPendingPage() {
   }, [navigate])
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
-      <div className="bg-grid bg-grid-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+    <main className="theme-landing relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
+      <div className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-30" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute left-1/2 top-0 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-primary/[0.16] blur-3xl"
+          aria-hidden="true"
+        />
+      </div>
 
       <div className="relative w-full max-w-lg">
         <div className="mb-8 flex flex-col items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 text-primary">
-            <CalendarRange className="size-8" aria-hidden="true" />
-            <span className="text-2xl font-extrabold tracking-tight text-foreground">
-              Event<span className="text-primary">Hub</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <BrandMark iconClassName="size-9" textClassName="text-2xl" />
           </Link>
         </div>
 
-        <Card className="p-6 sm:p-8">
+        <Card className="p-6 shadow-[0_0_60px_-25px_var(--primary)] sm:p-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
