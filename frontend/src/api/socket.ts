@@ -7,7 +7,7 @@ export function getSocket(): Socket {
     const token = localStorage.getItem("eventhub_token")
     socket = io(import.meta.env.VITE_SOCKET_URL || "/", {
       auth: { token },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
     })
   }
   return socket
