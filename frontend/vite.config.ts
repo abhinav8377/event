@@ -5,7 +5,7 @@ import path from "node:path"
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
-  const apiTarget = env.VITE_API_TARGET || "https://event-production-2b1c.up.railway.app"
+  const apiTarget = env.VITE_API_TARGET || "api.event-hub.in"
 
   return {
     plugins: [react(), tailwindcss()],
