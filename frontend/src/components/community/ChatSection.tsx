@@ -186,17 +186,22 @@ export default function ChatSection({
     const payload: any = { communityId, message: text }
     if (replyTo) payload.replyToId = replyTo.id
 
-    socketRef.current.emit("community:message", payload, (r: any) => {
-      setSending(false)
-      if (r?.ok) {
-        setDraft("")
-        setReplyTo(null)
-      } else {
-        dispatch(
-          pushToast({ type: "error", message: r?.error || "Failed to send" }),
-        )
-      }
-    })
+    socketRef.current
+      .timeout(8000)
+      .emit("community:message", payload, (err: any, r: any) => {
+        setSending(false)
+        if (!err && r?.ok) {
+          setDraft("")
+          setReplyTo(null)
+        } else {
+          dispatch(
+            pushToast({
+              type: "error",
+              message: err ? "Connection timed out — check your connection" : r?.error || "Failed to send",
+            }),
+          )
+        }
+      })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
