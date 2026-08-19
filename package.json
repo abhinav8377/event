@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "install:all": "cd Backend && npm install && cd ../Frontend && npm install",
-    "build": "cd Backend && npm run build",
+    "build": "cd Backend && npm install && npm run build",
     "start": "cd Backend && npm start",
     "dev:backend": "cd Backend && npm run server",
     "dev:frontend": "cd Frontend && npm run dev",
