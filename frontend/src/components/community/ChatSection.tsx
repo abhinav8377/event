@@ -52,7 +52,7 @@ export default function ChatSection({
   const [showMembers, setShowMembers] = useState(false)
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Typing indicator state
   const [typingUsers, setTypingUsers] = useState<{ [userId: string]: string }>(
