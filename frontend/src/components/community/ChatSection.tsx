@@ -259,25 +259,27 @@ export default function ChatSection({
     const opts = pollOptions.map((o) => o.trim()).filter(Boolean)
     if (!q || opts.length < 2 || !socketRef.current) return
     setCreatingPoll(true)
-    socketRef.current.emit(
-      "community:poll:create",
-      { communityId, question: q, options: opts },
-      (r: any) => {
-        setCreatingPoll(false)
-        if (r?.ok) {
-          setShowPollModal(false)
-          setPollQuestion("")
-          setPollOptions(["", ""])
-        } else {
-          dispatch(
-            pushToast({
-              type: "error",
-              message: r?.error || "Failed to create poll",
-            }),
-          )
-        }
-      },
-    )
+    socketRef.current
+      .timeout(8000)
+      .emit(
+        "community:poll:create",
+        { communityId, question: q, options: opts },
+        (err: any, r: any) => {
+          setCreatingPoll(false)
+          if (!err && r?.ok) {
+            setShowPollModal(false)
+            setPollQuestion("")
+            setPollOptions(["", ""])
+          } else {
+            dispatch(
+              pushToast({
+                type: "error",
+                message: err ? "Connection timed out — check your connection" : r?.error || "Failed to create poll",
+              }),
+            )
+          }
+        },
+      )
   }
 
   const typingNames = Object.keys(typingUsers)
