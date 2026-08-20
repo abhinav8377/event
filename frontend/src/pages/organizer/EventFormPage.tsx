@@ -35,7 +35,7 @@ const schema = z
       (val) => stripHtml(val).length >= 20,
       "Full description must be at least 20 characters of content"
     ),
-    category: z.string(),
+    category: z.enum(["Technology", "Business", "Education", "Arts", "Sports", "Community", "Other"]),
     mode: z.enum(["IN_PERSON", "ONLINE", "HYBRID"]),
     banner: z.string(),
     venue: z.string(),
@@ -303,13 +303,15 @@ export default function EventFormPage() {
 
             <Section title="Category & mode" eyebrow="Step 03" icon={<LayoutGrid className="size-4" />}>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Input
-                  id="category"
-                  label="Category"
-                  placeholder="e.g. Technology, Sports, Business"
-                  error={errors.category?.message}
-                  {...register("category")}
-                />
+                <Select id="category" label="Category" error={errors.category?.message} {...register("category")}>
+                  <option value="Technology">Technology</option>
+                  <option value="Business">Business</option>
+                  <option value="Education">Education</option>
+                  <option value="Arts">Arts</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Community">Community</option>
+                  <option value="Other">Other</option>
+                </Select>
                 <Select id="mode" label="Event mode" error={errors.mode?.message} {...register("mode")}>
                   <option value="IN_PERSON">In person</option>
                   <option value="ONLINE">Online</option>

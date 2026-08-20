@@ -5,10 +5,10 @@ export type EventCategory =
   | "Technology"
   | "Business"
   | "Education"
-  | "Health"
   | "Arts"
   | "Sports"
   | "Community"
+  | "Other"
 export type EventMode = "IN_PERSON" | "ONLINE" | "HYBRID"
 
 export interface User {

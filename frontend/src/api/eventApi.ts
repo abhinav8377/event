@@ -26,7 +26,7 @@ const CATEGORY_MAP: Record<string, string> = {
   CULTURE: "Arts",
   SPORTS: "Sports",
   COMMUNITY: "Community",
-  OTHER: "Community",
+  OTHER: "Other",
 }
 
 const CATEGORY_REVERSE: Record<string, string> = {
@@ -36,11 +36,12 @@ const CATEGORY_REVERSE: Record<string, string> = {
   Arts: "CULTURE",
   Sports: "SPORTS",
   Community: "COMMUNITY",
+  Other: "OTHER",
 }
 
 function mapEvent(e: any): EventItem {
   if (!e) return {} as EventItem
-  const cat = CATEGORY_MAP[e.category] || e.category || "Community"
+  const cat = CATEGORY_MAP[e.category] || e.category || "Other"
 
   const startDate = e.date || e.startDate
   const endDate = e.endDate || startDate

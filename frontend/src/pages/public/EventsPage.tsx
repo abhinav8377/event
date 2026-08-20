@@ -7,7 +7,7 @@ import type { EventItem } from "@/constants/types"
 import { EventCard } from "@/components/cards/EventCard"
 import { Select, Skeleton, EmptyState, Eyebrow } from "@/components/common/ui"
 
-const categories = ["All", "Technology", "Business", "Education", "Health", "Arts", "Sports", "Community"]
+const categories = ["All", "Technology", "Business", "Education", "Arts", "Sports", "Community", "Other"]
 const modes = [
   { value: "All", label: "All modes" },
   { value: "IN_PERSON", label: "In person" },

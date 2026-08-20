@@ -24,7 +24,7 @@ import { EventCard } from "@/components/cards/EventCard"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Select, Skeleton, EmptyState, Card, Badge, Button } from "@/components/common/ui"
 
-const categories = ["All", "Technology", "Business", "Education", "Health", "Arts", "Sports", "Community"]
+const categories = ["All", "Technology", "Business", "Education", "Arts", "Sports", "Community", "Other"]
 const modes = [
   { value: "All", label: "All modes" },
   { value: "IN_PERSON", label: "In person" },
