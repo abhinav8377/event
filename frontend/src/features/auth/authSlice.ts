@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
 import * as authApi from "@/api/authApi"
 import * as userApi from "@/api/userApi"
+import { resetSocket } from "@/api/socket"
 import type { User } from "@/constants/types"
 
 interface AuthState {
@@ -108,6 +109,7 @@ const authSlice = createSlice({
       state.token = null
       localStorage.removeItem("eventhub_token")
       localStorage.removeItem("eventhub_user")
+      resetSocket()
     },
     clearError(state) {
       state.error = null
@@ -120,6 +122,7 @@ const authSlice = createSlice({
       state.token = payload.token
       localStorage.setItem("eventhub_token", payload.token)
       localStorage.setItem("eventhub_user", JSON.stringify(payload.user))
+      resetSocket()
     }
     builder
       .addCase(login.pending, (s) => {
@@ -155,6 +158,7 @@ const authSlice = createSlice({
         s.loading = false
         localStorage.removeItem("eventhub_token")
         localStorage.removeItem("eventhub_user")
+        resetSocket()
       })
       .addCase(logoutUser.rejected, (s) => {
         s.user = null
@@ -162,6 +166,7 @@ const authSlice = createSlice({
         s.loading = false
         localStorage.removeItem("eventhub_token")
         localStorage.removeItem("eventhub_user")
+        resetSocket()
       })
       .addCase(updateProfile.pending, (s) => {
         s.loading = true
