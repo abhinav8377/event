@@ -140,7 +140,7 @@ export default function OrganizerDashboard() {
                 {upcoming.map((e) => (
                   <div key={e.id} className="flex flex-col gap-2 px-5 py-3">
                     <div className="flex items-start justify-between gap-3">
-                      <Link to={`/events/${e.id}`} className="font-semibold text-foreground hover:text-primary">
+                      <Link to={`/organizer/events/${e.id}/edit`} className="font-semibold text-foreground hover:text-primary">
                         {e.title}
                       </Link>
                       <Badge variant={statusVariant[e.status]} className="shrink-0">{e.status}</Badge>
@@ -184,7 +184,7 @@ export default function OrganizerDashboard() {
                   {upcoming.map((e) => (
                     <tr key={e.id} className="transition-colors hover:bg-muted/50">
                       <td className="px-5 py-3">
-                        <Link to={`/events/${e.id}`} className="font-semibold text-foreground hover:text-primary">
+                        <Link to={`/organizer/events/${e.id}/edit`} className="font-semibold text-foreground hover:text-primary">
                           {e.title}
                         </Link>
                       </td>
