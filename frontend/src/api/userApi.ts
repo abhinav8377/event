@@ -72,7 +72,7 @@ export async function getUserDashboard() {
   }
 }
 
-export async function updateProfile(input: { name?: string; organization?: string }) {
+export async function updateProfile(input: { name?: string; email?: string; organization?: string }) {
   const res = await api.patch<ApiResponse<{ user: any }>>("/api/users/profile", input)
   return {
     success: res.data.success,

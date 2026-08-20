@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const user = useAppSelector((s) => s.auth.user)!
   const dispatch = useAppDispatch()
   const [name, setName] = useState(user.name)
+  const [email, setEmail] = useState(user.email)
   const [organization, setOrganization] = useState(user.organization ?? "")
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -22,10 +23,15 @@ export default function ProfilePage() {
       dispatch(pushToast({ type: "error", message: "Name must be at least 2 characters" }))
       return
     }
+    if (!/^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/.test(email.trim())) {
+      dispatch(pushToast({ type: "error", message: "Please enter a valid email address" }))
+      return
+    }
     try {
       await dispatch(
         updateProfile({
           name: name.trim(),
+          email: email.trim(),
           organization: user.role === "ORGANIZER" ? organization.trim() || undefined : user.organization,
         }),
       ).unwrap()
@@ -89,7 +95,7 @@ export default function ProfilePage() {
             <h2 className="mb-4 text-lg font-bold text-foreground">Account details</h2>
             <div className="flex flex-col gap-4">
               <Input id="profile-name" label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-              <Input id="profile-email" label="Email" value={user.email} disabled />
+              <Input id="profile-email" label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               {user.role === "ORGANIZER" && (
                 <Input
                   id="profile-org"

@@ -131,8 +131,17 @@ export const getDashboard = async (userId: string) => {
   };
 };
 
-export const updateProfile = async (user: any, { name, organizationName }: { name?: string; organizationName?: string }) => {
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/;
+
+export const updateProfile = async (user: any, { name, email, organizationName }: { name?: string; email?: string; organizationName?: string }) => {
   if (name) user.name = name;
+  if (email && email.toLowerCase().trim() !== user.email) {
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!EMAIL_REGEX.test(normalizedEmail)) throwErr('Please enter a valid email address', 400);
+    const existing = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+    if (existing) throwErr('Email already registered', 409);
+    user.email = normalizedEmail;
+  }
   if (organizationName && user.roleId && user.roleId.name === 'ORGANIZER') {
     user.organization = user.organization || {};
     user.organization.name = organizationName;

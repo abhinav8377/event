@@ -78,7 +78,7 @@ export const logoutUser = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
-  async (input: { name?: string; organization?: string }, { rejectWithValue }) => {
+  async (input: { name?: string; email?: string; organization?: string }, { rejectWithValue }) => {
     try {
       const res = await userApi.updateProfile(input)
       return res.data
